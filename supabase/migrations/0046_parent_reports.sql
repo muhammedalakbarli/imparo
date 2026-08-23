@@ -45,13 +45,16 @@ create policy "own parent report read" on parent_reports
 revoke insert, update, delete on parent_reports from authenticated, anon;
 
 -- ── Token generatoru ─────────────────────────────────────────────────────────
--- 32 hex simvol = 128 bit entropiya. gen_random_uuid() PG-nin özündədir,
--- pgcrypto asılılığı yaratmır.
+-- İki UUID birləşdirilir → 64 hex simvol, ~244 bit entropiya.
+-- gen_random_uuid() PG-nin özündədir, pgcrypto asılılığı yaratmır.
 create or replace function new_report_token()
 returns text language sql volatile as $$
   select replace(gen_random_uuid()::text, '-', '')
       || replace(gen_random_uuid()::text, '-', '');
 $$;
+
+-- Token generatoru yalnız yuxarıdakı funksiyaların daxilində işlədilir.
+revoke execute on function new_report_token() from public, anon, authenticated;
 
 -- ── Valideyn e-poçtunu təyin et ──────────────────────────────────────────────
 -- Hər çağırışda təsdiq SIFIRLANIR: ünvan dəyişdisə, yeni ünvan da təsdiqlənməlidir.
@@ -86,7 +89,10 @@ $$;
 -- Postgres yeni funksiyaya EXECUTE-u avtomatik PUBLIC-ə verir; authenticated/anon
 -- PUBLIC-dən miras alır. Ona görə əvvəlcə PUBLIC-dən alınır, sonra ünvanlı verilir —
 -- yalnız "revoke from authenticated" yazsaydıq, icazə PUBLIC üzərindən qalardı.
-revoke execute on function set_parent_email(text) from public;
+-- `from public` TƏK BAŞINA KİFAYƏT ETMİR: Supabase `public` sxemi üçün DEFAULT
+-- PRIVILEGES qurur və yeni funksiyaya birbaşa anon/authenticated/service_role
+-- qrantı düşür. Ona görə anon-dan ayrıca alınır.
+revoke execute on function set_parent_email(text) from public, anon;
 grant execute on function set_parent_email(text) to authenticated;
 
 create or replace function remove_parent_email()
@@ -99,7 +105,7 @@ begin
 end;
 $$;
 
-revoke execute on function remove_parent_email() from public;
+revoke execute on function remove_parent_email() from public, anon;
 grant execute on function remove_parent_email() to authenticated;
 
 -- ══════════════════════════════════════════════════════════════════════════════
@@ -181,7 +187,10 @@ begin
     order by (b.pct - p.pct) desc
     limit 1
   ),
-  -- Çətinlik: ən azı 5 cəhd olan, doğruluğu ən aşağı bölmə.
+  -- Çətinlik: ən azı 5 cəhd olan, doğruluğu ən aşağı bölmə — AMMA yalnız
+  -- həqiqətən zəifdirsə. Yalnız "ən aşağı"nı götürsək, hər şeyi yaxşı bilən
+  -- şagirdin 94%-lik bölməsi "diqqət tələb edir" kimi göstərilərdi; valideyn
+  -- bunu bir dəfə görsə hesabata inanmağı dayandırar. 75% ≈ hər 4 sualdan biri səhv.
   weakest as (
     select u.title as unit, round(100.0 * count(*) filter (where a.correct) / count(*))::int as pct
     from task_attempts a
@@ -191,6 +200,7 @@ begin
       and a.created_at >= p_from and a.created_at < p_to
     group by u.title
     having count(*) >= 5
+       and round(100.0 * count(*) filter (where a.correct) / count(*)) < 75
     order by 2 asc
     limit 1
   ),
