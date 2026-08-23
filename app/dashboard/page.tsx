@@ -437,6 +437,7 @@ function DashboardFooter() {
     { label: t("ft.shop"), href: "/magaza" },
     { label: t("ft.efficacy"), href: "/semerelilik" },
     { label: t("ft.careers"), href: "/karyera" },
+    { label: t("ft.partners"), href: "/partnyorlar" },
     { label: t("ft.investors"), href: "/investorlar" },
     { label: t("ft.terms"), href: "/sertler" },
     { label: t("ft.privacy"), href: "/mexfilik" },

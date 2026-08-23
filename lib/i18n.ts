@@ -1031,6 +1031,7 @@ const DICT: Dict = {
   "ft.shop": { az: "Mağaza", en: "Store", ru: "Магазин" },
   "ft.help": { az: "Yardım mərkəzi", en: "Help center", ru: "Центр помощи" },
   "ft.contact": { az: "Əlaqə", en: "Contact", ru: "Контакты" },
+  "ft.partners": { az: "Partnyorluq", en: "Partnerships", ru: "Партнёрство" },
   "ft.investors": { az: "İnvestorlar", en: "Investors", ru: "Инвесторы" },
   "ft.terms": { az: "Şərtlər", en: "Terms", ru: "Условия" },
   "ft.privacy": { az: "Məxfilik", en: "Privacy", ru: "Конфиденциальность" },
@@ -1064,6 +1065,97 @@ const DICT: Dict = {
     en: "Imparo is a growing gamified education platform in the Azerbaijani market — with both B2C (students/parents) and B2B (schools/teachers) directions. If you’re interested in collaboration, investment or strategic partnership, get in touch.",
     ru: "Imparo — растущая геймифицированная образовательная платформа на азербайджанском рынке — с направлениями B2C (ученики/родители) и B2B (школы/учителя). Если вам интересно сотрудничество, инвестиции или стратегическое партнёрство — свяжитесь с нами.",
   },
+
+  "partners.title": { az: "Partnyorluq", en: "Partnerships", ru: "Партнёрство" },
+  "partners.intro": {
+    az: "Imparo-nu tək qurmuruq. Məktəblər, təhsil mərkəzləri, fondlar və şirkətlərlə birlikdə daha çox şagirdə çatırıq. Aşağıda hazırda açıq olan əməkdaşlıq istiqamətləri var.",
+    en: "We aren’t building Imparo alone. Together with schools, learning centres, foundations and companies we reach more students. Below are the partnership tracks currently open.",
+    ru: "Мы строим Imparo не в одиночку. Вместе со школами, учебными центрами, фондами и компаниями мы доходим до большего числа учеников. Ниже — открытые сейчас направления партнёрства.",
+  },
+  "partners.whoTitle": { az: "Kimlərlə işləyirik", en: "Who we work with", ru: "С кем мы работаем" },
+
+  "partners.schools.t": { az: "Məktəblər", en: "Schools", ru: "Школы" },
+  "partners.schools.b": {
+    az: "Müəllim sinif yaradır, tapşırıq təyin edir və hər şagirdin tərəqqisini bir ekrandan izləyir. Quraşdırma tələb olunmur — şagirdlər brauzerdən girir. Pilot sinifləri üçün tam pulsuzdur.",
+    en: "A teacher creates a class, assigns tasks and follows every student’s progress on one screen. Nothing to install — students sign in from the browser. Free for pilot classes.",
+    ru: "Учитель создаёт класс, назначает задания и видит прогресс каждого ученика на одном экране. Ничего устанавливать не нужно — ученики заходят из браузера. Для пилотных классов бесплатно.",
+  },
+  "partners.tutors.t": { az: "Repetitor və hazırlıq mərkəzləri", en: "Tutors and prep centres", ru: "Репетиторы и учебные центры" },
+  "partners.tutors.b": {
+    az: "Dərs aralarında şagirdin nə qədər məşq etdiyini görmək çətindir. Imparo ev tapşırığını avtomatlaşdırır və hansı mövzunun oturmadığını rəqəmlə göstərir.",
+    en: "It’s hard to see how much a student practises between lessons. Imparo automates homework and shows, in numbers, which topic hasn’t landed yet.",
+    ru: "Трудно понять, сколько ученик занимается между уроками. Imparo автоматизирует домашнюю работу и показывает в цифрах, какая тема не усвоена.",
+  },
+  "partners.ngo.t": { az: "Fondlar və qeyri-hökumət təşkilatları", en: "Foundations and NGOs", ru: "Фонды и НПО" },
+  "partners.ngo.b": {
+    az: "Regionlarda internetə çıxışı olan hər şagird üçün platforma pulsuzdur. Qrant və sosial təsir layihələrində məzmun, hesabat və ölçmə tərəfini biz götürürük.",
+    en: "The platform is free for every student in the regions with internet access. In grant and social-impact projects we take on the content, reporting and measurement side.",
+    ru: "Платформа бесплатна для каждого ученика в регионах, у кого есть интернет. В грантовых и социальных проектах мы берём на себя контент, отчётность и измерение результата.",
+  },
+  "partners.csr.t": { az: "Şirkətlər (sosial məsuliyyət)", en: "Companies (CSR)", ru: "Компании (КСО)" },
+  "partners.csr.b": {
+    az: "Sosial məsuliyyət büdcəsini konkret nəticəyə çevir: seçdiyin məktəb və ya rayon üçün Imparo Plus abunəliyini sponsorlaşdır, təsirin rüblük hesabatını al.",
+    en: "Turn a CSR budget into a concrete outcome: sponsor Imparo Plus for a school or district of your choice and receive a quarterly impact report.",
+    ru: "Превратите бюджет КСО в конкретный результат: спонсируйте Imparo Plus для выбранной школы или района и получайте ежеквартальный отчёт о влиянии.",
+  },
+  "partners.content.t": { az: "Məzmun və texnologiya partnyorları", en: "Content and technology partners", ru: "Контентные и технологические партнёры" },
+  "partners.content.b": {
+    az: "Müəllif, nəşriyyat və ya təhsil məhsulu qurursansa — məzmun mübadiləsi və inteqrasiya danışa bilərik.",
+    en: "If you’re an author, a publisher or building an education product — we can talk about content exchange and integration.",
+    ru: "Если вы автор, издательство или создаёте образовательный продукт — можем обсудить обмен контентом и интеграцию.",
+  },
+
+  "partners.getTitle": { az: "Partnyor nə alır", en: "What a partner gets", ru: "Что получает партнёр" },
+  "partners.get1": {
+    az: "Pilot müddətində platformaya tam pulsuz giriş — şagird sayına limit qoymuruq.",
+    en: "Full free access to the platform during the pilot — we set no cap on the number of students.",
+    ru: "Полный бесплатный доступ к платформе на время пилота — без ограничения по числу учеников.",
+  },
+  "partners.get2": {
+    az: "Sinif və ya qrup üzrə tərəqqi hesabatı: kim nə qədər məşq edib, hansı mövzu çətin gəlib.",
+    en: "Progress reporting by class or group: who practised how much, and which topic proved hard.",
+    ru: "Отчёт о прогрессе по классу или группе: кто сколько занимался и какая тема оказалась трудной.",
+  },
+  "partners.get3": {
+    az: "1–8-ci siniflər üçün kurikuluma uyğun hazır məzmun — sıfırdan material hazırlamağa ehtiyac yoxdur.",
+    en: "Ready curriculum-aligned content for grades 1–8 — no need to build material from scratch.",
+    ru: "Готовый контент по программе 1–8 классов — не нужно создавать материалы с нуля.",
+  },
+  "partners.get4": {
+    az: "Şagird məlumatlarının qorunması: məlumatlar satılmır, reklam üçün istifadə olunmur.",
+    en: "Student data protection: data is never sold and never used for advertising.",
+    ru: "Защита данных учеников: данные не продаются и не используются для рекламы.",
+  },
+
+  "partners.howTitle": { az: "Necə başlayır", en: "How it starts", ru: "С чего начинается" },
+  "partners.how1.t": { az: "Yaz", en: "Write to us", ru: "Напишите" },
+  "partners.how1.b": {
+    az: "Kim olduğunu və təxminən neçə şagirdə çatmaq istədiyini bir abzasda yaz. Uzun təqdimat lazım deyil.",
+    en: "Tell us in one paragraph who you are and roughly how many students you want to reach. No long deck needed.",
+    ru: "В одном абзаце расскажите, кто вы и до скольких учеников хотите дойти. Длинная презентация не нужна.",
+  },
+  "partners.how2.t": { az: "Qısa görüş", en: "A short call", ru: "Короткий созвон" },
+  "partners.how2.b": {
+    az: "20 dəqiqəlik onlayn söhbətdə ehtiyacına baxırıq və Imparo-nun ona uyğun olub-olmadığını açıq deyirik.",
+    en: "In a 20-minute call we look at your need and say plainly whether Imparo fits it.",
+    ru: "За 20 минут разбираем вашу задачу и честно говорим, подходит ли Imparo.",
+  },
+  "partners.how3.t": { az: "Pilot", en: "Pilot", ru: "Пилот" },
+  "partners.how3.b": {
+    az: "Bir sinif və ya qrupla başlayırıq. Dörd həftədən sonra nəticəyə birlikdə baxırıq — işləməsə, genişləndirmirik.",
+    en: "We start with one class or group. After four weeks we look at the results together — if it doesn’t work, we don’t scale it.",
+    ru: "Начинаем с одного класса или группы. Через четыре недели вместе смотрим на результат — если не работает, не масштабируем.",
+  },
+
+  "partners.honest": {
+    az: "Açıq deyək: Imparo erkən mərhələdədir. Böyük vədlər vermirik — kiçik pilotla başlayır, nəticə görünəndə genişləndiririk.",
+    en: "To be straight with you: Imparo is at an early stage. We don’t make big promises — we start with a small pilot and scale once results show.",
+    ru: "Скажем прямо: Imparo на раннем этапе. Мы не даём громких обещаний — начинаем с небольшого пилота и расширяем, когда виден результат.",
+  },
+  "partners.statSubjects": { az: "fənn", en: "subjects", ru: "предметов" },
+  "partners.statGrades": { az: "sinif əhatəsi", en: "grades covered", ru: "классов охвачено" },
+  "partners.statLessons": { az: "hazır dərs", en: "ready lessons", ru: "готовых уроков" },
+  "partners.cta": { az: "Partnyorluq üçün yaz", en: "Write about a partnership", ru: "Написать о партнёрстве" },
 
   "efficacy.title": { az: "Səmərəlilik", en: "Efficacy", ru: "Эффективность" },
   "efficacy.intro": {

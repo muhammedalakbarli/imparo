@@ -195,6 +195,7 @@ function AboutFooter() {
       links: [
         { label: t("ft.help"), href: "/yardim" },
         { label: t("ft.contact"), href: "/haqqimizda" },
+        { label: t("ft.partners"), href: "/partnyorlar" },
         { label: t("ft.investors"), href: "/investorlar" },
       ],
     },

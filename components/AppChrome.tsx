@@ -11,6 +11,25 @@ import Sidebar from "./Sidebar";
 import AnnouncementBanner from "./AnnouncementBanner";
 import { loadPrefs, applyPrefs } from "@/lib/prefs";
 
+const BARE_ROUTES = new Set([
+  "/",
+  "/login",
+  "/signup",
+  "/parol-unutdum",
+  "/parol-yenile",
+  "/onboarding",
+  "/haqqimizda",
+  "/sertler",
+  "/mexfilik",
+  "/blog",
+  "/karyera",
+  "/investorlar",
+  "/partnyorlar",
+  "/semerelilik",
+]);
+
+const BARE_PREFIXES = ["/lessons/", "/u/", "/dost/", "/admin"];
+
 export default function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [animEnabled, setAnimEnabled] = useState(true);
@@ -23,25 +42,12 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
     setAnimEnabled(p.animations);
   }, [pathname]);
 
-  // Giriş, qeydiyyat və immersiv dərs ekranında sidebar göstərilmir.
-  const bare =
-    pathname === "/" ||
-    pathname === "/login" ||
-    pathname === "/signup" ||
-    pathname === "/parol-unutdum" ||
-    pathname === "/parol-yenile" ||
-    pathname === "/onboarding" ||
-    pathname === "/haqqimizda" ||
-    pathname === "/sertler" ||
-    pathname === "/mexfilik" ||
-    pathname === "/blog" ||
-    pathname === "/karyera" ||
-    pathname === "/investorlar" ||
-    pathname === "/semerelilik" ||
-    pathname.startsWith("/lessons/") ||
-    pathname.startsWith("/u/") ||
-    pathname.startsWith("/dost/") ||
-    pathname.startsWith("/admin");
+  // Sidebar-sız ("bare") səhifələr: marketing/hüquqi səhifələr öz başlığını
+  // özləri gətirir (InfoShell/SiteFooter), giriş və dərs ekranı isə immersivdir.
+  //
+  // ⚠️ YENİ MARKETING SƏHİFƏSİ ƏLAVƏ EDƏNDƏ ONU BURAYA DA YAZ — yoxsa səhifə
+  // tətbiq səhifəsi sayılır və solunda şagird sidebar-ı görünür.
+  const bare = BARE_ROUTES.has(pathname) || BARE_PREFIXES.some((p) => pathname.startsWith(p));
 
   const body = bare ? (
     <>{children}</>
