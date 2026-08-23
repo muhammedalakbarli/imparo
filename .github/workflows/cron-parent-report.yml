@@ -10,6 +10,12 @@ name: Həftəlik valideyn hesabatı
 # Bazar günü 16:00 UTC = 20:00 Bakı. Həftə Bakı vaxtı ilə bazar 00:00-da bitir,
 # yəni hesabat tam bağlanmış həftəni əhatə edir. Axşam saatı valideynin məktubu
 # həqiqətən açdığı vaxtdır — iş günü səhəri yox.
+#
+# ⚠️ URL QƏSDƏN workers.dev-dir, imparo.app DEYİL: imparo.app zonasında Bot Fight
+# Mode datamərkəz IP-lərini (GitHub Actions runner-ləri) "managed challenge" ilə
+# bloklayır və cron 403 alır. WAF "Skip" qaydası kömək etmir — BFM pulsuz planda
+# custom rule ilə keçilmir. workers.dev hostu həmin zonaya aid deyil.
+# Endpoint onsuz da CRON_SECRET ilə qorunur (fail-closed).
 on:
   schedule:
     - cron: "0 16 * * 0"
@@ -26,7 +32,7 @@ jobs:
           for i in $(seq 1 20); do
             code=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
               -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-              "https://imparo.app/api/cron/parent-report")
+              "https://imparo.m-alakbarli2007.workers.dev/api/cron/parent-report")
             echo "── dövr $i · HTTP $code"
             cat /tmp/resp.txt; echo
             if [ "$code" != "200" ]; then

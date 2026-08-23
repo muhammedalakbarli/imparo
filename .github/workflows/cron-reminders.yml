@@ -12,6 +12,12 @@ name: Streak xatırlatma bildirişləri
 #
 # Saat 15:00 UTC = 19:00 Bakı vaxtı (UTC+4) — gecə yarısından ~5 saat əvvəl,
 # şagirdə seriyasını qorumaq üçün hələ vaxt qalır.
+#
+# ⚠️ URL QƏSDƏN workers.dev-dir, imparo.app DEYİL: imparo.app zonasında Bot Fight
+# Mode datamərkəz IP-lərini (GitHub Actions runner-ləri) "managed challenge" ilə
+# bloklayır və cron 403 alır. WAF "Skip" qaydası kömək etmir — BFM pulsuz planda
+# custom rule ilə keçilmir. workers.dev hostu həmin zonaya aid deyil.
+# Endpoint onsuz da CRON_SECRET ilə qorunur (fail-closed).
 on:
   schedule:
     - cron: "0 15 * * *"
@@ -25,7 +31,7 @@ jobs:
         run: |
           code=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "https://imparo.app/api/cron/reminders")
+            "https://imparo.m-alakbarli2007.workers.dev/api/cron/reminders")
           echo "HTTP $code"
           cat /tmp/resp.txt
           if [ "$code" != "200" ]; then

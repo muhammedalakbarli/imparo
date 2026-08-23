@@ -16,6 +16,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { LEGACY_HOSTS, SITE_HOST } from "@/lib/site";
 
 export function middleware(req: NextRequest) {
+  // API sorğuları YÖNLƏNDİRİLMİR. İki səbəb:
+  //   1. Kanoniklik SEO məsələsidir, API-nin ona ehtiyacı yoxdur; bir çox client
+  //      (curl daxil) 301-i izləmir və POST gövdəsi yönləndirmədə itir.
+  //   2. imparo.app zonasında Bot Fight Mode datamərkəz IP-lərini (GitHub Actions)
+  //      "managed challenge" ilə bloklayır — cron 403 alırdı. workers.dev hostu
+  //      həmin zonaya aid deyil, ona görə cron oradan çağırılır və yönləndirilməməlidir.
+  if (req.nextUrl.pathname.startsWith("/api/")) return NextResponse.next();
+
   // Host başlığında port ola bilər (lokal/preview) — müqayisədən əvvəl atılır.
   const host = (req.headers.get("host") ?? "").split(":")[0].toLowerCase();
   if (LEGACY_HOSTS.includes(host)) {
