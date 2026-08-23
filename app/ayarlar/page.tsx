@@ -20,6 +20,7 @@ import {
 import { useT, LANG_NAMES } from "@/lib/i18n";
 import { PageSkeleton } from "@/components/Skeleton";
 import Toggle from "@/components/Toggle";
+import ParentReportCard from "@/components/ParentReportCard";
 
 const LESSON_ROWS: { key: keyof Prefs; labelKey: string; hintKey: string }[] = [
   { key: "sound", labelKey: "settings.sound", hintKey: "settings.soundHint" },
@@ -243,6 +244,8 @@ export default function SettingsPage() {
             </select>
           </div>
         </div>
+
+        <ParentReportCard />
 
         {/* Məlumatlarım — özünə-xidmət ixrac + silmə (məxfilik hüquqları) */}
         <h2 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">

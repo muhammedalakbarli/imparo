@@ -1,0 +1,43 @@
+name: Həftəlik valideyn hesabatı
+
+# /api/cron/parent-report-i çağırır — təsdiqlənmiş valideyn ünvanlarına uşağın
+# həftəlik öyrənmə hesabatını göndərir.
+#
+# Niyə GitHub Actions: streak xatırlatması ilə eyni səbəb — @opennextjs/cloudflare
+# öz worker giriş nöqtəsini generasiya edir və scheduled() handler dəstəyi yoxdur
+# (bax cron-reminders.yml).
+#
+# Bazar günü 16:00 UTC = 20:00 Bakı. Həftə Bakı vaxtı ilə bazar 00:00-da bitir,
+# yəni hesabat tam bağlanmış həftəni əhatə edir. Axşam saatı valideynin məktubu
+# həqiqətən açdığı vaxtdır — iş günü səhəri yox.
+on:
+  schedule:
+    - cron: "0 16 * * 0"
+  workflow_dispatch: {} # əl ilə test üçün
+
+jobs:
+  send-parent-reports:
+    runs-on: ubuntu-latest
+    steps:
+      # Endpoint bir çağırışda ~12 nəfər emal edir (Cloudflare Worker-in subrequest
+      # limiti). `remaining` sıfır olana qədər təkrar çağırılır; 20 dövr ≈ 240 abunəçi.
+      - name: /api/cron/parent-report çağır (partiyalarla)
+        run: |
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              "https://imparo.app/api/cron/parent-report")
+            echo "── dövr $i · HTTP $code"
+            cat /tmp/resp.txt; echo
+            if [ "$code" != "200" ]; then
+              echo "::error::Gözlənilməyən status: $code"
+              exit 1
+            fi
+            remaining=$(sed -n 's/.*"remaining":\([0-9]*\).*/\1/p' /tmp/resp.txt)
+            if [ "${remaining:-0}" -eq 0 ]; then
+              echo "Bitdi — qalıq yoxdur."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::warning::20 dövrdən sonra hələ qalıq var — abunəçi sayı artıb, BATCH-ə bax."

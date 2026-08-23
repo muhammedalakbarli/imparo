@@ -1,6 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { subjects } from "@/lib/content";
 import { subjectMeta } from "@/lib/subjectMeta";
+import {
+  formatDuration,
+  accuracy,
+  hasActivity,
+  renderReportEmail,
+  reportLinks,
+  type ReportData,
+} from "@/lib/parentReport";
 import { gradeTask } from "@/lib/grading";
 import { levelFromXp } from "@/lib/levels";
 import { weekKey } from "@/lib/leaderboard";
@@ -189,5 +197,65 @@ describe("subjectMeta", () => {
       lessons: s.units.reduce((n, u) => n + u.lessons.length, 0),
     }));
     expect(subjectMeta).toEqual(expected);
+  });
+});
+
+// ── Valideyn hesabatı ────────────────────────────────────────────────────────
+describe("parentReport", () => {
+  const base: ReportData = {
+    from: "2026-08-16T20:00:00.000Z",
+    to: "2026-08-23T20:00:00.000Z",
+    child: "Məhəmməd",
+    grade: 5,
+    streak: 4,
+    seconds: 8040,
+    tasks: 84,
+    correct: 63,
+    activeDays: 5,
+    lessons: 17,
+    subjects: [{ name: "Riyaziyyat", pct: 72, tasks: 50 }],
+    improved: { subject: "Riyaziyyat", delta: 8 },
+    weakest: { unit: "Kəsrlər", pct: 41 },
+  };
+
+  it("müddəti azərbaycanca yuvarlaqlaşdırır", () => {
+    expect(formatDuration(0)).toBe("0 dəqiqə");
+    expect(formatDuration(90)).toBe("2 dəqiqə"); // 1.5 dəq → yuvarlaqlaşır
+    expect(formatDuration(3600)).toBe("1 saat"); // tam saatda "0 dəqiqə" yazılmır
+    expect(formatDuration(8040)).toBe("2 saat 14 dəqiqə");
+  });
+
+  it("doğruluq faizini hesablayır, sıfır bölməyə düşmür", () => {
+    expect(accuracy(base)).toBe(75);
+    expect(accuracy({ ...base, tasks: 0, correct: 0 })).toBe(0);
+  });
+
+  it("fəaliyyəti dərsə VƏ tapşırığa görə ölçür", () => {
+    expect(hasActivity(base)).toBe(true);
+    expect(hasActivity({ ...base, tasks: 0, correct: 0, lessons: 3 })).toBe(true);
+    expect(hasActivity({ ...base, tasks: 0, correct: 0, lessons: 0 })).toBe(false);
+  });
+
+  it("məktubda uşağın adını HTML-ə qaçırır (XSS)", () => {
+    const evil = { ...base, child: '<img src=x onerror="alert(1)">' };
+    const mail = renderReportEmail(evil, { viewUrl: "https://x/v", unsubUrl: "https://x/u" });
+    expect(mail.html).not.toContain("<img src=x");
+    expect(mail.html).toContain("&lt;img src=x");
+  });
+
+  it("fəaliyyət olmayanda da məktub qurulur və imtina linki qalır", () => {
+    const quiet = { ...base, tasks: 0, correct: 0, lessons: 0, seconds: 0, subjects: [] };
+    const mail = renderReportEmail(quiet, { viewUrl: "https://x/v", unsubUrl: "https://x/u" });
+    expect(mail.html).toContain("məşq etmədi");
+    expect(mail.html).toContain("https://x/u");
+    expect(mail.text).toContain("https://x/u");
+  });
+
+  it("hesabat linklərini tokenlərdən qurur", () => {
+    const l = reportLinks("VVV", "UUU");
+    expect(l.viewUrl).toContain("/hesabat/VVV");
+    expect(l.unsubUrl).toContain("token=UUU");
+    // İki token AYRIDIR: hesabat linki paylaşılsa da imtina edilə bilməməlidir.
+    expect(l.viewUrl).not.toContain("UUU");
   });
 });

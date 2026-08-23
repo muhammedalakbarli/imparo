@@ -28,7 +28,7 @@ const BARE_ROUTES = new Set([
   "/semerelilik",
 ]);
 
-const BARE_PREFIXES = ["/lessons/", "/u/", "/dost/", "/admin"];
+const BARE_PREFIXES = ["/lessons/", "/u/", "/dost/", "/hesabat/", "/admin"];
 
 export default function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

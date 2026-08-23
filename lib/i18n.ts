@@ -1066,6 +1066,33 @@ const DICT: Dict = {
     ru: "Imparo — растущая геймифицированная образовательная платформа на азербайджанском рынке — с направлениями B2C (ученики/родители) и B2B (школы/учителя). Если вам интересно сотрудничество, инвестиции или стратегическое партнёрство — свяжитесь с нами.",
   },
 
+  // ── Valideyn hesabatı (Ayarlar) ──
+  "parent.title": { az: "Valideyn hesabatı", en: "Parent report", ru: "Отчёт для родителя" },
+  "parent.heading": { az: "Həftəlik hesabatı valideynə göndər", en: "Send a weekly report to a parent", ru: "Отправлять родителю еженедельный отчёт" },
+  "parent.hint": {
+    az: "Hər bazar günü valideynin e-poçtuna qısa hesabat gedir: nə qədər məşq etdin, hansı fənlərdə irəlilədin, harada çətinlik çəkdin. Ünvan təsdiqlənməyənə qədər heç nə göndərilmir.",
+    en: "Every Sunday a short report goes to your parent’s email: how much you practised, where you improved and where you struggled. Nothing is sent until the address is confirmed.",
+    ru: "Каждое воскресенье на почту родителя приходит короткий отчёт: сколько занимался, где прогресс, где трудности. До подтверждения адреса ничего не отправляется.",
+  },
+  "parent.placeholder": { az: "valideyn@nümunə.com", en: "parent@example.com", ru: "parent@example.com" },
+  "parent.add": { az: "Əlavə et", en: "Add", ru: "Добавить" },
+  "parent.change": { az: "Dəyiş", en: "Change", ru: "Изменить" },
+  "parent.remove": { az: "Sil", en: "Remove", ru: "Удалить" },
+  "parent.removed": { az: "Ünvan silindi — hesabat göndərilməyəcək.", en: "Address removed — no reports will be sent.", ru: "Адрес удалён — отчёты отправляться не будут." },
+  "parent.pending": { az: "təsdiq gözlənilir", en: "awaiting confirmation", ru: "ожидает подтверждения" },
+  "parent.verified": { az: "təsdiqlənib", en: "confirmed", ru: "подтверждён" },
+  "parent.sentTo": {
+    az: "Təsdiq məktubu {email} ünvanına göndərildi. Valideyn linkə klikləyəndə hesabatlar başlayacaq.",
+    en: "A confirmation email was sent to {email}. Reports start once your parent clicks the link.",
+    ru: "Письмо для подтверждения отправлено на {email}. Отчёты начнутся после перехода по ссылке.",
+  },
+  "parent.mailFail": {
+    az: "Ünvan yadda saxlanıldı, amma təsdiq məktubu göndərilə bilmədi. Bir azdan yenidən yoxla.",
+    en: "The address was saved, but the confirmation email could not be sent. Please try again shortly.",
+    ru: "Адрес сохранён, но письмо для подтверждения отправить не удалось. Попробуйте позже.",
+  },
+  "parent.err": { az: "Alınmadı, yenidən yoxla.", en: "Something went wrong, please try again.", ru: "Не получилось, попробуйте снова." },
+
   "partners.title": { az: "Partnyorluq", en: "Partnerships", ru: "Партнёрство" },
   "partners.intro": {
     az: "Imparo-nu tək qurmuruq. Məktəblər, təhsil mərkəzləri, fondlar və şirkətlərlə birlikdə daha çox şagirdə çatırıq. Aşağıda hazırda açıq olan əməkdaşlıq istiqamətləri var.",

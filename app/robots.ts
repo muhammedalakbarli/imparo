@@ -22,6 +22,7 @@ export default function robots(): MetadataRoute.Robots {
           "/onboarding",
           "/lessons/",
           "/dost/",
+          "/hesabat/",
           "/mekteb/sinif/",
           "/parol-unutdum",
           "/parol-yenile",

@@ -11,6 +11,7 @@ declare global {
     VAPID_PRIVATE_KEY?: string;
     VAPID_SUBJECT?: string;
     LEMONSQUEEZY_WEBHOOK_SECRET?: string;
+    RESEND_API_KEY?: string;
   }
 }
 export {};
