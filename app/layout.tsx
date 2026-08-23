@@ -6,7 +6,9 @@ import { ContentProvider } from "@/components/ContentProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
 import ActivityTracker from "@/components/ActivityTracker";
+import BanGate from "@/components/BanGate";
 import RecoveryRedirect from "@/components/RecoveryRedirect";
+import { SITE_URL } from "@/lib/site";
 
 // Gövdə şrifti — yumşaq, oxunaqlı.
 const nunito = Nunito({
@@ -36,7 +38,7 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
-const SITE_URL = "https://imparo.m-alakbarli2007.workers.dev";
+
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -168,6 +170,7 @@ export default function RootLayout({
         <ContentProvider>
           <AppChrome>{children}</AppChrome>
         </ContentProvider>
+        <BanGate />
         <AnalyticsProvider />
         <ActivityTracker />
         <RecoveryRedirect />

@@ -18,6 +18,12 @@ export interface Column<T> {
   className?: string;
 }
 
+// Sütunun mətn dəyəri (axtarış/sıralama/CSV üçün). Komponentdən kənardadır ki,
+// hər render-də yenidən yaranıb useMemo-nu bosuna sıfırlamasın.
+function val<T>(row: T, c: Column<T>): string | number {
+  return c.value ? c.value(row) : "";
+}
+
 export function DataTable<T>({
   columns, data, getRowId, searchable = true, searchPlaceholder = "Axtar…",
   selectable = false, selected, onSelectedChange, onRowClick,
@@ -37,11 +43,9 @@ export function DataTable<T>({
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [colMenu, setColMenu] = useState(false);
 
-  const val = (row: T, c: Column<T>) => (c.value ? c.value(row) : "");
-
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    let out = s
+    const out = s
       ? data.filter((r) => columns.some((c) => String(val(r, c)).toLowerCase().includes(s)))
       : [...data];
     if (sortKey) {
@@ -78,7 +82,9 @@ export function DataTable<T>({
   const allPageSelected = selectable && pageRows.length > 0 && pageRows.every((r) => selected?.has(getRowId(r)));
   const toggleRow = (id: string) => {
     if (!onSelectedChange) return;
-    const n = new Set(selected); n.has(id) ? n.delete(id) : n.add(id); onSelectedChange(n);
+    const n = new Set(selected);
+    if (n.has(id)) n.delete(id); else n.add(id);
+    onSelectedChange(n);
   };
   const togglePage = () => {
     if (!onSelectedChange) return;
@@ -111,7 +117,9 @@ export function DataTable<T>({
               {columns.filter((c) => c.hideable).map((c) => (
                 <label key={c.key} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-[13px] text-fg hover:bg-panel-2">
                   <input type="checkbox" checked={!hidden.has(c.key)} onChange={() => setHidden((prev) => {
-                    const n = new Set(prev); n.has(c.key) ? n.delete(c.key) : n.add(c.key); return n;
+                    const n = new Set(prev);
+                    if (n.has(c.key)) n.delete(c.key); else n.add(c.key);
+                    return n;
                   })} />
                   {c.header}
                 </label>

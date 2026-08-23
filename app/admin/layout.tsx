@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard, BookOpen, Users, BarChart3, School,
   GraduationCap, Megaphone, MessageSquare, ExternalLink,
-  TrendingUp, Gauge, ShieldAlert, ShieldCheck, Search, Siren,
+  TrendingUp, Gauge, ShieldAlert, ShieldCheck, Search, Siren, Bot,
   Menu, X, ChevronRight,
 } from "lucide-react";
 import { Toaster } from "sonner";
@@ -50,6 +50,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/admin", label: "Məzmun", Icon: BookOpen, exact: true },
       { href: "/admin/istifadeciler", label: "İstifadəçilər", Icon: Users },
+      { href: "/admin/botlar", label: "Moderasiya", Icon: Bot },
       { href: "/admin/elan", label: "Elanlar", Icon: Megaphone },
       { href: "/admin/feedback", label: "Rəylər", Icon: MessageSquare },
     ],
@@ -84,8 +85,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (isAdmin) adminListTeacherRequests().then((r) => setPending(r.length)).catch(() => {});
   }, [isAdmin, pathname]);
-  // Səhifə dəyişəndə mobil çekmecə bağlansın.
-  useEffect(() => { setDrawer(false); }, [pathname]);
+  // Səhifə dəyişəndə mobil çekmecə bağlansın. Effekt yox, render zamanı düzəliş
+  // (React-in rəsmi "derive state from props" nümunəsi) — effekt kaskad render yaradırdı.
+  const [lastPath, setLastPath] = useState(pathname);
+  if (lastPath !== pathname) {
+    setLastPath(pathname);
+    setDrawer(false);
+  }
 
   // Admin deyilsə layout çərçivəsi göstərmə (səhifələr özləri yönləndirir).
   if (!isAdmin) return <>{children}</>;

@@ -9,14 +9,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft, Users, Flame, Crown, UserPlus, Star, Search, Download,
-  X, Trash2, Bot, ChevronDown, ChevronUp,
+  X, Trash2, Bot, ChevronDown, ChevronUp, Ban, ShieldOff, ShieldAlert,
 } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import {
   checkIsAdmin, adminUsers, adminUserStats, adminUserDetail,
-  adminSetBot, adminGrantPlus, adminRevokePlus, adminDeleteUser,
+  adminSetBot, adminGrantPlus, adminRevokePlus, adminDeleteUser, adminUnbanUser,
   type AdminUserRow, type AdminUserStats, type AdminUserDetail,
 } from "@/lib/adminApi";
+import { BanDialog, PlusDialog, fmtUntil, daysLeft } from "@/components/admin/moderation";
 import { PageSkeleton } from "@/components/Skeleton";
 import { toast } from "sonner";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
@@ -96,7 +97,7 @@ export default function AdminUsersPage() {
       return 0;
     });
     return out;
-  }, [rows, q, sortKey, sortDir]);
+  }, [rows, q, sortKey, sortDir, fGrade, fPlus, fActive, sevenDaysAgo]);
 
   function toggleSort(k: SortKey) {
     if (sortKey === k) setSortDir((d) => (d === 1 ? -1 : 1));
@@ -124,7 +125,11 @@ export default function AdminUsersPage() {
     [rows],
   );
   function toggleSel(id: string) {
-    setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+    setSelected((prev) => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
   }
   const allVisibleSelected = filtered.length > 0 && filtered.every((r) => selected.has(r.user_id));
   function toggleAllVisible() {
@@ -314,7 +319,11 @@ function SortTh({
 function UserDetailModal({ uid, onClose, onChanged }: { uid: string; onClose: () => void; onChanged: () => void }) {
   const [d, setD] = useState<AdminUserDetail | null>(null);
   const [busy, setBusy] = useState(false);
+  const [banOpen, setBanOpen] = useState(false);
+  const [plusOpen, setPlusOpen] = useState(false);
   const confirm = useConfirm();
+
+  const refresh = async () => { setD(await adminUserDetail(uid)); onChanged(); };
 
   useEffect(() => { adminUserDetail(uid).then(setD); }, [uid]);
 
@@ -348,6 +357,19 @@ function UserDetailModal({ uid, onClose, onChanged }: { uid: string; onClose: ()
           <p className="mt-6 text-center text-muted">Yüklənir…</p>
         ) : (
           <>
+            {d.banned && (
+              <div className="mt-4 flex items-start gap-2.5 rounded-[10px] border border-red-500/30 bg-red-500/5 px-3.5 py-3">
+                <ShieldAlert size={18} className="mt-0.5 shrink-0 text-red-500" />
+                <div className="min-w-0 text-sm">
+                  <div className="font-bold text-red-500">
+                    Hesab bloklanıb — {fmtUntil(d.banned_until)}
+                    {daysLeft(d.banned_until) && <span className="font-semibold text-muted"> · {daysLeft(d.banned_until)}</span>}
+                  </div>
+                  {d.ban_reason && <div className="mt-0.5 text-muted">Səbəb: {d.ban_reason}</div>}
+                </div>
+              </div>
+            )}
+
             <div className="mt-4 grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
               <Info label="XP" value={String(d.total_xp)} />
               <Info label="Streak" value={`🔥 ${d.streak_days}`} />
@@ -377,13 +399,21 @@ function UserDetailModal({ uid, onClose, onChanged }: { uid: string; onClose: ()
             )}
 
             <div className="mt-5 flex flex-col gap-2">
-              {d.is_plus ? (
+              <div className="text-[10px] font-bold uppercase tracking-wide text-muted">Plus</div>
+              <ActionBtn Icon={Crown} label="Plus ver (müddət seç)" tone="gold" busy={busy}
+                onClick={() => setPlusOpen(true)} />
+              {d.is_plus && (
                 <ActionBtn Icon={Crown} label="Plus-u ləğv et" tone="ghost" busy={busy}
                   onClick={() => act(() => adminRevokePlus(uid))} />
-              ) : (
-                <ActionBtn Icon={Crown} label="Plus ver (12 ay)" tone="gold" busy={busy}
-                  onClick={() => act(() => adminGrantPlus(uid, 12))} />
               )}
+
+              <div className="mt-3 text-[10px] font-bold uppercase tracking-wide text-muted">Moderasiya</div>
+              {d.banned ? (
+                <ActionBtn Icon={ShieldOff} label="Banı qaldır" tone="ghost" busy={busy}
+                  onClick={() => act(() => adminUnbanUser(uid))} />
+              ) : null}
+              <ActionBtn Icon={Ban} label={d.banned ? "Ban müddətini dəyiş" : "Hesabı banla"} tone="danger" busy={busy}
+                onClick={() => setBanOpen(true)} />
               <ActionBtn Icon={Bot} label={d.is_bot ? "Bot işarəsini götür" : "Bot kimi işarələ (gizlət)"} tone="ghost" busy={busy}
                 onClick={() => act(() => adminSetBot(uid, !d.is_bot))} />
               <ActionBtn Icon={Trash2} label="Hesabı sil" tone="danger" busy={busy}
@@ -392,6 +422,14 @@ function UserDetailModal({ uid, onClose, onChanged }: { uid: string; onClose: ()
           </>
         )}
       </div>
+
+      {banOpen && d && (
+        <BanDialog target={{ uid, label: d.email }} onClose={() => setBanOpen(false)} onDone={refresh} />
+      )}
+      {plusOpen && d && (
+        <PlusDialog target={{ uid, label: d.email }} hasPlus={d.is_plus}
+          onClose={() => setPlusOpen(false)} onDone={refresh} />
+      )}
     </div>
   );
 }

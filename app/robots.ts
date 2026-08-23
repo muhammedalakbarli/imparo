@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 // robots.txt — axtarış motorlarına indeksləşdirmə qaydaları + sitemap ünvanı.
-const SITE_URL = "https://imparo.m-alakbarli2007.workers.dev";
+import { SITE_URL } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,8 +9,30 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        // Şəxsi/istifadəçiyə-özəl səhifələri indeksləmə.
-        disallow: ["/admin", "/api/", "/profil/redakte", "/auth/"],
+        // Girişdən sonrakı (login arxası) və şəxsi səhifələr. Bunları indeksləmək
+        // faydasızdır: Google-a ya boş qabıq, ya da yönləndirmə düşür — nəticədə
+        // saytın "keyfiyyətsiz səhifə" nisbəti artır.
+        disallow: [
+          "/admin",
+          "/api/",
+          "/auth/",
+          "/dashboard",
+          "/profil",
+          "/ayarlar",
+          "/onboarding",
+          "/lessons/",
+          "/dost/",
+          "/mekteb/sinif/",
+          "/parol-unutdum",
+          "/parol-yenile",
+          "/gorevler",
+          "/liqa",
+          "/praktika",
+          "/semerelilik",
+          "/streak",
+          "/magaza",
+          "/daha",
+        ],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
