@@ -3,8 +3,8 @@
 // Dərs səhifəsi (immersiv, sidebar-sız): giriş (Zefi + balon + qaydalar) → tapşırıqlar.
 
 import { use, useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import { notFound, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { X } from "lucide-react";
 import { useContent } from "@/components/ContentProvider";
 import ChestModal from "@/components/ChestModal";
@@ -14,6 +14,7 @@ import type { ChestReward } from "@/lib/quests";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { useT } from "@/lib/i18n";
 import LessonRunner from "@/components/lesson/LessonRunner";
+import QuitDialog from "@/components/lesson/QuitDialog";
 import LessonVisual from "@/components/LessonVisual";
 import Mascot from "@/components/Mascot";
 import SpeechBubble from "@/components/SpeechBubble";
@@ -33,6 +34,7 @@ export default function LessonPage({
   const guest = onboarding && !user;
   const { getLesson, orderedLessonIds, loading } = useContent();
   const [started, setStarted] = useState(false);
+  const [quitOpen, setQuitOpen] = useState(false);
   const t = useT();
 
   const found = getLesson(id);
@@ -78,14 +80,29 @@ export default function LessonPage({
   return (
     <div className="min-h-screen bg-ink">
       <div className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-4 pb-28 pt-5">
-        {/* Yuxarı: çıxış */}
-        <Link
-          href={`/subjects/${subject.slug}${guest ? "?onboarding=1" : ""}`}
-          aria-label="Çıx"
+        {/* Yuxarı: çıxış — dərsin İÇİNDƏKİ X kimi təsdiq soruşur.
+            Dərsin hər yerində çıxış eyni davranmalıdır. */}
+        <button
+          type="button"
+          onClick={() => setQuitOpen(true)}
+          aria-label={t("run.quitLeave")}
           className="flex h-9 w-9 items-center justify-center rounded-full text-muted transition hover:bg-panel-2 hover:text-fg"
         >
           <X size={26} />
-        </Link>
+        </button>
+
+        <AnimatePresence>
+          {quitOpen && (
+            <QuitDialog
+              answered={0}
+              total={lesson.tasks.length}
+              onStay={() => setQuitOpen(false)}
+              onLeave={() =>
+                router.push(`/subjects/${subject.slug}${guest ? "?onboarding=1" : ""}`)
+              }
+            />
+          )}
+        </AnimatePresence>
 
         {/* Zefi + danışıq balonu */}
         <div className="mt-4 flex items-end gap-3">
