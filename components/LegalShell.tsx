@@ -37,8 +37,8 @@ export default function LegalShell({
 
         <div className="mt-12 border-t border-line pt-6 text-sm text-muted">
           {t("legal.contactLine")}{" "}
-          <a href="mailto:m.alakbarli2007@gmail.com" className="font-bold text-brand hover:underline">
-            m.alakbarli2007@gmail.com
+          <a href="mailto:mexfilik@imparo.app" className="font-bold text-brand hover:underline">
+            mexfilik@imparo.app
           </a>
         </div>
       </article>

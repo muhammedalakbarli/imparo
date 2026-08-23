@@ -62,7 +62,7 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "Hesabımı necə silim?",
-          a: "Hesabını və məlumatlarını silmək üçün destek@imparo.az ünvanına yaz — tələbini emal edəcəyik.",
+          a: "Hesabını və məlumatlarını silmək üçün destek@imparo.app ünvanına yaz — tələbini emal edəcəyik.",
         },
       ],
     },
@@ -135,7 +135,7 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "How do I delete my account?",
-          a: "To delete your account and data, write to destek@imparo.az and we'll process your request.",
+          a: "To delete your account and data, write to destek@imparo.app and we'll process your request.",
         },
       ],
     },
@@ -208,7 +208,7 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "Как удалить аккаунт?",
-          a: "Чтобы удалить аккаунт и данные, напиши на destek@imparo.az — мы обработаем запрос.",
+          a: "Чтобы удалить аккаунт и данные, напиши на destek@imparo.app — мы обработаем запрос.",
         },
       ],
     },
@@ -290,7 +290,7 @@ export default function HelpPage() {
           <h2 className="text-lg font-extrabold text-fg">{t("help.stillQ")}</h2>
           <p className="mt-1 text-sm text-muted">{t("help.stillDesc")}</p>
           <a
-            href="mailto:destek@imparo.az"
+            href="mailto:destek@imparo.app"
             className="mt-4 inline-block rounded-2xl bg-brand px-6 py-3 font-extrabold uppercase tracking-wide text-white btn-pop hover:bg-brand-dark"
           >
             {t("help.writeUs")}

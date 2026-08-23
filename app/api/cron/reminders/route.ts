@@ -44,7 +44,7 @@ export async function GET(req: Request) {
   const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
   const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const vapidPrivate = env.VAPID_PRIVATE_KEY;
-  const vapidSubject = env.VAPID_SUBJECT || "mailto:info@imparo.az";
+  const vapidSubject = env.VAPID_SUBJECT || "mailto:info@imparo.app";
   if (!url || !serviceKey || !vapidPublic || !vapidPrivate) {
     return Response.json({ ok: false, error: "missing_env" }, { status: 500 });
   }

@@ -1201,9 +1201,9 @@ const DICT: Dict = {
   },
   "terms.s18.t": { az: "18. Dil, məxfilik, digər müddəalar və əlaqə", en: "18. Language, privacy, miscellaneous and contact", ru: "18. Язык, конфиденциальность, прочее и контакты" },
   "terms.s18.b": {
-    az: "Bu razılaşma əslən Azərbaycan dilində yazılıb; tərcümələr arasında ziddiyyət olduqda Azərbaycan dili əsas götürülür. Xidmətdən istifadə həm də Məxfilik siyasətimizlə tənzimlənir. Hər hansı müddəa qüvvədən düşərsə, qalan müddəalar qüvvədə qalır. Suallar üçün: m.alakbarli2007@gmail.com və ya ichbinmahammad@gmail.com.",
-    en: "This agreement was originally written in Azerbaijani; if translations conflict, the Azerbaijani version controls. Use of the Service is also governed by our Privacy Policy. If any provision is unenforceable, the rest remain in effect. Questions: m.alakbarli2007@gmail.com or ichbinmahammad@gmail.com.",
-    ru: "Это соглашение изначально составлено на азербайджанском; при противоречии переводов преимущество имеет азербайджанская версия. Использование Сервиса также регулируется нашей Политикой конфиденциальности. Если какое-либо положение недействительно, остальные сохраняют силу. Вопросы: m.alakbarli2007@gmail.com или ichbinmahammad@gmail.com.",
+    az: "Bu razılaşma əslən Azərbaycan dilində yazılıb; tərcümələr arasında ziddiyyət olduqda Azərbaycan dili əsas götürülür. Xidmətdən istifadə həm də Məxfilik siyasətimizlə tənzimlənir. Hər hansı müddəa qüvvədən düşərsə, qalan müddəalar qüvvədə qalır. Suallar üçün: info@imparo.app.",
+    en: "This agreement was originally written in Azerbaijani; if translations conflict, the Azerbaijani version controls. Use of the Service is also governed by our Privacy Policy. If any provision is unenforceable, the rest remain in effect. Questions: info@imparo.app.",
+    ru: "Это соглашение изначально составлено на азербайджанском; при противоречии переводов преимущество имеет азербайджанская версия. Использование Сервиса также регулируется нашей Политикой конфиденциальности. Если какое-либо положение недействительно, остальные сохраняют силу. Вопросы: info@imparo.app.",
   },
 
   // ── Məxfilik ──
@@ -1294,9 +1294,9 @@ const DICT: Dict = {
   },
   "privacy.s14.t": { az: "14. Data nəzarətçisi və əlaqə", en: "14. Data controller and contact", ru: "14. Контролёр данных и контакты" },
   "privacy.s14.b": {
-    az: "Məlumatının nəzarətçisi Imparo-dur. Məxfiliklə bağlı istənilən sual və ya sorğu üçün: m.alakbarli2007@gmail.com və ya ichbinmahammad@gmail.com.",
-    en: "The controller of your data is Imparo. For any privacy question or request: m.alakbarli2007@gmail.com or ichbinmahammad@gmail.com.",
-    ru: "Контролёр ваших данных — Imparo. По любым вопросам или запросам о конфиденциальности: m.alakbarli2007@gmail.com или ichbinmahammad@gmail.com.",
+    az: "Məlumatının nəzarətçisi Imparo-dur. Məxfiliklə bağlı istənilən sual və ya sorğu üçün: mexfilik@imparo.app.",
+    en: "The controller of your data is Imparo. For any privacy question or request: mexfilik@imparo.app.",
+    ru: "Контролёр ваших данных — Imparo. По любым вопросам или запросам о конфиденциальности: mexfilik@imparo.app.",
   },
 };
 
