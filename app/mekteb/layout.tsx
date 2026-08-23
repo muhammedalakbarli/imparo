@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 // Səhifənin özü "use client"-dir (interaktivdir), client komponentdən isə
 // `metadata` export etmək olmur — ona görə SEO başlığı bu server layout-dan verilir.
 export const metadata: Metadata = {
-  title: "Imparo Məktəb",
+  title: "Məktəb — müəllimlər üçün",
   description: "Müəllimlər üçün: sinif yarat, şagirdlərə tapşırıq təyin et və tərəqqini bir ekrandan izlə.",
   alternates: { canonical: "/mekteb" },
   openGraph: {
-    title: "Imparo Məktəb · Imparo",
+    title: "Imparo Məktəb",
     description: "Müəllimlər üçün: sinif yarat, şagirdlərə tapşırıq təyin et və tərəqqini bir ekrandan izlə.",
     url: "/mekteb",
   },

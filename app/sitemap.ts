@@ -1,13 +1,14 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
+import { subjectMeta } from "@/lib/subjectMeta";
 
 // sitemap.xml — yalnız açıq (public) səhifələr. Girişdən sonrakı səhifələr
 // robots.ts-də onsuz da bağlıdır, buraya da salınmır.
 //
-// Fənn səhifələri DİNAMİK idxal olunur: `@/lib/content` statik idxal ediləndə
-// bütün seed məzmunu Worker-in başlanğıc yoluna düşür və CPU limitini keçirdi
-// (Error 1102). `await import(...)` onu yalnız bu route çağırılanda yükləyir.
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+// Fənn siyahısı `@/lib/subjectMeta`-dan gəlir, `@/lib/content`-dən YOX: content
+// bütün seed məzmunudur və Worker paketini 3 MiB limitindən keçirir (dinamik
+// import da kömək etmir — bundler onu yenə paketə salır).
+export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
   const staticRoutes: { path: string; priority: number; freq: "daily" | "weekly" | "monthly" }[] = [
@@ -25,15 +26,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/mexfilik", priority: 0.3, freq: "monthly" },
   ];
 
-  let subjectPaths: string[] = [];
-  try {
-    const { subjects } = await import("@/lib/content");
-    subjectPaths = [...new Set(subjects.map((s) => `/subjects/${s.slug}`))];
-  } catch {
-    // Məzmun yüklənməsə sitemap yenə də statik səhifələrlə qaytarılsın —
-    // boş/500 sitemap Google-da bütün səhifələrin düşməsinə səbəb olur.
-  }
-
   return [
     ...staticRoutes.map((r) => ({
       url: `${SITE_URL}${r.path}`,
@@ -41,8 +33,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: r.freq,
       priority: r.priority,
     })),
-    ...subjectPaths.map((p) => ({
-      url: `${SITE_URL}${p}`,
+    ...subjectMeta.map((s) => ({
+      url: `${SITE_URL}/subjects/${s.slug}`,
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.9,

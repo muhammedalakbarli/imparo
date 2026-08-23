@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { subjects } from "@/lib/content";
+import { subjectMeta } from "@/lib/subjectMeta";
 import { gradeTask } from "@/lib/grading";
 import { levelFromXp } from "@/lib/levels";
 import { weekKey } from "@/lib/leaderboard";
@@ -170,5 +172,22 @@ describe("srs", () => {
       { id: "a", box: 0, dueAt: now },
       { id: "b", box: 0, dueAt: now },
     ]);
+  });
+});
+
+// ── lib/subjectMeta sinxronluğu ──────────────────────────────────────────────
+// subjectMeta lib/content-dən avtomatik yaradılır və Worker paketini kiçik
+// saxlamaq üçün var. Məzmun dəyişib skript işlədilməsə, sitemap və fənn
+// səhifələrinin başlıqları köhnə qalacaqdı — bu test onu tutur.
+describe("subjectMeta", () => {
+  it("lib/content ilə eynidir (dəyişibsə: npx tsx scripts/gen-subject-meta.ts)", () => {
+    const expected = subjects.map((s) => ({
+      slug: s.slug,
+      name: s.name,
+      grade: s.grade,
+      units: s.units.length,
+      lessons: s.units.reduce((n, u) => n + u.lessons.length, 0),
+    }));
+    expect(subjectMeta).toEqual(expected);
   });
 });

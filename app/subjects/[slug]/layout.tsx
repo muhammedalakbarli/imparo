@@ -1,39 +1,32 @@
 import type { Metadata } from "next";
+import { getSubjectMeta } from "@/lib/subjectMeta";
 
 // Fənn səhifələri saytın ən dəyərli açıq məzmunudur ("5-ci sinif riyaziyyat"
 // kimi axtarışlar buraya düşür), ona görə başlıq/təsvir hər fənn üçün ayrıca
-// qurulur — hamısına eyni ümumi başlıq düşsəydi, Google onları bir-birindən
-// ayıra bilməzdi.
+// qurulur — hamısına eyni ümumi başlıq düşsəydi, Google onları ayırd edə bilməzdi.
 //
-// `@/lib/content` DİNAMİK idxal olunur: statik idxal bütün seed məzmununu
-// Worker-in başlanğıc yoluna salır və CPU limitini keçirir (Error 1102).
+// Məlumat `@/lib/subjectMeta`-dan gəlir, `@/lib/content`-dən YOX: content bütün
+// seed məzmunudur və Worker paketini 3 MiB limitindən keçirir.
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  try {
-    const { getSubject } = await import("@/lib/content");
-    const subject = getSubject(slug);
-    if (!subject) return { title: "Fənn tapılmadı" };
+  const s = getSubjectMeta(slug);
+  if (!s) return { title: "Fənn tapılmadı" };
 
-    const lessonCount = subject.units.reduce((n, u) => n + u.lessons.length, 0);
-    const title = `${subject.grade}-ci sinif ${subject.name}`;
-    const description =
-      `${subject.grade}-ci sinif ${subject.name} proqramı: ${subject.units.length} bölmə, ` +
-      `${lessonCount} interaktiv dərs. Pulsuz məşq et, tərəqqini izlə.`;
+  const title = `${s.grade}-ci sinif ${s.name}`;
+  const description =
+    `${s.grade}-ci sinif ${s.name} proqramı: ${s.units} bölmə, ${s.lessons} interaktiv dərs. ` +
+    `Pulsuz məşq et, tərəqqini izlə.`;
 
-    return {
-      title,
-      description,
-      alternates: { canonical: `/subjects/${slug}` },
-      openGraph: { title: `${title} · Imparo`, description, url: `/subjects/${slug}` },
-    };
-  } catch {
-    // Məzmun yüklənməsə səhifə yenə açılsın — metadata olmaması səhifəni sındırmır.
-    return {};
-  }
+  return {
+    title,
+    description,
+    alternates: { canonical: `/subjects/${slug}` },
+    openGraph: { title: `${title} · Imparo`, description, url: `/subjects/${slug}` },
+  };
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
