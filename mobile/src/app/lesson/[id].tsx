@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, StyleSheet, ScrollView, ActivityIndicator, Vibration, Animated } from "react-native";
+import { View, Text, Pressable, StyleSheet, ScrollView, ActivityIndicator, Vibration, Animated, Alert, BackHandler } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { X, Heart } from "lucide-react-native";
@@ -62,6 +62,33 @@ export default function LessonScreen() {
   const mainTasks = lesson?.tasks ?? [];
   const inRetry = phase === "retry";
   const task: Task | undefined = inRetry ? retryQueue[0] : mainTasks[index];
+
+  // Dərsdən çıxış təsdiqi. Yarımçıq dərs saxlanılmır — həll edilən tapşırıqlar
+  // itir, ona görə çıxış təsadüfi toxunuşla baş verməməlidir.
+  function confirmQuit() {
+    Alert.alert(
+      "Dayan, getmə!",
+      answered > 0
+        ? `İndi çıxsan bu dərsdəki irəliləyişin itəcək.\n\nHəll edilib: ${answered} / ${mainTasks.length}`
+        : "İndi çıxsan bu dərsə yenidən başlamalı olacaqsan.",
+      [
+        { text: "Dərsə davam et", style: "cancel" },
+        { text: "Dərsi bitir", style: "destructive", onPress: () => router.back() },
+      ],
+      { cancelable: true },
+    );
+  }
+
+  // Android-də əsas çıxış yolu aparat/jest "geri"dir — X-i qorumaq kifayət etmir,
+  // yoxsa eyni problem geri düyməsində qalır.
+  useEffect(() => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      confirmQuit();
+      return true; // defolt "geri"ni dayandır
+    });
+    return () => sub.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answered, mainTasks.length]);
   const total = inRetry ? retryTotal : mainTasks.length;
   const doneCount = inRetry ? retryTotal - retryQueue.length : index;
   const pct = total ? Math.round((doneCount / total) * 100) : 0;
@@ -209,7 +236,7 @@ export default function LessonScreen() {
     <View style={{ flex: 1, backgroundColor: C.ink }}>
       {/* Üst bar: çıxış + progress + canlar */}
       <View style={[s.top, { paddingTop: insets.top + 12 }]}>
-        <Pressable onPress={() => router.back()} hitSlop={10}><X color={C.muted} size={26} /></Pressable>
+        <Pressable onPress={confirmQuit} hitSlop={10}><X color={C.muted} size={26} /></Pressable>
         <AnimatedBar pct={pct} color={inRetry ? "#E9A23B" : C.brand} />
         <View style={s.hearts}>
           <Heart color={C.danger} fill={C.danger} size={18} />

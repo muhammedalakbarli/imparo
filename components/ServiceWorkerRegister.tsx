@@ -37,9 +37,23 @@ export default function ServiceWorkerRegister() {
       });
     };
 
-    const register = () =>
+    // Skript URL-inə build kimliyi əlavə olunur ki, hər deploy-da SW YENİ sayılsın.
+    // Bunsuz sw.js dəyişmədiyi üçün brauzer yeniləmə axtarmır və istifadəçi köhnə
+    // paketdə qalır (bax public/sw.js başlığı). /BUILD_ID hər build-də dəyişir.
+    const swUrl = async (): Promise<string> => {
+      try {
+        const res = await fetch("/BUILD_ID", { cache: "no-store" });
+        const id = (await res.text()).trim();
+        if (id) return `/sw.js?v=${encodeURIComponent(id.slice(0, 64))}`;
+      } catch {
+        /* alınmasa versiyasız qeydiyyat — köhnə davranış, sayt yenə işləyir */
+      }
+      return "/sw.js";
+    };
+
+    const register = async () =>
       navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
+        .register(await swUrl(), { scope: "/" })
         .then((r) => {
           reg = r;
           activate(r);
@@ -51,8 +65,9 @@ export default function ServiceWorkerRegister() {
         });
 
     // Səhifə yüklənməsini ləngitməmək üçün load-dan sonra.
-    if (document.readyState === "complete") register();
-    else window.addEventListener("load", register, { once: true });
+    const start = () => void register();
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
 
     return () => {
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);

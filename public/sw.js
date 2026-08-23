@@ -5,7 +5,18 @@
 //   - Naviqasiya (səhifə): əvvəlcə şəbəkə, offline olsa keşdən/ana səhifədən.
 //   - Statik fayllar (_next/static, şəkil, şrift): stale-while-revalidate.
 
-const CACHE = "bilik-yolu-v99";
+// Keş adı DEPLOY-a görə dəyişir. Əvvəl sabit ("bilik-yolu-v99") idi və bu,
+// ciddi bir nasazlıq yaradırdı: sw.js faylı hər deploy-da BAYT-BAYT EYNİ qalırdı,
+// ona görə brauzer "yeni service worker var" qərarına gəlmirdi — nə install,
+// nə activate, nə də köhnə keşin silinməsi baş verirdi. Nəticədə aşağıdakı
+// activate bloku və ServiceWorkerRegister-dəki avtomatik yeniləmə HEÇ VAXT
+// işə düşmürdü; istifadəçi köhnə JS paketində ilişib qalırdı.
+//
+// İndi SW `/sw.js?v=<BUILD_ID>` kimi qeydiyyatdan keçir: hər deploy-da skript
+// URL-i dəyişir → brauzer yeni SW görür → activate köhnə keşləri silir →
+// controllerchange açıq səhifəni bir dəfə təzələyir.
+const VERSION = new URL(self.location.href).searchParams.get("v") || "dev";
+const CACHE = `imparo-${VERSION}`;
 const OFFLINE_URL = "/";
 
 // Şəbəkə çatmayanda göstəriləcək minimal offline HTML.
