@@ -31,6 +31,7 @@ import { useCountUp } from "@/lib/useCountUp";
 import { useT } from "@/lib/i18n";
 import TaskInput from "@/components/tasks/TaskInput";
 import { preloadEnglish, spokenTextsOf } from "@/lib/tts";
+import QuitDialog from "@/components/lesson/QuitDialog";
 import TaskFigure from "@/components/TaskFigure";
 import Mascot from "@/components/Mascot";
 import Confetti from "@/components/Confetti";
@@ -68,6 +69,7 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
   const [correctCount, setCorrectCount] = useState(0);
   const [answered, setAnswered] = useState(0);
   const [combo, setCombo] = useState(0);
+  const [quitOpen, setQuitOpen] = useState(false);
   const [bestCombo, setBestCombo] = useState(0);
   const [comboBonus, setComboBonus] = useState(0); // bu addımda verilən combo bonusu
   const [startXp, setStartXp] = useState<number | null>(guest ? 0 : null);
@@ -429,6 +431,18 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
 
   return (
     <div className="flex min-h-screen flex-col bg-ink">
+      {/* Dərsdən çıxış təsdiqi — yarımçıq dərs itir, ona görə soruşulur */}
+      <AnimatePresence>
+        {quitOpen && (
+          <QuitDialog
+            answered={answered}
+            total={total}
+            onStay={() => setQuitOpen(false)}
+            onLeave={() => router.push(`/subjects/${slug}`)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Cavab flaşı — bütün ekran qısa yaşıl/qırmızı parıltı */}
       <AnimatePresence>
         {checked && (
@@ -449,13 +463,18 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
 
       {/* Yuxarı bar: X + qalın progress + combo */}
       <div className="mx-auto flex w-full max-w-xl items-center gap-4 px-4 pt-5">
-        <Link
-          href={`/subjects/${slug}`}
-          aria-label="Çıx"
+        <button
+          type="button"
+          onClick={() => {
+            // Heç nə həll edilməyibsə itiriləsi bir şey yoxdur — birbaşa çıx.
+            if (answered === 0) router.push(`/subjects/${slug}`);
+            else setQuitOpen(true);
+          }}
+          aria-label={t("run.quitLeave")}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-panel-2 hover:text-fg"
         >
           <X size={26} />
-        </Link>
+        </button>
         <div className="h-4 flex-1 overflow-hidden rounded-full bg-panel-2">
           <motion.div
             className={`h-full origin-left rounded-full ${inRetry ? "bg-orange-500" : inBonus ? "bg-accent" : "bg-brand"}`}

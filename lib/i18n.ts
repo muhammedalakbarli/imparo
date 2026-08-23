@@ -1067,6 +1067,20 @@ const DICT: Dict = {
   },
 
   // ── Valideyn hesabatı (Ayarlar) ──
+  // ── Dərsdən çıxış təsdiqi ──
+  "run.quitTitle": { az: "Dayan, getmə!", en: "Wait, don’t go!", ru: "Постой, не уходи!" },
+  "run.quitBody": {
+    az: "İndi çıxsan bu dərsdəki irəliləyişin itəcək.",
+    en: "If you quit now, your progress in this lesson is lost.",
+    ru: "Если выйдешь сейчас, прогресс в этом уроке пропадёт.",
+  },
+  // Say cümlənin İÇİNDƏ deyil, ayrıca göstərilir. Səbəb: "1 tasks" qrammatik
+  // səhvdir, rus dilində isə üç fərqli forma var (1 задание / 2 задания /
+  // 5 заданий). Rəqəmi cümlədən çıxarmaq üç dildə də düzgün nəticə verir.
+  "run.quitProgress": { az: "Həll edilib", en: "Answered", ru: "Отвечено" },
+  "run.quitStay": { az: "Dərsə davam et", en: "Keep learning", ru: "Продолжить урок" },
+  "run.quitLeave": { az: "Dərsi bitir", en: "End session", ru: "Завершить урок" },
+
   "parent.title": { az: "Valideyn hesabatı", en: "Parent report", ru: "Отчёт для родителя" },
   "parent.heading": { az: "Həftəlik hesabatı valideynə göndər", en: "Send a weekly report to a parent", ru: "Отправлять родителю еженедельный отчёт" },
   "parent.hint": {
