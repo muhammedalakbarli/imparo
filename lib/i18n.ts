@@ -1077,6 +1077,11 @@ const DICT: Dict = {
   // Say cümlənin İÇİNDƏ deyil, ayrıca göstərilir. Səbəb: "1 tasks" qrammatik
   // səhvdir, rus dilində isə üç fərqli forma var (1 задание / 2 задания /
   // 5 заданий). Rəqəmi cümlədən çıxarmaq üç dildə də düzgün nəticə verir.
+  "run.quitBodyStart": {
+    az: "İndi çıxsan bu dərsə yenidən başlamalı olacaqsan.",
+    en: "If you quit now, you’ll have to start this lesson over.",
+    ru: "Если выйдешь сейчас, урок придётся начать заново.",
+  },
   "run.quitProgress": { az: "Həll edilib", en: "Answered", ru: "Отвечено" },
   "run.quitStay": { az: "Dərsə davam et", en: "Keep learning", ru: "Продолжить урок" },
   "run.quitLeave": { az: "Dərsi bitir", en: "End session", ru: "Завершить урок" },

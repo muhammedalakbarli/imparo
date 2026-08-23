@@ -84,17 +84,22 @@ export default function QuitDialog({
         <h2 id="quit-title" className="mt-4 text-2xl font-extrabold text-fg">
           {t("run.quitTitle")}
         </h2>
-        <p className="mt-2 leading-relaxed text-muted">{t("run.quitBody")}</p>
+        {/* Hələ cavab yoxdursa "irəliləyişin itəcək" demək YALAN olardı — ayrı mətn. */}
+        <p className="mt-2 leading-relaxed text-muted">
+          {answered > 0 ? t("run.quitBody") : t("run.quitBodyStart")}
+        </p>
 
-        {/* İtki konkret görünsün: "Həll edilib 3 / 15" */}
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-line bg-panel-2 px-4 py-2">
-          <span className="text-xs font-bold uppercase tracking-wide text-muted">
-            {t("run.quitProgress")}
-          </span>
-          <span className="tabular text-base font-extrabold text-brand">
-            {answered} / {total}
-          </span>
-        </div>
+        {/* İtki konkret görünsün: "Həll edilib 3 / 15". Sıfırda göstərilmir. */}
+        {answered > 0 && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-line bg-panel-2 px-4 py-2">
+            <span className="text-xs font-bold uppercase tracking-wide text-muted">
+              {t("run.quitProgress")}
+            </span>
+            <span className="tabular text-base font-extrabold text-brand">
+              {answered} / {total}
+            </span>
+          </div>
+        )}
 
         <button
           ref={stayRef}

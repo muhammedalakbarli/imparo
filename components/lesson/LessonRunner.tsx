@@ -465,11 +465,10 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
       <div className="mx-auto flex w-full max-w-xl items-center gap-4 px-4 pt-5">
         <button
           type="button"
-          onClick={() => {
-            // Heç nə həll edilməyibsə itiriləsi bir şey yoxdur — birbaşa çıx.
-            if (answered === 0) router.push(`/subjects/${slug}`);
-            else setQuitOpen(true);
-          }}
+          // Dərs BAŞLAYANDAN sonra çıxış HƏMİŞƏ təsdiq istəyir (Duolingo da belədir).
+          // Əvvəl yalnız `answered > 0` olanda soruşulurdu — nəticədə dərsə girib
+          // dərhal X-ə basanda heç nə görünmürdü və düzəliş "işləmir" kimi görünürdü.
+          onClick={() => setQuitOpen(true)}
           aria-label={t("run.quitLeave")}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-panel-2 hover:text-fg"
         >
