@@ -3,6 +3,7 @@ import { subjects } from "@/lib/content";
 import { subjectMeta } from "@/lib/subjectMeta";
 import {
   formatDuration,
+  formatRange,
   accuracy,
   hasActivity,
   renderReportEmail,
@@ -257,5 +258,21 @@ describe("parentReport", () => {
     expect(l.unsubUrl).toContain("token=UUU");
     // İki token AYRIDIR: hesabat linki paylaşılsa da imtina edilə bilməməlidir.
     expect(l.viewUrl).not.toContain("UUU");
+  });
+});
+
+// Ay adı Workers runtime-ında "M08"-ə düşürdü (az-AZ ICU məlumatı yoxdur) —
+// bu test ay adının həqiqətən azərbaycanca yazıldığını təsbit edir.
+describe("formatRange", () => {
+  it("ay adını azərbaycanca yazır, ICU-dan asılı deyil", () => {
+    const r = formatRange("2026-08-16T20:00:00.000Z", "2026-08-23T20:00:00.000Z");
+    expect(r).toBe("17 avqust – 23 avqust");
+    expect(r).not.toMatch(/M\d/);
+  });
+
+  it("ay sərhədini keçəndə hər iki ayı düzgün adlandırır", () => {
+    expect(formatRange("2026-07-28T20:00:00.000Z", "2026-08-04T20:00:00.000Z")).toBe(
+      "29 iyul – 4 avqust",
+    );
   });
 });

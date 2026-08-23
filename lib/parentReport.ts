@@ -42,13 +42,30 @@ export function formatDuration(seconds: number): string {
   return rest === 0 ? `${h} saat` : `${h} saat ${rest} dəqiqə`;
 }
 
+// Ay adları ƏLLƏ yazılıb, `toLocaleDateString("az-AZ", { month: "long" })` ilə YOX.
+// Səbəb: Cloudflare Workers runtime-ında az-AZ lokalının ay adları yoxdur və
+// ICU geri düşərək "M08" qaytarır — valideynə gedən məktubun mövzusunda
+// "M08 16 – M08 22" yazılırdı. Lokal Node-da düzgün göründüyü üçün yalnız
+// real göndərişdə üzə çıxdı.
+const AY = [
+  "yanvar", "fevral", "mart", "aprel", "may", "iyun",
+  "iyul", "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr",
+];
+
 export function formatRange(from: string, to: string): string {
-  const f = new Date(from);
   const t = new Date(to);
   t.setDate(t.getDate() - 1); // `to` daxil deyil — göstəriləndə son günü geri al
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("az-AZ", { day: "numeric", month: "long", timeZone: "Asia/Baku" });
-  return `${fmt(f)} – ${fmt(t)}`;
+
+  // Bakı vaxtına görə gün/ay. en-CA hər yerdə "YYYY-MM-DD" verir və ICU-dan asılı deyil.
+  const parts = (d: Date) => {
+    const [, m, day] = d
+      .toLocaleDateString("en-CA", { timeZone: "Asia/Baku" })
+      .split("-")
+      .map(Number);
+    return `${day} ${AY[m - 1]}`;
+  };
+
+  return `${parts(new Date(from))} – ${parts(t)}`;
 }
 
 export function accuracy(d: ReportData): number {
