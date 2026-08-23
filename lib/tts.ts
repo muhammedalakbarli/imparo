@@ -4,6 +4,7 @@
 // Bütün çağırışlar istifadəçi klikindən gəlir, ona görə autoplay siyasəti bloklamır.
 
 import { useSyncExternalStore } from "react";
+import type { Task } from "@/lib/types";
 
 let current: HTMLAudioElement | null = null;
 
@@ -76,6 +77,22 @@ function getOrCreate(text: string): HTMLAudioElement {
   }
   ready.set(key, audio);
   return audio;
+}
+
+/**
+ * Tapşırıqda səsləndiriləcək İngilis mətnləri.
+ *
+ * DİQQƏT: variantlar yalnız `speakOptions` true olanda İngilisdir. Dinləmə
+ * tapşırığında onlar adətən azərbaycanca tərcümədir ("Futbol oynayıram") —
+ * onları TTS-ə göndərmək boş sorğu olar və keşi zibilləyər.
+ */
+export function spokenTextsOf(task: Task): string[] {
+  const out: string[] = [];
+  if (task.type === "listening") out.push(task.audioText);
+  if ((task.type === "listening" || task.type === "multiple_choice") && task.speakOptions) {
+    out.push(...task.options);
+  }
+  return out;
 }
 
 /**

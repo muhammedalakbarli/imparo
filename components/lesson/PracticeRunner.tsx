@@ -12,6 +12,7 @@ import { playCorrect, playWrong, playComplete, playStreak } from "@/lib/sound";
 import { vibrateCelebrate } from "@/lib/haptics";
 import { useCountUp } from "@/lib/useCountUp";
 import TaskInput from "@/components/tasks/TaskInput";
+import { preloadEnglish, spokenTextsOf } from "@/lib/tts";
 import TaskFigure from "@/components/TaskFigure";
 import Mascot from "@/components/Mascot";
 import Confetti from "@/components/Confetti";
@@ -46,6 +47,13 @@ function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish }: Props) {
 
   const task = tasks[index];
   const total = tasks.length;
+
+  // İrəli-yükləmə (LessonRunner ilə eyni səbəb): növbəti 2 tapşırığın
+  // İngilis audiosu şagird ora çatmamış hazır olsun.
+  useEffect(() => {
+    const ahead = tasks.slice(index + 1, index + 3).flatMap(spokenTextsOf);
+    if (ahead.length) preloadEnglish(ahead);
+  }, [tasks, index]);
 
   function check() {
     if (answer === null || answer === "") return;

@@ -30,6 +30,7 @@ import { vibrateCorrect, vibrateWrong, vibrateCelebrate } from "@/lib/haptics";
 import { useCountUp } from "@/lib/useCountUp";
 import { useT } from "@/lib/i18n";
 import TaskInput from "@/components/tasks/TaskInput";
+import { preloadEnglish, spokenTextsOf } from "@/lib/tts";
 import TaskFigure from "@/components/TaskFigure";
 import Mascot from "@/components/Mascot";
 import Confetti from "@/components/Confetti";
@@ -124,6 +125,18 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
     : total
       ? Math.round((index / total) * 100)
       : 0;
+
+  // İRƏLİ-YÜKLƏMƏ: növbəti 2 tapşırığın İngilis audiosunu indidən gətir.
+  // TaskInput cari tapşırığı onsuz da önyükləyir, amma o, tapşırıq EKRANA
+  // GƏLƏNDƏ başlayır — şagird dərhal "Dinlə"yə basarsa audio hələ hazır
+  // olmaya bilər. İki tapşırıq irəli getmək bu boşluğu bağlayır.
+  //
+  // Bütün dərs qəsdən yüklənmir: 20 tapşırıq × 4 variant ≈ 640 KB olardı və
+  // mobil şəbəkədə onlarla paralel sorğu deməkdir.
+  useEffect(() => {
+    const ahead = list.slice(index + 1, index + 3).flatMap(spokenTextsOf);
+    if (ahead.length) preloadEnglish(ahead);
+  }, [list, index]);
 
   function handleCheck() {
     if (answer === null || answer === "") return;

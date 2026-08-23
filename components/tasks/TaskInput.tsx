@@ -10,7 +10,7 @@ import { Volume2 } from "lucide-react";
 import type { Task } from "@/lib/types";
 import type { UserAnswer } from "@/lib/grading";
 import { playSelect } from "@/lib/sound";
-import { speakEnglish, preloadEnglish } from "@/lib/tts";
+import { speakEnglish, preloadEnglish, spokenTextsOf } from "@/lib/tts";
 
 interface Props {
   task: Task;
@@ -25,18 +25,7 @@ export default function TaskInput({ task, value, onChange, disabled, reveal }: P
   // Əvvəl audio yalnız klikdən sonra yüklənirdi və səs 0.3–0.7 saniyə gecikirdi —
   // şagird üçün düymə ilə səs arasındakı əlaqə itirdi. Bax lib/tts.ts.
   useEffect(() => {
-    // Variantlar YALNIZ speakOptions=true olduqda İngilis sözdür. Dinləmə
-    // tapşırığında variantlar adətən azərbaycanca tərcümədir ("Futbol oynayıram")
-    // — onları önyükləmək boş sorğu olardı və keşi zibilləyərdi.
-    const texts: string[] = [];
-    if (task.type === "listening") texts.push(task.audioText);
-    if (
-      (task.type === "listening" || task.type === "multiple_choice") &&
-      task.speakOptions
-    ) {
-      texts.push(...task.options);
-    }
-    if (texts.length) preloadEnglish(texts);
+    preloadEnglish(spokenTextsOf(task));
   }, [task]);
 
   // ── Çoxseçimli ─────────────────────────────────────────────
