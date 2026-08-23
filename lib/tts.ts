@@ -43,6 +43,58 @@ export function ttsSupported(): boolean {
   return typeof window !== "undefined";
 }
 
+// ── Önyükləmə keşi ───────────────────────────────────────────────────────────
+// Problem: klikdən sonra audio SIFIRDAN yüklənirdi — Worker Google-a gedib
+// qayıdırdı (ölçülmüş: 330–750 ms). Şagird düyməni basırdı, səs yarım saniyə
+// sonra gəlirdi və seçimlə səs əlaqəsi itirdi.
+//
+// Həll: variantlar EKRANA GƏLƏN KİMİ audio arxa planda yüklənir. Klik anında
+// element artıq hazırdır → səs dərhal çıxır.
+//
+// Audio ELEMENTİ keşlənir (yalnız URL yox): `preload="auto"` faylı endirməklə
+// yanaşı dekod da edir, yəni play() anında əlavə iş qalmır.
+const ready = new Map<string, HTMLAudioElement>();
+const MAX_CACHE = 64; // ~8 KB × 64 ≈ 0.5 MB — bir dərs üçün bol-bol bəsdir
+
+function cacheKey(text: string): string {
+  return text.trim().slice(0, 200);
+}
+
+function getOrCreate(text: string): HTMLAudioElement {
+  const key = cacheKey(text);
+  const hit = ready.get(key);
+  if (hit) return hit;
+
+  const audio = new Audio(ttsUrl(key));
+  audio.preload = "auto";
+  audio.load();
+
+  // Ən köhnəni at (Map daxil olma sırasını saxlayır).
+  if (ready.size >= MAX_CACHE) {
+    const oldest = ready.keys().next().value;
+    if (oldest !== undefined) ready.delete(oldest);
+  }
+  ready.set(key, audio);
+  return audio;
+}
+
+/**
+ * Verilmiş İngilis mətnlərini ƏVVƏLCƏDƏN yükləyir (səsləndirmir).
+ * Tapşırıq ekrana gələndə çağırılır — bax components/tasks/TaskInput.tsx.
+ */
+export function preloadEnglish(texts: (string | undefined | null)[]): void {
+  if (typeof window === "undefined") return;
+  for (const t of texts) {
+    if (t && t.trim()) {
+      try {
+        getOrCreate(t);
+      } catch {
+        /* yaddaş/quota problemi olsa səssizcə keç — önyükləmə məcburi deyil */
+      }
+    }
+  }
+}
+
 // Web Speech API ehtiyat yolu — səslər asinxron yüklənə bilər.
 function webSpeechFallback(text: string): void {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -88,7 +140,10 @@ export function speakEnglish(text: string): void {
   setSpeaking(false);
 
   try {
-    const audio = new Audio(ttsUrl(text));
+    // Önyüklənmiş element varsa ondan istifadə olunur → şəbəkə gözləməsi YOXDUR.
+    // Yoxdursa yaradılır və eyni zamanda keşə düşür (ikinci klik dərhal işləyir).
+    const audio = getOrCreate(text);
+    audio.currentTime = 0; // eyni sözə təkrar basanda əvvəldən başlasın
     current = audio;
     audio.onplaying = () => setSpeaking(true);
     audio.onended = () => setSpeaking(false);
