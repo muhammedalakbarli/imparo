@@ -3,7 +3,7 @@
 --
 -- Niyə: istifadəçini geri qaytarmaq üçün (streak yanır, gündəlik quest hazırdır) push
 -- göndərmək lazımdır. Brauzer abunəsi (endpoint + açarlar) burada saxlanılır; server
--- (Vercel Cron) service_role ilə oxuyub web-push göndərir.
+-- (cron) service_role ilə oxuyub web-push göndərir.
 
 create table if not exists push_subscriptions (
   id uuid primary key default gen_random_uuid(),
@@ -35,4 +35,4 @@ drop policy if exists "own push delete" on push_subscriptions;
 create policy "own push delete" on push_subscriptions
   for delete using (auth.uid() = user_id);
 
--- Qeyd: göndərici (Vercel Cron) service_role ilə işləyir → RLS-i keçir, hamısını oxuyur.
+-- Qeyd: göndərici (cron) service_role ilə işləyir → RLS-i keçir, hamısını oxuyur.

@@ -35,7 +35,7 @@ self.addEventListener("message", (event) => {
 });
 
 // ── Push bildirişləri (re-engagement) ──
-// Server (Vercel Cron) push göndərəndə bildirişi göstər.
+// Server (GitHub Actions cron → /api/cron/reminders) push göndərəndə bildirişi göstər.
 self.addEventListener("push", (event) => {
   let data = {};
   try {

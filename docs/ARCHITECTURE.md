@@ -7,7 +7,9 @@ Imparo-nun yüksək səviyyəli quruluşu — yeni komanda üzvləri üçün.
 - **Frontend:** Next.js 16 (App Router) + React 19 + TypeScript. Səhifələr `app/` altında.
 - **Backend:** Supabase — Postgres (verilənlər), Auth (qeydiyyat/giriş), Row-Level Security (RLS)
   və RPC funksiyaları (`supabase/migrations/`).
-- **Deploy:** Vercel (production = `main`).
+- **Deploy:** Cloudflare Workers (`@opennextjs/cloudflare` adapteri) — `npm run cf:deploy`.
+  Canlı: `imparo.app`. Vercel ARTIQ İŞLƏDİLMİR (2026 Avq 14-də köçürüldü).
+  Cloudflare Pages DA YOX — adapter Workers üçündür, bax `wrangler.jsonc`.
 
 ## Məzmun modeli
 
@@ -54,5 +56,8 @@ istifadə olunur ki, fənlər təkrarlanmasın.
 
 ## Bildirişlər
 
-PWA manifesti (`app/manifest.ts`) + web push (`lib/push.ts`, VAPID) + Vercel Cron
-(`app/api/cron/`) re-engagement üçün.
+PWA manifesti (`app/manifest.ts`) + web push (`lib/push.ts`, VAPID) + cron
+(`app/api/cron/`) re-engagement üçün. Cron-ları **GitHub Actions** çağırır
+(`.github/workflows/cron-*.yml`) — Vercel Cron deyil. Çağırış `workers.dev`
+hostuna gedir, çünki `imparo.app` zonasında Bot Fight Mode datamərkəz IP-lərini
+bloklayır.

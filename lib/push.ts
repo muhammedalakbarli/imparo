@@ -1,7 +1,7 @@
 "use client";
 
 // Web Push abunəsi — istifadəçini re-engagement bildirişlərinə yazır.
-// Abunə Supabase `push_subscriptions` cədvəlində saxlanılır; server (Vercel Cron)
+// Abunə Supabase `push_subscriptions` cədvəlində saxlanılır; server (GitHub Actions cron)
 // oradan oxuyub push göndərir. VAPID public açarı NEXT_PUBLIC env-dədir.
 
 import { createClient } from "./supabase/client";
