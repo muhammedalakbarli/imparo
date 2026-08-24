@@ -56,3 +56,7 @@ mobile/.expo
 .open-next/
 .wrangler/
 .dev.vars
+
+# Ekran şəkilləri / iş qeydləri
+*.jpeg
+/supabase*.png
