@@ -7,6 +7,7 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
 import ActivityTracker from "@/components/ActivityTracker";
 import BanGate from "@/components/BanGate";
+import LegalUpdateBanner from "@/components/LegalUpdateBanner";
 import RecoveryRedirect from "@/components/RecoveryRedirect";
 import { SITE_URL } from "@/lib/site";
 
@@ -168,6 +169,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ContentProvider>
+          {/* Hüquqi dəyişiklik bildirişi — HƏR səhifədə (şərtlərdə vəd edilib).
+              AppChrome-dan KƏNARDA: landing və hüquqi səhifələr "bare" rejimdədir
+              və AppChrome-un içindəki bannerlər orada göstərilmir. */}
+          <LegalUpdateBanner />
           <AppChrome>{children}</AppChrome>
         </ContentProvider>
         <BanGate />

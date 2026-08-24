@@ -1038,7 +1038,23 @@ const DICT: Dict = {
   "ft.rights": { az: "Bütün hüquqlar qorunur.", en: "All rights reserved.", ru: "Все права защищены." },
 
   // ── Hüquqi (ümumi) ──
-  "legal.updated": { az: "Son yenilənmə: 24 avqust 2026", en: "Last updated: August 24, 2026", ru: "Обновлено: 24 августа 2026" },
+  // DİQQƏT: tarix burada YAZILMIR — lib/legal.ts-dəki LEGAL_UPDATED-dən gəlir.
+  // Əvvəl üç dildə əl ilə yazılırdı və sənəd dəyişəndə köhnəlirdi.
+  "legal.updated": { az: "Son yenilənmə: {d}", en: "Last updated: {d}", ru: "Обновлено: {d}" },
+  "legal.notice.body": {
+    az: "İstifadə şərtlərini və Məxfilik siyasətini yenilədik.",
+    en: "We have updated our Terms of Use and Privacy Policy.",
+    ru: "Мы обновили Условия использования и Политику конфиденциальности.",
+  },
+  "legal.notice.terms": { az: "Şərtlərə bax", en: "Read the Terms", ru: "Открыть условия" },
+  "legal.notice.privacy": { az: "Məxfiliyə bax", en: "Read the Privacy Policy", ru: "Открыть политику" },
+  "legal.notice.close": { az: "Bildirişi bağla", en: "Dismiss notice", ru: "Закрыть уведомление" },
+  "legal.changed": { az: "Bu dəfə nə dəyişdi", en: "What changed this time", ru: "Что изменилось" },
+  "legal.changedBody": {
+    az: "Fənn siyahısı düzəldildi (5 fənn), reklamla bağlı ziddiyyət aradan qaldırıldı (Imparo reklam göstərmir), alt-emalçılara Cloudflare və Resend əlavə olundu, könüllü valideyn hesabatı ayrıca izah edildi və mövcud olmayan App Store/Google Play alışı barədə bənd silindi.",
+    en: "Corrected the subject list (5 subjects), removed a contradiction about ads (Imparo shows no ads), added Cloudflare and Resend to sub-processors, documented the optional parent report, and removed a clause about App Store/Google Play purchases that do not exist.",
+    ru: "Исправлен список предметов (5), устранено противоречие про рекламу (Imparo не показывает рекламу), в список субобработчиков добавлены Cloudflare и Resend, описан необязательный родительский отчёт, удалён пункт о покупках через App Store/Google Play, которых нет.",
+  },
   "legal.contactLine": { az: "Sualın var? Bizə yaz:", en: "Have a question? Write to us:", ru: "Есть вопрос? Напишите нам:" },
 
   // ── Info səhifələri (Bloq, Karyera, İnvestorlar, Səmərəlilik) ──

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import Logo from "@/components/Logo";
 import { useT } from "@/lib/i18n";
+import { legalNoticeOpen } from "@/lib/legal";
 
 export default function LegalShell({
   title,
@@ -33,6 +34,15 @@ export default function LegalShell({
       <article className="mx-auto max-w-3xl px-5 py-12">
         <h1 className="text-3xl font-extrabold text-fg sm:text-4xl">{title}</h1>
         <p className="mt-2 text-sm text-muted">{updated}</p>
+
+        {/* Son dəyişikliyin xülasəsi — şərtlərdə vəd edilən 7 gün ərzində görünür.
+            "Nəyisə dəyişdik" demək azdır; nəyi dəyişdiyimiz də göstərilməlidir. */}
+        {legalNoticeOpen() && (
+          <div className="mt-5 rounded-2xl border border-brand/30 bg-brand/5 px-5 py-4">
+            <div className="text-sm font-extrabold text-fg">{t("legal.changed")}</div>
+            <p className="mt-1 text-sm leading-relaxed text-muted">{t("legal.changedBody")}</p>
+          </div>
+        )}
         <div className="mt-8 space-y-6">{children}</div>
 
         <div className="mt-12 border-t border-line pt-6 text-sm text-muted">

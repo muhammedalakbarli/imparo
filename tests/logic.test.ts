@@ -2,6 +2,12 @@ import { describe, it, expect } from "vitest";
 import { subjects } from "@/lib/content";
 import { subjectMeta } from "@/lib/subjectMeta";
 import {
+  LEGAL_UPDATED,
+  LEGAL_DISMISS_KEY,
+  legalNoticeOpen,
+  formatLegalDate,
+} from "@/lib/legal";
+import {
   formatDuration,
   formatRange,
   accuracy,
@@ -277,5 +283,43 @@ describe("formatRange", () => {
     expect(formatRange("2026-07-28T20:00:00.000Z", "2026-08-04T20:00:00.000Z")).toBe(
       "29 iyul – 4 avqust",
     );
+  });
+});
+
+// ── Hüquqi bildiriş pəncərəsi ────────────────────────────────────────────────
+// Şərtlər "ən azı 7 gün bildiriş" vəd edir. Bu hesablama səhv olsa, banner ya
+// heç görünməz (vəd pozulur), ya da əbədi qalar (istifadəçini bezdirir).
+describe("legal notice", () => {
+  const [y, m, d] = LEGAL_UPDATED.split("-").map(Number);
+  const bakuStart = Date.UTC(y, m - 1, d) - 4 * 60 * 60 * 1000; // Bakı UTC+4
+
+  it("dəyişiklik günündə açıqdır", () => {
+    expect(legalNoticeOpen(new Date(bakuStart))).toBe(true);
+    expect(legalNoticeOpen(new Date(bakuStart + 60_000))).toBe(true);
+  });
+
+  it("7-ci günün sonunadək açıq qalır", () => {
+    const almost = bakuStart + 7 * 24 * 3600_000 - 60_000;
+    expect(legalNoticeOpen(new Date(almost))).toBe(true);
+  });
+
+  it("7 gündən sonra bağlanır", () => {
+    const after = bakuStart + 7 * 24 * 3600_000;
+    expect(legalNoticeOpen(new Date(after))).toBe(false);
+  });
+
+  it("dəyişiklikdən əvvəl göstərilmir", () => {
+    expect(legalNoticeOpen(new Date(bakuStart - 60_000))).toBe(false);
+  });
+
+  it("tarixi ICU-dan asılı olmadan üç dildə yazır", () => {
+    expect(formatLegalDate("az")).toBe("24 avqust 2026");
+    expect(formatLegalDate("en")).toBe("August 24, 2026");
+    expect(formatLegalDate("ru")).toBe("24 августа 2026");
+    expect(formatLegalDate("az")).not.toMatch(/M\d/);
+  });
+
+  it("bağlama açarı tarixə bağlıdır — yeni dəyişiklikdə banner qayıdır", () => {
+    expect(LEGAL_DISMISS_KEY).toContain(LEGAL_UPDATED);
   });
 });
