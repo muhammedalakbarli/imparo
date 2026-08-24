@@ -114,6 +114,7 @@ function parseTask(row: TaskRow): { task: Task; bonus: boolean } {
     };
   }
   if (d.speakOptions === true) task.speakOptions = true;
+  if (typeof d.explanation === "string" && d.explanation) task.explanation = d.explanation;
   return { task, bonus };
 }
 

@@ -4,7 +4,7 @@
 // Düzgün → yaşıl "Əla!"; səhv → qırmızı "Düzgün cavab: …". Böyük Zefi + DAVAM ET.
 
 import { motion } from "framer-motion";
-import { Check, X } from "lucide-react";
+import { Check, X, Lightbulb } from "lucide-react";
 import Mascot from "@/components/Mascot";
 import QuestionFeedback from "@/components/lesson/QuestionFeedback";
 import { useT } from "@/lib/i18n";
@@ -20,6 +20,8 @@ const CONFETTI = Array.from({ length: 10 }, (_, i) => ({
 interface Props {
   correct: boolean;
   correctText?: string; // səhv olduqda düzgün cavab
+  /** Bu sualın cavabı NİYƏ belədir (task.explanation). Yoxdursa blok göstərilmir. */
+  explanation?: string;
   comboBonus?: number;
   ctaLabel: string;
   taskId: string; // sualla bağlı rəy üçün
@@ -29,6 +31,7 @@ interface Props {
 export default function ResultSheet({
   correct,
   correctText,
+  explanation,
   comboBonus = 0,
   ctaLabel,
   taskId,
@@ -117,6 +120,21 @@ export default function ResultSheet({
           {ctaLabel}
         </button>
        </div>
+
+        {/* İzah — sualın cavabı niyə belədir. Tam enində, çünki mətn cümlədir;
+            yuxarıdakı sətrə sıxışdırılsa düymə ilə dartışıb oxunmaz olur. */}
+        {explanation && (
+          <div
+            className={`mt-3 flex gap-2.5 rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+              correct
+                ? "bg-emerald-500/10 text-emerald-900 dark:text-emerald-100"
+                : "bg-red-500/10 text-red-900 dark:text-red-100"
+            }`}
+          >
+            <Lightbulb size={17} className="mt-0.5 shrink-0 opacity-70" />
+            <span>{explanation}</span>
+          </div>
+        )}
 
         <QuestionFeedback key={taskId} taskId={taskId} />
       </div>

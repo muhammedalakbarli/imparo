@@ -29,6 +29,13 @@ interface TaskBase {
   // Variantlar İngilis sözdürsə: seçiləndə avtomatik səslənir (TTS ilə tələffüz).
   // Yalnız BÜTÜN variantları İngilis olan tapşırıqlarda true qoyulur.
   speakOptions?: boolean;
+
+  // Cavabdan sonra nəticə lövhəsində göstərilən izah: MƏHZ BU SUALIN cavabı
+  // niyə belədir. Dərsin ümumi qaydası DEYİL — şagird artıq sualı görüb, ona
+  // "yüzlük, onluq, təklik var" demək kömək etmir; "345-də 3 yüzlük var, çünki
+  // soldan birinci rəqəm yüzlükdür" kömək edir.
+  // İstəyə bağlıdır: yazılmayıbsa lövhədə izah bloku ümumiyyətlə göstərilmir.
+  explanation?: string;
 }
 
 // Çoxseçimli sual

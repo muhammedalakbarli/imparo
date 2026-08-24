@@ -622,6 +622,7 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
             key="sheet"
             correct={lastCorrect}
             correctText={correctAnswerText(task)}
+            explanation={task.explanation}
             comboBonus={comboBonus}
             ctaLabel={ctaText}
             taskId={task.id}
