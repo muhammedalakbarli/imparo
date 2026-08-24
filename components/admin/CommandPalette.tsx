@@ -7,13 +7,14 @@ import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import {
   LayoutDashboard, BookOpen, Users, BarChart3, School, GraduationCap,
-  Megaphone, MessageSquare, ShieldAlert, ShieldCheck, TrendingUp, Gauge, ExternalLink, Search, Siren,
+  Megaphone, MessageSquare, ShieldAlert, ShieldCheck, TrendingUp, Gauge, ExternalLink, Search, Siren, Bot,
 } from "lucide-react";
 
 const ITEMS = [
   { href: "/admin/panel", label: "Panel (overview)", Icon: LayoutDashboard },
   { href: "/admin", label: "Məzmun (fənn/dərs)", Icon: BookOpen },
   { href: "/admin/istifadeciler", label: "İstifadəçilər", Icon: Users },
+  { href: "/admin/botlar", label: "Moderasiya (botlar / banlar)", Icon: Bot },
   { href: "/admin/analitika", label: "Analitika", Icon: BarChart3 },
   { href: "/admin/gelir", label: "Gəlir / abunə", Icon: TrendingUp },
   { href: "/admin/mezmun-performans", label: "Məzmun performansı", Icon: Gauge },

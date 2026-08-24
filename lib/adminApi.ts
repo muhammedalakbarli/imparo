@@ -228,7 +228,11 @@ export interface AdminUserDetail {
   user_id: string;
   email: string;
   name: string;
+  username: string | null;
   is_bot: boolean;
+  banned: boolean;
+  banned_until: string | null;
+  ban_reason: string | null;
   created_at: string;
   last_sign_in_at: string | null;
   email_confirmed: boolean;
@@ -469,4 +473,68 @@ export interface HourlyPoint { hour: number; cnt: number; }
 export async function adminHourlyActivity(): Promise<HourlyPoint[]> {
   try { const { data } = await createClient().rpc("admin_hourly_activity"); return (data as HourlyPoint[]) ?? []; }
   catch { return []; }
+}
+
+// ── Moderasiya: ban / bot / sərbəst müddətli Plus (migration 0043 + 0045) ──
+// `banned_until = 'infinity'` → həmişəlik ban. Postgres bunu JSON-da "infinity"
+// mətni kimi qaytarır — Date() onu parse edə bilmir, ona görə `isForever()` ilə
+// yoxlanılır (bütün UI formatlaması bu köməkçidən keçir).
+export function isForever(ts: string | null | undefined): boolean {
+  return ts === "infinity" || ts === "Infinity";
+}
+
+export interface AdminModerationRow {
+  user_id: string;
+  email: string | null;
+  name: string | null;
+  username: string | null;
+  is_bot: boolean;
+  banned_until: string | null;
+  ban_reason: string | null;
+  is_plus: boolean;
+  plus_until: string | null;
+  total_xp: number;
+  created_at: string;
+}
+
+// Botlar + hazırda banlı olan hesablar (tək sorğu, `is_bot`/`banned_until` ilə süzülür).
+export async function adminModerationList(): Promise<AdminModerationRow[]> {
+  try {
+    const { data } = await createClient().rpc("admin_moderation_list");
+    return (data as AdminModerationRow[]) ?? [];
+  } catch { return []; }
+}
+
+// days: null və ya <= 0 → həmişəlik ban.
+export async function adminBanUser(uid: string, days: number | null, reason?: string): Promise<Res> {
+  const { error } = await createClient().rpc("admin_ban_user", {
+    p_uid: uid,
+    p_days: days === null || days <= 0 ? null : Math.round(days),
+    p_reason: reason?.trim() || null,
+  });
+  return { ok: !error, error: error?.message };
+}
+export async function adminUnbanUser(uid: string): Promise<Res> {
+  const { error } = await createClient().rpc("admin_unban_user", { p_uid: uid });
+  return { ok: !error, error: error?.message };
+}
+
+// Gün əsaslı Plus. days <= 0 → həmişəlik. extend = mövcud abunənin üstünə əlavə et.
+export async function adminGrantPlusDays(
+  uid: string, days: number, extend = false,
+): Promise<Res & { until?: string }> {
+  const { data, error } = await createClient().rpc("admin_grant_plus_days", {
+    p_uid: uid, p_days: Math.round(days), p_extend: extend,
+  });
+  return { ok: !error, error: error?.message, until: (data as string) ?? undefined };
+}
+
+// İstifadəçi öz ban vəziyyətini oxuyur (app tərəfindəki "hesab bloklanıb" ekranı üçün).
+export interface BanStatus { banned: boolean; until: string | null; reason: string | null }
+export async function myBanStatus(): Promise<BanStatus> {
+  try {
+    const { data } = await createClient().rpc("my_ban_status");
+    const row = (data as BanStatus[])?.[0];
+    return row ?? { banned: false, until: null, reason: null };
+  } catch { return { banned: false, until: null, reason: null }; }
 }
