@@ -49,9 +49,9 @@ export default function LandingPage() {
     });
   }, [router]);
 
-  // Vitrin rəqəmləri YUVARLAQ göstərilir: "776 dərs" səliqəsiz görünür, "750+" isə
+  // Vitrin rəqəmləri YUVARLAQ göstərilir: "666 dərs" səliqəsiz görünür, "650+" isə
   // həm təmiz, həm dürüstdür (real say həmişə göstərilən rəqəmdən çoxdur).
-  // Addım rəqəmin böyüklüyünə uyğunlaşır: 776 → 750, 11 693 → 10 000.
+  // Addım rəqəmin böyüklüyünə uyğunlaşır: 666 → 650, 11 693 → 10 000.
   function niceFloor(n: number): number {
     if (n < 10) return n;
     const step = Math.pow(10, Math.floor(Math.log10(n))) / 2;
@@ -62,8 +62,12 @@ export default function LandingPage() {
   // (26 sətir), amma şagird üçün bu, 5 fərqli fənn deməkdir.
   const subjectCount = new Set(subjects.map((s) => s.name)).size;
 
+  // Sandıqlar "dərs" sayılmır — onların tapşırığı yoxdur. Əvvəl sayılırdı və
+  // ana səhifə 750+ göstərirdi, halbuki 110-u boş sandıqdır (bax subjectMeta).
   const totalLessons = subjects.reduce(
-    (n, s) => n + s.units.reduce((m, u) => m + u.lessons.length, 0),
+    (n, s) =>
+      n +
+      s.units.reduce((m, u) => m + u.lessons.filter((l) => l.tasks.length > 0).length, 0),
     0,
   );
   const totalTasks = subjects.reduce(

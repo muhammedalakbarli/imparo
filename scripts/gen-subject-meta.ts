@@ -15,7 +15,12 @@ const rows = subjects.map((s) => ({
   name: s.name,
   grade: s.grade,
   units: s.units.length,
-  lessons: s.units.reduce((n, u) => n + u.lessons.length, 0),
+  // Sandıqlar SAYILMIR: onların tapşırığı yoxdur, ona görə "dərs" deyil.
+  // Əvvəl sayılırdı və sayt 776 "dərs" göstərirdi, halbuki 110-u boş sandıqdır.
+  lessons: s.units.reduce(
+    (n, u) => n + u.lessons.filter((l) => l.tasks.length > 0).length,
+    0,
+  ),
 }));
 
 const out = `// AVTOMATİK YARADILIB — əl ilə redaktə etmə.

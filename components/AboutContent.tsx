@@ -9,6 +9,7 @@ import Logo from "@/components/Logo";
 import Mascot from "@/components/Mascot";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useT } from "@/lib/i18n";
+import { subjectMeta } from "@/lib/subjectMeta";
 
 export default function AboutContent() {
   const t = useT();
@@ -115,9 +116,9 @@ export default function AboutContent() {
       {/* Statistika */}
       <section className="mx-auto max-w-5xl px-5 py-10">
         <div className="grid grid-cols-3 gap-4 rounded-3xl border border-line bg-gradient-to-br from-brand/10 to-accent/5 p-8 text-center">
-          <Stat value="3" label={t("about.stats.subjects")} />
-          <Stat value="60+" label={t("about.stats.lessons")} />
-          <Stat value="1–8" label={t("about.stats.grades")} />
+          <Stat value={String(SUBJECT_COUNT)} label={t("about.stats.subjects")} />
+          <Stat value={`${LESSON_COUNT}+`} label={t("about.stats.lessons")} />
+          <Stat value={GRADE_RANGE} label={t("about.stats.grades")} />
         </div>
       </section>
 
@@ -159,6 +160,15 @@ export default function AboutContent() {
     </main>
   );
 }
+
+// Rəqəmlər ƏL İLƏ YAZILMIR. Əvvəl burada "3 fənn" və "60+ dərs" sabit yazılmışdı —
+// məzmun böyüdükcə köhnəldi və ziyarətçiyə 5 fənn / 650+ dərs əvəzinə 10 dəfə az
+// göstərirdi (ana səhifə isə düzgün rəqəmi göstərirdi → sayt öz-özü ilə ziddiyyətdə).
+const SUBJECT_COUNT = new Set(subjectMeta.map((s) => s.name)).size;
+const GRADES = subjectMeta.map((s) => s.grade);
+const GRADE_RANGE = `${Math.min(...GRADES)}–${Math.max(...GRADES)}`;
+// Sandıqlar dərs sayılmır (tapşırığı yoxdur) — bax lib/subjectMeta.ts qeydi.
+const LESSON_COUNT = Math.floor(subjectMeta.reduce((n, s) => n + s.lessons, 0) / 50) * 50;
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (

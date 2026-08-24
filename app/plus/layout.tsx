@@ -4,11 +4,11 @@ import type { Metadata } from "next";
 // `metadata` export etmək olmur — ona görə SEO başlığı bu server layout-dan verilir.
 export const metadata: Metadata = {
   title: "Plus",
-  description: "Limitsiz can, iki dəfə çox zümrüd və reklamsız öyrənmə. Imparo Plus abunəliyinin qiyməti və üstünlükləri.",
+  description: "Limitsiz can və iki dəfə çox zümrüd. Imparo Plus abunəliyinin qiyməti və üstünlükləri.",
   alternates: { canonical: "/plus" },
   openGraph: {
     title: "Imparo Plus",
-    description: "Limitsiz can, iki dəfə çox zümrüd və reklamsız öyrənmə. Imparo Plus abunəliyinin qiyməti və üstünlükləri.",
+    description: "Limitsiz can və iki dəfə çox zümrüd. Imparo Plus abunəliyinin qiyməti və üstünlükləri.",
     url: "/plus",
   },
 };

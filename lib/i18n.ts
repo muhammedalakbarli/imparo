@@ -692,9 +692,9 @@ const DICT: Dict = {
   // ── Landing: necə işləyir ──
   "home.app.title": { az: "İstənilən yerdə öyrən", en: "Learn anytime, anywhere", ru: "Учись где угодно" },
   "home.app.body": {
-    az: "Imparo brauzerdə işləyir və telefonda tətbiq kimi (PWA) quraşdırıla bilər. Native iOS/Android tətbiqi tezliklə.",
-    en: "Imparo works in the browser and installs as an app on your phone (PWA). Native iOS/Android apps coming soon.",
-    ru: "Imparo работает в браузере и устанавливается как приложение на телефон (PWA). Нативные приложения iOS/Android скоро.",
+    az: "Imparo brauzerdə işləyir və telefonda tətbiq kimi (PWA) quraşdırıla bilər. Native iOS/Android tətbiqi üzərində işləyirik.",
+    en: "Imparo works in the browser and installs as an app on your phone (PWA). Native iOS/Android apps are in development.",
+    ru: "Imparo работает в браузере и устанавливается как приложение на телефон (PWA). Нативные приложения iOS/Android в разработке.",
   },
   "home.app.soon": { az: "Tezliklə", en: "Coming soon", ru: "Скоро" },
   "home.how.title": { az: "Necə işləyir?", en: "How it works", ru: "Как это работает" },
@@ -973,15 +973,15 @@ const DICT: Dict = {
   "about.products.heading": { az: "Nə təklif edirik", en: "What we offer", ru: "Что мы предлагаем" },
   "about.prod.imparo.title": { az: "Imparo", en: "Imparo", ru: "Imparo" },
   "about.prod.imparo.desc": {
-    az: "1–8-ci siniflər üçün interaktiv öyrənmə platforması — Riyaziyyat, Azərbaycan dili və İngilis dili, oyun kimi.",
-    en: "An interactive learning platform for grades 1–8 — Math, Azerbaijani and English, like a game.",
-    ru: "Интерактивная платформа для 1–8 классов — математика, азербайджанский и английский, как игра.",
+    az: "1–8-ci siniflər üçün interaktiv öyrənmə platforması — Riyaziyyat, Azərbaycan dili, İngilis dili, həmçinin Rəqəmsal Təhlükəsizlik və Maliyyə Savadlılığı, oyun kimi.",
+    en: "An interactive learning platform for grades 1–8 — Math, Azerbaijani, English, plus Digital Safety and Financial Literacy, like a game.",
+    ru: "Интерактивная платформа для 1–8 классов — математика, азербайджанский, английский, а также цифровая безопасность и финансовая грамотность, как игра.",
   },
   "about.prod.plus.title": { az: "Imparo Plus", en: "Imparo Plus", ru: "Imparo Plus" },
   "about.prod.plus.desc": {
-    az: "Limitsiz can, 2× zümrüd və reklamsız təcrübə ilə öyrənməni daha rahat və sürətli et.",
-    en: "Make learning smoother and faster with unlimited hearts, 2× gems and an ad-free experience.",
-    ru: "Сделай учёбу удобнее и быстрее с безлимитными жизнями, 2× кристаллами и без рекламы.",
+    az: "Limitsiz can və 2× zümrüd ilə öyrənməni daha rahat və sürətli et.",
+    en: "Make learning smoother and faster with unlimited hearts and 2× gems.",
+    ru: "Сделай учёбу удобнее и быстрее с безлимитными жизнями и 2× кристаллами.",
   },
   "about.prod.school.title": { az: "Imparo Məktəb", en: "Imparo for Schools", ru: "Imparo для школ" },
   "about.prod.school.desc": {
@@ -1038,7 +1038,7 @@ const DICT: Dict = {
   "ft.rights": { az: "Bütün hüquqlar qorunur.", en: "All rights reserved.", ru: "Все права защищены." },
 
   // ── Hüquqi (ümumi) ──
-  "legal.updated": { az: "Son yenilənmə: 18 avqust 2026", en: "Last updated: August 18, 2026", ru: "Обновлено: 18 августа 2026" },
+  "legal.updated": { az: "Son yenilənmə: 24 avqust 2026", en: "Last updated: August 24, 2026", ru: "Обновлено: 24 августа 2026" },
   "legal.contactLine": { az: "Sualın var? Bizə yaz:", en: "Have a question? Write to us:", ru: "Есть вопрос? Напишите нам:" },
 
   // ── Info səhifələri (Bloq, Karyera, İnvestorlar, Səmərəlilik) ──
@@ -1243,9 +1243,9 @@ const DICT: Dict = {
   },
   "terms.s2.t": { az: "2. Xidmətin təsviri", en: "2. Description of the Service", ru: "2. Описание Сервиса" },
   "terms.s2.b": {
-    az: "Imparo — 1–8-ci siniflər üçün Riyaziyyat, Azərbaycan dili və İngilis dili üzrə oyunlaşdırılmış onlayn öyrənmə platformasıdır. Xidmətin istənilən hissəsini istənilən vaxt öz mülahizəmizlə yeniləyə, dəyişə, dayandıra və ya ləğv edə bilərik.",
-    en: "Imparo is a gamified online learning platform for grades 1–8 covering Math, Azerbaijani and English. We may update, change, suspend or discontinue any part of the Service at any time at our discretion.",
-    ru: "Imparo — геймифицированная онлайн-платформа для 1–8 классов по математике, азербайджанскому и английскому. Мы можем обновлять, изменять, приостанавливать или прекращать любую часть Сервиса в любое время по своему усмотрению.",
+    az: "Imparo — 1–8-ci siniflər üçün oyunlaşdırılmış onlayn öyrənmə platformasıdır (Riyaziyyat, Azərbaycan dili, İngilis dili, Rəqəmsal Təhlükəsizlik və Maliyyə Savadlılığı; fənn siyahısı vaxtaşırı genişlənir). Xidmətin istənilən hissəsini istənilən vaxt öz mülahizəmizlə yeniləyə, dəyişə, dayandıra və ya ləğv edə bilərik.",
+    en: "Imparo is a gamified online learning platform for grades 1–8 (Math, Azerbaijani, English, Digital Safety and Financial Literacy; the subject list expands over time). We may update, change, suspend or discontinue any part of the Service at any time at our discretion.",
+    ru: "Imparo — геймифицированная онлайн-платформа для 1–8 классов (математика, азербайджанский, английский, цифровая безопасность и финансовая грамотность; список предметов со временем расширяется). Мы можем обновлять, изменять, приостанавливать или прекращать любую часть Сервиса в любое время по своему усмотрению.",
   },
   "terms.s3.t": { az: "3. Qeydiyyat və hesab", en: "3. Registration and account", ru: "3. Регистрация и аккаунт" },
   "terms.s3.b": {
@@ -1297,15 +1297,15 @@ const DICT: Dict = {
   },
   "terms.s11.t": { az: "11. Geri qaytarma siyasəti", en: "11. Refund policy", ru: "11. Политика возврата" },
   "terms.s11.b": {
-    az: "Qanunla tələb olunmadıqca, ödənişlər geri qaytarılmır və virtual əşyalar üçün geri ödəmə edilmir. Abunəliyi ləğv etsən, cari ödəniş dövrünün sonuna qədər Xidmətə çıxışın qalır. App Store/Google Play vasitəsilə alışlarda geri qaytarma müvafiq mağaza tərəfindən idarə olunur.",
-    en: "Unless required by law, payments are non-refundable and there are no refunds for virtual items. If you cancel, you keep access until the end of the current billing period. For purchases via the App Store/Google Play, refunds are handled by the respective store.",
-    ru: "Если иное не требуется законом, платежи не возвращаются, и возврата за виртуальные предметы нет. При отмене доступ сохраняется до конца текущего периода. Для покупок через App Store/Google Play возврат обрабатывается соответствующим магазином.",
+    az: "Qanunla tələb olunmadıqca, ödənişlər geri qaytarılmır və virtual əşyalar üçün geri ödəmə edilmir. Abunəliyi ləğv etsən, cari ödəniş dövrünün sonuna qədər Xidmətə çıxışın qalır.",
+    en: "Unless required by law, payments are non-refundable and there are no refunds for virtual items. If you cancel, you keep access until the end of the current billing period.",
+    ru: "Если иное не требуется законом, платежи не возвращаются, и возврата за виртуальные предметы нет. При отмене доступ сохраняется до конца текущего периода.",
   },
   "terms.s12.t": { az: "12. Üçüncü tərəf linkləri və reklam", en: "12. Third-party links and ads", ru: "12. Ссылки третьих лиц и реклама" },
   "terms.s12.b": {
-    az: "Xidmət bizə aid olmayan üçüncü tərəf saytlarına link və ya reklam ehtiva edə bilər. Onların məzmununa və ya siyasətlərinə görə cavabdeh deyilik və onların istifadəsindən yaranan zərərə görə məsuliyyət daşımırıq.",
-    en: "The Service may contain links to or ads for third-party sites we do not control. We are not responsible for their content or policies and are not liable for any harm from using them.",
-    ru: "Сервис может содержать ссылки на сайты третьих лиц или их рекламу, которые мы не контролируем. Мы не отвечаем за их контент или политики и не несём ответственности за вред от их использования.",
+    az: "Xidmət bizə aid olmayan üçüncü tərəf saytlarına link ehtiva edə bilər. Imparo reklam göstərmir. Onların məzmununa və ya siyasətlərinə görə cavabdeh deyilik və onların istifadəsindən yaranan zərərə görə məsuliyyət daşımırıq.",
+    en: "The Service may contain links to third-party sites we do not control. Imparo does not show ads. We are not responsible for their content or policies and are not liable for any harm from using them.",
+    ru: "Сервис может содержать ссылки на сайты третьих лиц, которые мы не контролируем. Imparo не показывает рекламу. Мы не отвечаем за их контент или политики и не несём ответственности за вред от их использования.",
   },
   "terms.s13.t": { az: "13. Zəmanətlərin olmaması", en: "13. No warranties", ru: "13. Отсутствие гарантий" },
   "terms.s13.b": {
@@ -1366,9 +1366,9 @@ const DICT: Dict = {
   },
   "privacy.s3.t": { az: "3. Kimlərlə paylaşırıq", en: "3. Who we share with", ru: "3. С кем мы делимся" },
   "privacy.s3.b": {
-    az: "Məlumatı satmırıq. Xidməti təmin edən etibarlı provayderlərlə paylaşırıq:\n• Supabase — məlumat bazası və autentifikasiya;\n• PostHog (Aİ-də yerləşir) — istifadə analitikası; hesabınla və sinfinlə əlaqələndirilir (tam anonim deyil), platformanı yaxşılaşdırmaq üçün istifadə olunur;\n• Google — istəyə bağlı “Google ilə giriş”;\n• Ödəniş provayderi — Imparo Plus ödənişləri.\nHəmçinin qanuni tələb olduqda (məhkəmə qərarı və s.) və ya təhlükə/saxtakarlığın qarşısını almaq üçün lazım olduqda paylaşa bilərik.",
-    en: "We do not sell data. We share it with trusted providers that run the Service:\n• Supabase — database and authentication;\n• PostHog (EU-based) — usage analytics; linked to your account and grade (not fully anonymous), used to improve the platform;\n• Google — optional “Sign in with Google”;\n• Payment provider — Imparo Plus payments.\nWe may also share when legally required (court order, etc.) or to prevent harm/fraud.",
-    ru: "Мы не продаём данные. Мы делимся ими с надёжными провайдерами, обеспечивающими Сервис:\n• Supabase — база данных и аутентификация;\n• PostHog (расположен в ЕС) — аналитика использования; связана с вашим аккаунтом и классом (не полностью анонимна), используется для улучшения платформы;\n• Google — опциональный «Вход через Google»;\n• Платёжный провайдер — платежи Imparo Plus.\nМы также можем делиться при законных требованиях (судебный приказ и т. п.) или для предотвращения вреда/мошенничества.",
+    az: "Məlumatı satmırıq. Xidməti təmin edən etibarlı provayderlərlə paylaşırıq:\n• Supabase — məlumat bazası və autentifikasiya;\n• PostHog (Aİ-də yerləşir) — istifadə analitikası; hesabınla və sinfinlə əlaqələndirilir (tam anonim deyil), platformanı yaxşılaşdırmaq üçün istifadə olunur;\n• Google — istəyə bağlı “Google ilə giriş”;\n• Ödəniş provayderi — Imparo Plus ödənişləri;\n• Cloudflare — sayt hostinqi və şəbəkə (bütün sorğular ondan keçir);\n• Resend — e-poçt göndərilməsi (valideyn hesabatı və təsdiq məktubları).\nHəmçinin qanuni tələb olduqda (məhkəmə qərarı və s.) və ya təhlükə/saxtakarlığın qarşısını almaq üçün lazım olduqda paylaşa bilərik.",
+    en: "We do not sell data. We share it with trusted providers that run the Service:\n• Supabase — database and authentication;\n• PostHog (EU-based) — usage analytics; linked to your account and grade (not fully anonymous), used to improve the platform;\n• Google — optional “Sign in with Google”;\n• Payment provider — Imparo Plus payments;\n• Cloudflare — site hosting and network (all requests pass through it);\n• Resend — email delivery (parent reports and confirmation emails).\nWe may also share when legally required (court order, etc.) or to prevent harm/fraud.",
+    ru: "Мы не продаём данные. Мы делимся ими с надёжными провайдерами, обеспечивающими Сервис:\n• Supabase — база данных и аутентификация;\n• PostHog (расположен в ЕС) — аналитика использования; связана с вашим аккаунтом и классом (не полностью анонимна), используется для улучшения платформы;\n• Google — опциональный «Вход через Google»;\n• Платёжный провайдер — платежи Imparo Plus;\n• Cloudflare — хостинг сайта и сеть (через неё проходят все запросы);\n• Resend — доставка писем (родительские отчёты и письма-подтверждения).\nМы также можем делиться при законных требованиях (судебный приказ и т. п.) или для предотвращения вреда/мошенничества.",
   },
   "privacy.s4.t": { az: "4. Profil və liqa", en: "4. Profile and league", ru: "4. Профиль и лига" },
   "privacy.s4.b": {
@@ -1390,9 +1390,9 @@ const DICT: Dict = {
   },
   "privacy.s7.t": { az: "7. Kommunikasiya", en: "7. Communications", ru: "7. Коммуникации" },
   "privacy.s7.b": {
-    az: "E-poçtundan öyrənmə xatırlatmaları, irəliləyiş hesabatları, dost fəaliyyəti və yeni funksiyalar barədə bildirişlər göndərmək üçün istifadə edə bilərik. Zəruri olmayan mesajlardan Ayarlardan imtina edə bilərsən. Parol sıfırlama kimi zəruri mesajlar həmişə göndərilir.",
-    en: "We may use your email to send learning reminders, progress reports, friend activity and announcements about new features. You can opt out of non-essential messages in Settings. Essential messages such as password resets are always sent.",
-    ru: "Мы можем использовать вашу почту для напоминаний об учёбе, отчётов о прогрессе, активности друзей и анонсов новых функций. От необязательных сообщений можно отказаться в настройках. Обязательные сообщения (например, сброс пароля) отправляются всегда.",
+    az: "E-poçtundan öyrənmə xatırlatmaları, dost fəaliyyəti və yeni funksiyalar barədə bildirişlər göndərmək üçün istifadə edə bilərik. Parol sıfırlama kimi zəruri mesajlar həmişə göndərilir.\n\nValideyn hesabatı (könüllü): Ayarlar bölməsində valideyn e-poçtu qeyd edilərsə, həmin ünvana hər həftə sənin öyrənmə xülasən göndərilir — məşq vaxtı, tamamlanan dərslər, doğruluq faizi, fənlər üzrə nəticə və çətinlik çəkdiyin mövzu. Ünvan TƏSDİQLƏNMƏYƏNƏ qədər heç nə göndərilmir; məktublar Resend vasitəsilə gedir. Bunu istənilən vaxt Ayarlardan silmək, valideyn isə məktubdakı linklə dayandırmaq olar.",
+    en: "We may use your email to send learning reminders, friend activity and announcements about new features. Essential messages such as password resets are always sent.\n\nParent report (optional): if a parent email is added in Settings, a weekly summary of your learning is sent to that address — practice time, completed lessons, accuracy, results per subject and the topic you struggled with. Nothing is sent until the address is CONFIRMED; emails are delivered via Resend. You can remove it in Settings at any time, and the parent can stop it from the link in the email.",
+    ru: "Мы можем использовать вашу почту для напоминаний об учёбе, активности друзей и анонсов новых функций. Обязательные сообщения (например, сброс пароля) отправляются всегда.\n\nРодительский отчёт (по желанию): если в настройках указана почта родителя, на неё еженедельно отправляется сводка твоей учёбы — время занятий, пройденные уроки, точность, результаты по предметам и тема, которая даётся трудно. Ничего не отправляется, пока адрес НЕ ПОДТВЕРЖДЁН; письма доставляются через Resend. Ты можешь удалить адрес в настройках в любой момент, а родитель — отключить письма по ссылке в письме.",
   },
   "privacy.s8.t": { az: "8. Kukilər və lokal yaddaş", en: "8. Cookies and local storage", ru: "8. Куки и локальное хранилище" },
   "privacy.s8.b": {

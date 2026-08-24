@@ -46,7 +46,7 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "Adımı və ya emailimi necə dəyişim?",
-          a: "Profil redaktəsi tezliklə əlavə olunacaq. Bu vaxt dəyişiklik üçün dəstək ünvanına yaz.",
+          a: "Profil → Redaktə bölməsindən adını və profil məlumatlarını dəyişə bilərsən.",
         },
         {
           q: "Bir fənni necə sıfırlayım?",
@@ -58,11 +58,15 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "Şifrəmi unutdum, nə edim?",
-          a: "Şifrə bərpası əlavə olunur. Bu vaxt Google ilə giriş edə bilərsən.",
+          a: "Giriş səhifəsindəki «Şifrəni unutmusan?» linkinə bas — e-poçtuna bərpa linki göndəriləcək.",
+        },
+        {
+          q: "Valideynim irəliləyişimi izləyə bilərmi?",
+          a: "Bəli, istəsən. Ayarlar → Valideyn hesabatı bölməsinə valideynin e-poçtunu yaz; ona təsdiq məktubu gedir. Təsdiqdən sonra hər bazar günü qısa hesabat alır: nə qədər məşq etdin, hansı fənlərdə irəlilədin, harada çətinlik çəkdin. İstədiyin vaxt silə bilərsən.",
         },
         {
           q: "Hesabımı necə silim?",
-          a: "Hesabını və məlumatlarını silmək üçün destek@imparo.app ünvanına yaz — tələbini emal edəcəyik.",
+          a: "Ayarlar → Məlumatlarım bölməsindən «Hesabımı sil» ilə özün silə bilərsən (məlumatlarını əvvəlcə yükləmək də mümkündür). Problem olsa: destek@imparo.app.",
         },
       ],
     },
@@ -71,7 +75,7 @@ const FAQ: Record<Lang, Category[]> = {
       items: [
         {
           q: "Imparo pulsuzdur?",
-          a: "Bəli, tamamilə pulsuzdur. Kart məlumatı və ya ödəniş tələb olunmur.",
+          a: "Bütün dərslər, tapşırıqlar və məşqlər pulsuzdur — kart məlumatı tələb olunmur. Əlavə olaraq könüllü Imparo Plus abunəliyi var (limitsiz can və 2× zümrüd); onsuz da hər şeyi öyrənə bilərsən.",
         },
         {
           q: "Saytda reklam varmı?",
@@ -79,7 +83,7 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "Gələcəkdə ödənişli olacaq?",
-          a: "Əsas dərslər həmişə pulsuz qalacaq. Əlavə imkanlar olsa, ayrıca bildiriləcək.",
+          a: "Əsas dərslər həmişə pulsuz qalacaq. Ödənişli olan yalnız könüllü Imparo Plus abunəliyidir — o da öyrənməyə deyil, rahatlığa aiddir (limitsiz can, 2× zümrüd).",
         },
       ],
     },
@@ -119,7 +123,7 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "How do I change my name or email?",
-          a: "Profile editing is coming soon. Meanwhile, write to the support address for changes.",
+          a: "You can change your name and profile details in Profile → Edit.",
         },
         {
           q: "How do I reset a subject?",
@@ -131,11 +135,15 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "I forgot my password, what do I do?",
-          a: "Password recovery is being added. For now you can sign in with Google.",
+          a: "Click “Forgot your password?” on the login page — a reset link will be sent to your email.",
+        },
+        {
+          q: "Can my parent follow my progress?",
+          a: "Yes, if you want. In Settings → Parent report, add your parent's email; they get a confirmation email. After they confirm, they receive a short weekly report: how much you practised, where you improved and where you struggled. You can remove it at any time.",
         },
         {
           q: "How do I delete my account?",
-          a: "To delete your account and data, write to destek@imparo.app and we'll process your request.",
+          a: "You can delete it yourself in Settings → My data → “Delete my account” (you can download your data first). If anything goes wrong: destek@imparo.app.",
         },
       ],
     },
@@ -144,7 +152,7 @@ const FAQ: Record<Lang, Category[]> = {
       items: [
         {
           q: "Is Imparo free?",
-          a: "Yes, completely free. No card details or payment required.",
+          a: "All lessons, tasks and practice are free — no card details required. There is also an optional Imparo Plus subscription (unlimited hearts and 2× gems); you can learn everything without it.",
         },
         {
           q: "Are there ads on the site?",
@@ -152,7 +160,7 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "Will it be paid in the future?",
-          a: "Core lessons will always stay free. If extra features appear, we'll announce them separately.",
+          a: "Core lessons will always stay free. The only paid part is the optional Imparo Plus subscription — and it affects comfort, not learning (unlimited hearts, 2× gems).",
         },
       ],
     },
@@ -192,7 +200,7 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "Как изменить имя или email?",
-          a: "Редактирование профиля скоро появится. А пока напиши на адрес поддержки для изменений.",
+          a: "Имя и данные профиля можно изменить в разделе Профиль → Редактировать.",
         },
         {
           q: "Как сбросить предмет?",
@@ -204,11 +212,15 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "Я забыл пароль, что делать?",
-          a: "Восстановление пароля добавляется. Пока можно войти через Google.",
+          a: "Нажми «Забыли пароль?» на странице входа — на почту придёт ссылка для сброса.",
+        },
+        {
+          q: "Может ли родитель следить за моим прогрессом?",
+          a: "Да, если ты захочешь. В Настройках → Родительский отчёт укажи почту родителя; ему придёт письмо для подтверждения. После подтверждения он раз в неделю получает короткий отчёт: сколько ты занимался, где продвинулся и где были трудности. Удалить можно в любой момент.",
         },
         {
           q: "Как удалить аккаунт?",
-          a: "Чтобы удалить аккаунт и данные, напиши на destek@imparo.app — мы обработаем запрос.",
+          a: "Удалить можно самому: Настройки → Мои данные → «Удалить аккаунт» (сначала можно скачать свои данные). Если не получится: destek@imparo.app.",
         },
       ],
     },
@@ -217,7 +229,7 @@ const FAQ: Record<Lang, Category[]> = {
       items: [
         {
           q: "Imparo бесплатный?",
-          a: "Да, полностью бесплатный. Данные карты или оплата не требуются.",
+          a: "Все уроки, задания и практика бесплатны — данные карты не нужны. Дополнительно есть необязательная подписка Imparo Plus (безлимитные жизни и 2× изумрудов); без неё доступно всё обучение.",
         },
         {
           q: "Есть ли реклама на сайте?",
@@ -225,7 +237,7 @@ const FAQ: Record<Lang, Category[]> = {
         },
         {
           q: "Станет ли платным в будущем?",
-          a: "Основные уроки всегда останутся бесплатными. Если появятся дополнительные возможности, мы сообщим отдельно.",
+          a: "Основные уроки всегда останутся бесплатными. Платная — только необязательная подписка Imparo Plus, и она про удобство, а не про обучение (безлимитные жизни, 2× изумрудов).",
         },
       ],
     },

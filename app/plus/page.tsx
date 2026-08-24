@@ -4,7 +4,7 @@
 // Ödəniş inteqrasiyası hələ yoxdur; CTA marağı qeyd edir + "tezliklə".
 
 import { useEffect, useState } from "react";
-import { Heart, Gem, Sparkles, BarChart3, Rocket, Crown } from "lucide-react";
+import { Heart, Gem, Sparkles, BarChart3, Crown } from "lucide-react";
 import { track } from "@/lib/analytics";
 import { loadPlus } from "@/lib/plus";
 import { useOptionalUser } from "@/lib/useOptionalUser";
@@ -16,16 +16,23 @@ const CHECKOUT: Record<string, string | undefined> = {
   monthly: process.env.NEXT_PUBLIC_LS_CHECKOUT_MONTHLY,
 };
 
+// YALNIZ HƏQİQƏTƏN MÖVCUD OLAN İMKANLAR SADALANIR.
+// Əvvəl burada üç uydurma vəd var idi və bunlar PUL MÜQABİLİNDƏ satılırdı:
+//   · "Zefi geyimləri / mağaza endirimləri" — geyim sistemi ümumiyyətlə yoxdur,
+//     mağazada yalnız can doldurma və seriya qoruyucu var, Plus endirimi yoxdur;
+//   · "Prioritet məzmun" — belə bir mexanizm heç yerdə yoxdur;
+//   · "Valideyn hesabatı" — MÖVCUDDUR, amma HAMIYA PULSUZDUR (bax Ayarlar),
+//     Plus üstünlüyü kimi göstərmək yanlış idi.
+// Qalan ikisi koddan təsdiqləndi: limitsiz can (LessonRunner Plus-da loseHeart
+// çağırmır) və 2× zümrüd (0037_complete_lesson.sql-də is_plus çarpanı).
 const BENEFITS = [
   { Icon: Heart, title: "Limitsiz can", desc: "Səhv etməkdən qorxma — canlar bitmir." },
   { Icon: Gem, title: "2× zümrüd", desc: "Hər dərsdə iki qat çox zümrüd qazan." },
-  { Icon: Sparkles, title: "Zefi geyimləri", desc: "Ekskluziv görkəmlər və mağaza endirimləri." },
-  { Icon: BarChart3, title: "Valideyn hesabatı", desc: "Həftəlik irəliləyiş hesabatı valideynə." },
-  { Icon: Rocket, title: "Prioritet məzmun", desc: "Yeni dərslərə və funksiyalara ilk sən çat." },
+  { Icon: BarChart3, title: "Imparo-ya dəstək", desc: "Abunəliyin yeni dərslərin hazırlanmasına gedir." },
 ];
 
 const PLANS = [
-  { id: "yearly", name: "İllik", price: "23.99 ₼", per: "il", note: "3 ay pulsuz", best: true, months: 12 },
+  { id: "yearly", name: "İllik", price: "23.99 ₼", per: "il", note: "33% qənaət", best: true, months: 12 },
   { id: "monthly", name: "Aylıq", price: "2.99 ₼", per: "ay", note: "", best: false, months: 1 },
 ];
 
@@ -77,7 +84,7 @@ export default function PlusPage() {
           </div>
           <h1 className="mt-3 text-3xl font-extrabold">Öyrənməni gücləndir</h1>
           <p className="mx-auto mt-2 max-w-sm text-white/90">
-            Zefi ilə daha sürətli, daha çox mükafatla və reklamsız irəlilə.
+            Zefi ilə daha sürətli və daha çox mükafatla irəlilə.
           </p>
         </div>
 

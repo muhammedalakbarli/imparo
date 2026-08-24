@@ -18,105 +18,105 @@ export const subjectMeta: SubjectMeta[] = [
     "name": "Riyaziyyat",
     "grade": 1,
     "units": 6,
-    "lessons": 33
+    "lessons": 27
   },
   {
     "slug": "azerbaycan-dili-1",
     "name": "Azərbaycan dili",
     "grade": 1,
     "units": 5,
-    "lessons": 28
+    "lessons": 23
   },
   {
     "slug": "ingilis-dili-1",
     "name": "İngilis dili",
     "grade": 1,
     "units": 6,
-    "lessons": 30
+    "lessons": 24
   },
   {
     "slug": "riyaziyyat-2",
     "name": "Riyaziyyat",
     "grade": 2,
     "units": 6,
-    "lessons": 31
+    "lessons": 25
   },
   {
     "slug": "azerbaycan-dili-2",
     "name": "Azərbaycan dili",
     "grade": 2,
     "units": 6,
-    "lessons": 24
+    "lessons": 18
   },
   {
     "slug": "ingilis-dili-2",
     "name": "İngilis dili",
     "grade": 2,
     "units": 6,
-    "lessons": 25
+    "lessons": 19
   },
   {
     "slug": "riyaziyyat-3",
     "name": "Riyaziyyat",
     "grade": 3,
     "units": 6,
-    "lessons": 25
+    "lessons": 19
   },
   {
     "slug": "azerbaycan-dili-3",
     "name": "Azərbaycan dili",
     "grade": 3,
     "units": 6,
-    "lessons": 24
+    "lessons": 18
   },
   {
     "slug": "ingilis-dili-3",
     "name": "İngilis dili",
     "grade": 3,
     "units": 6,
-    "lessons": 25
+    "lessons": 19
   },
   {
     "slug": "riyaziyyat-4",
     "name": "Riyaziyyat",
     "grade": 4,
     "units": 6,
-    "lessons": 25
+    "lessons": 19
   },
   {
     "slug": "azerbaycan-dili-4",
     "name": "Azərbaycan dili",
     "grade": 4,
     "units": 6,
-    "lessons": 24
+    "lessons": 18
   },
   {
     "slug": "ingilis-dili-4",
     "name": "İngilis dili",
     "grade": 4,
     "units": 6,
-    "lessons": 25
+    "lessons": 19
   },
   {
     "slug": "riyaziyyat",
     "name": "Riyaziyyat",
     "grade": 5,
     "units": 8,
-    "lessons": 48
+    "lessons": 40
   },
   {
     "slug": "azerbaycan-dili",
     "name": "Azərbaycan dili",
     "grade": 5,
     "units": 4,
-    "lessons": 22
+    "lessons": 19
   },
   {
     "slug": "ingilis-dili",
     "name": "İngilis dili",
     "grade": 5,
     "units": 10,
-    "lessons": 129
+    "lessons": 121
   },
   {
     "slug": "reqemsal-tehlukesizlik-5",
@@ -130,7 +130,7 @@ export const subjectMeta: SubjectMeta[] = [
     "name": "Maliyyə Savadlılığı",
     "grade": 5,
     "units": 3,
-    "lessons": 12
+    "lessons": 9
   },
   {
     "slug": "riyaziyyat-6",
@@ -144,7 +144,7 @@ export const subjectMeta: SubjectMeta[] = [
     "name": "Azərbaycan dili",
     "grade": 6,
     "units": 6,
-    "lessons": 28
+    "lessons": 23
   },
   {
     "slug": "ingilis-dili-6",
@@ -165,7 +165,7 @@ export const subjectMeta: SubjectMeta[] = [
     "name": "Azərbaycan dili",
     "grade": 7,
     "units": 6,
-    "lessons": 30
+    "lessons": 24
   },
   {
     "slug": "ingilis-dili-7",
@@ -186,7 +186,7 @@ export const subjectMeta: SubjectMeta[] = [
     "name": "Azərbaycan dili",
     "grade": 8,
     "units": 6,
-    "lessons": 30
+    "lessons": 24
   },
   {
     "slug": "ingilis-dili-8",

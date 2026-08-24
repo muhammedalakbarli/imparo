@@ -195,7 +195,10 @@ describe("subjectMeta", () => {
       name: s.name,
       grade: s.grade,
       units: s.units.length,
-      lessons: s.units.reduce((n, u) => n + u.lessons.length, 0),
+      lessons: s.units.reduce(
+        (n, u) => n + u.lessons.filter((l) => l.tasks.length > 0).length,
+        0,
+      ),
     }));
     expect(subjectMeta).toEqual(expected);
   });
