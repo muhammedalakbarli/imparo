@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { subjects } from "@/lib/content";
 import { buildAdaptiveSet, buildDiagnosticSet, type MasteryMap } from "@/lib/mastery";
+import type { AttemptSource } from "@/lib/attempts";
 import {
   PILOT_SKILLS,
   LIMITED_ITEM_SKILLS,
@@ -156,5 +157,15 @@ describe("əsas göstərici — qazanclar fərqi", () => {
 
   it("bir dəst boşdursa şagird əsas analizdən çıxır", () => {
     expect(differenceInGains(input, { target: ["s1"], comparison: [] })).toBeNull();
+  });
+});
+
+describe("cəhd mənbəyi", () => {
+  it("tipdəki dəyərlər DB check constraint-i ilə eynidir", () => {
+    // Sürüşmə qorunması: DB-dəki siyahı (0051) ilə tip sinxron qalmalıdır.
+    // Fərqlənsə, insert səssizcə 'legacy' yazılar və pilot datası korlanar.
+    const inType: AttemptSource[] = ["lesson", "diagnostic", "adaptive", "srs", "free_practice"];
+    const inDb = ["lesson", "diagnostic", "adaptive", "srs", "free_practice"];
+    expect([...inType].sort()).toEqual([...inDb].sort());
   });
 });

@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import type { Task, MultipleChoiceTask } from "@/lib/types";
 import { gradeTask, type UserAnswer } from "@/lib/grading";
-import { recordAttempt, flushAttempts } from "@/lib/attempts";
+import { recordAttempt, flushAttempts, type AttemptSource } from "@/lib/attempts";
 import { playCorrect, playWrong, playComplete, playStreak } from "@/lib/sound";
 import { vibrateCelebrate } from "@/lib/haptics";
 import { useCountUp } from "@/lib/useCountUp";
@@ -45,6 +45,9 @@ interface Props {
   // göstərsək, test öyrətməyə başlayır və sonrakı sualların (və pilotdakı
   // son testin) nəticəsi korlanır.
   silent?: boolean;
+  // Cəhd jurnalında mənbə (0051). Praktikanın hansı rejimindən gəldiyini
+  // runner özü bilmir — səhifə ötürür.
+  source: AttemptSource;
 }
 
 export default function PracticeRunner(props: Props) {
@@ -52,7 +55,7 @@ export default function PracticeRunner(props: Props) {
 }
 
 // ── Adi praktika ──────────────────────────────────────────────
-function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish, silent }: Props) {
+function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish, silent, source }: Props) {
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState<UserAnswer | null>(null);
   const [checked, setChecked] = useState(false);
@@ -94,6 +97,7 @@ function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish, silent }: P
       ms_taken: Date.now() - shownAtRef.current,
       attempt_no: attemptNo,
       is_review: !silent, // diaqnostika ilk ölçmədir, təkrar deyil
+      source,
     });
     setChecked(!silent);
     setLastCorrect(r.correct);
@@ -243,7 +247,7 @@ function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish, silent }: P
 }
 
 // ── Sürət raundu ──────────────────────────────────────────────
-function SpeedRunner({ tasks, onExit, onFinish }: Props) {
+function SpeedRunner({ source, tasks, onExit, onFinish }: Props) {
   const DURATION = 60;
   const mc = tasks.filter((t): t is MultipleChoiceTask => t.type === "multiple_choice");
 
@@ -284,6 +288,7 @@ function SpeedRunner({ tasks, onExit, onFinish }: Props) {
       correct: r.correct,
       chosen: chosenText(task, idx),
       is_review: true,
+      source,
     });
     setPicked(idx);
     if (r.correct) {

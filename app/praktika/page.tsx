@@ -30,7 +30,7 @@ import {
 } from "@/lib/pilot";
 import { loadDueTaskIds, markCorrect, addWrong } from "@/lib/srs";
 import { refillHearts } from "@/lib/hearts";
-import { flushAttempts } from "@/lib/attempts";
+import { flushAttempts, type AttemptSource } from "@/lib/attempts";
 // DİQQƏT: "@/lib/content"-dən YOX — o, 25 fənn faylını (~500 ms CPU) bundle-a çəkir.
 import { isPassageTask } from "@/lib/content/helpers";
 import { isDailyDone, markDailyDone } from "@/lib/daily";
@@ -43,7 +43,16 @@ import Mascot from "@/components/Mascot";
 const shuffle = <T,>(a: T[]): T[] => [...a].sort(() => Math.random() - 0.5);
 const sample = <T,>(a: T[], n: number): T[] => shuffle(a).slice(0, n);
 
-type Session = { tasks: Task[]; title: string; timed?: boolean; daily?: boolean; silent?: boolean };
+// `source` cəhd jurnalına yazılır (0051): pilot bitəndən sonra "bu səhv adaptiv
+// məşqdə oldu, yoxsa SRS-də?" sualına cavab verə bilək.
+type Session = {
+  tasks: Task[];
+  title: string;
+  timed?: boolean;
+  daily?: boolean;
+  silent?: boolean;
+  source: AttemptSource;
+};
 
 export default function PracticePage() {
   const { user, ready } = useAuthUser();
@@ -161,6 +170,7 @@ export default function PracticePage() {
             title={session.title}
             timed={session.timed}
             silent={session.silent}
+            source={session.source}
             onExit={() => {
               setSession(null);
               loadDueTaskIds().then(setMistakes);
@@ -203,7 +213,7 @@ export default function PracticePage() {
   const dailyPool = completedTasks.length >= 5 ? completedTasks : gradeAllTasks;
 
   function startDaily() {
-    setSession({ tasks: sample(dailyPool, 5), title: t("practice.daily"), daily: true });
+    setSession({ tasks: sample(dailyPool, 5), title: t("practice.daily"), daily: true, source: "free_practice" });
   }
 
   return (
@@ -252,7 +262,7 @@ export default function PracticePage() {
             }
             disabled={mistakeTasks.length === 0}
             onClick={() =>
-              setSession({ tasks: shuffle(mistakeTasks), title: t("practice.mistakes") })
+              setSession({ tasks: shuffle(mistakeTasks), title: t("practice.mistakes"), source: "srs" })
             }
           />
           <ModeCard
@@ -266,7 +276,7 @@ export default function PracticePage() {
             }
             disabled={adaptiveTasks.length === 0}
             onClick={() =>
-              setSession({ tasks: adaptiveTasks, title: t("practice.adaptive") })
+              setSession({ tasks: adaptiveTasks, title: t("practice.adaptive"), source: "adaptive" })
             }
           />
           <ModeCard
@@ -276,7 +286,7 @@ export default function PracticePage() {
             desc={t("practice.mixedDesc")}
             disabled={completedTasks.length === 0}
             onClick={() =>
-              setSession({ tasks: sample(completedTasks, 10), title: t("practice.mixed") })
+              setSession({ tasks: sample(completedTasks, 10), title: t("practice.mixed"), source: "free_practice" })
             }
           />
           <ModeCard
@@ -290,6 +300,7 @@ export default function PracticePage() {
                 tasks: diagnosticTasks,
                 title: t("practice.diagnostic"),
                 silent: true,
+                source: "diagnostic",
               })
             }
           />
@@ -300,7 +311,7 @@ export default function PracticePage() {
             desc={t("practice.speedDesc")}
             disabled={speedPool.length === 0}
             onClick={() =>
-              setSession({ tasks: speedPool, title: t("practice.speed"), timed: true })
+              setSession({ tasks: speedPool, title: t("practice.speed"), timed: true, source: "free_practice" })
             }
           />
         </div>
@@ -338,7 +349,7 @@ export default function PracticePage() {
             return (
               <button
                 key={u.id}
-                onClick={() => setSession({ tasks: sample(unitTasks, 10), title: unitName })}
+                onClick={() => setSession({ tasks: sample(unitTasks, 10), title: unitName, source: "free_practice" })}
                 className="flex w-full items-center gap-3 border-b border-line px-4 py-3.5 text-left transition last:border-b-0 hover:bg-panel-2"
               >
                 <span className="flex-1 font-bold text-fg">{unitName}</span>

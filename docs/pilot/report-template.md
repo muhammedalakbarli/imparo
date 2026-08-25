@@ -100,4 +100,5 @@ Bu bölmə **boş buraxıla bilməz**. Ən azı aşağıdakılar yazılmalıdır
 
 | tarix | dəyişiklik | səbəb |
 |---|---|---|
+| 2026-08-25 | `task_attempts.source` sahəsi əlavə olundu (migration 0051) | Ölçmə jurnalı natamam idi: praktikadan gələn bütün cəhdlər `lesson_id = 'practice'` kimi yazılırdı, yəni diaqnostika / adaptiv məşq / SRS bir-birindən ayırd edilmirdi. Müdaxilə, baseline/final, randomizasiya və əsas göstərici **dəyişmədi** — yalnız qeyd olunan məlumat zənginləşdi. Pilotda hələ 0 iştirakçı olduğu üçün heç bir data korlanmadı. |
 | ___ | ___ | ___ |

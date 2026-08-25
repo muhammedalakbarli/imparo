@@ -20,7 +20,13 @@ export interface AttemptRow {
   ms_taken?: number;        // sual göründüyü andan "Yoxla"ya qədər
   attempt_no?: number;      // eyni tapşırığa neçənci cəhd (təkrar mərhələsi)
   is_review?: boolean;      // SRS/təkrar, yoxsa ilk baxış
+  // Cəhdin HARADAN yarandığı (migration 0051). MƏCBURİDİR: DB-də default
+  // 'legacy' var, amma tip səviyyəsində məcbur edirik ki, yeni çağırış yeri
+  // əlavə edəndə mənbəyi yazmağı unutmaq mümkün olmasın.
+  source: AttemptSource;
 }
+
+export type AttemptSource = "lesson" | "diagnostic" | "adaptive" | "srs" | "free_practice";
 
 const BATCH = 20;   // bu qədər yığılanda özü göndərir (log_attempts tavanı 50)
 const MAX = 200;    // bufer bundan artıq şişməsin (offline uzun sürsə)

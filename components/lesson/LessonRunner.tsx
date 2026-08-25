@@ -159,6 +159,7 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
       ms_taken: Date.now() - shownAtRef.current,
       attempt_no: attemptNo,
       is_review: inRetry,
+      source: "lesson",
     });
 
     // Təkrar mərhələsi — XP/combo/statistika dəyişmir, yalnız düz cavab tələb olunur.
