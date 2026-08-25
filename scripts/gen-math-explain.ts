@@ -148,9 +148,6 @@ function tokenize(src: string): Tok[] | null {
 
 const SIGN: Record<string, string> = { "+": "+", "-": "−", "*": "×", "/": ":" };
 
-function show(toks: Tok[]): string {
-  return toks.map((x) => (typeof x === "number" ? String(x) : x === "(" || x === ")" ? x : ` ${SIGN[x]} `)).join("").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")");
-}
 
 function apply(a: number, op: string, b: number): number | null {
   if (op === "+") return a + b;

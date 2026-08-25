@@ -36,6 +36,13 @@ interface TaskBase {
   // soldan birinci rəqəm yüzlükdür" kömək edir.
   // İstəyə bağlıdır: yazılmayıbsa lövhədə izah bloku ümumiyyətlə göstərilmir.
   explanation?: string;
+
+  // Bu tapşırığın yoxladığı bacarıqlar (bax lib/skills.ts). Cəhd `task_attempts`-a
+  // yazılanda dərsə yox, məhz bu bacarıqlara proyeksiya olunur — mənimsəmə
+  // (mastery) və adaptiv tapşırıq seçimi buna söykənir.
+  // Bir tapşırıq bir neçə bacarıq daşıya bilər: mətn məsələsi həm `problem.one_step`,
+  // həm də istifadə etdiyi əməli (`arith.sub.borrow`) yoxlayır.
+  skills?: string[];
 }
 
 // Çoxseçimli sual

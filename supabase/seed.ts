@@ -45,6 +45,7 @@ function taskData(task: Task, bonus: boolean): Record<string, unknown> {
   if (bonus) d.bonus = true;
   if (task.speakOptions) d.speakOptions = true;
   if (task.explanation) d.explanation = task.explanation;
+  if (task.skills?.length) d.skills = task.skills;
   if (task.type === "multiple_choice") {
     d.options = task.options;
     d.correctIndex = task.correctIndex;
