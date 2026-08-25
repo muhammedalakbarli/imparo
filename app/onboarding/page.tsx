@@ -5,8 +5,17 @@
 // və hesab yaradılanda köçürülür. Giriş etmiş istifadəçi buraya düşsə, cavablar
 // eyni zamanda user_metadata-ya da yazılır.
 //
-// Skript: sinif → Zefi salamı → sorğu (mənbə/səbəb/səviyyə) → nə bacaracaqsan →
-// gündəlik məqsəd → bildiriş → başlanğıc nöqtəsi → motivasiya → ilk dərs.
+// Skript: sinif → Zefi salamı → nə bacaracaqsan → gündəlik məqsəd → mənbə →
+// başlanğıc nöqtəsi → ilk dərs.
+//
+// Addım sayı 12-dən 6-ya salınıb. Çıxarılanlar və səbəbi:
+//   • "start" — "hello" ilə eyni şeyi deyirdi (iki ardıcıl salam ekranı).
+//   • "reason", "level" — cavabları heç yerdə oxunmurdu; "level" özü-özünü
+//     qiymətləndirmə idi, dərhal sonrakı "placement" testi onu onsuz da ölçür.
+//   • "motivate1/2" — məhz ilk dərsdən əvvəl, dəyərə çatmağa iki toxunuş qalmış.
+//   • "notify" — brauzerin BİRDƏFƏLİK icazə pəncərəsini yandırırdı, üstəlik
+//     lib/push.ts abunəliyini yaratmırdı (yəni icazə alınsa da bildiriş getmirdi).
+//     Real abunəlik Ayarlardakı keçiddədir; istifadəçi dəyəri görməmiş soruşmuruq.
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -29,9 +38,7 @@ import { addWrong } from "@/lib/srs";
 import type { Subject, Task } from "@/lib/types";
 
 type Option = { value: string | number; label: string; note?: string };
-type StepKey =
-  | "grade" | "hello" | "start" | "source" | "reason" | "level"
-  | "achieve" | "goal" | "notify" | "placement" | "motivate1" | "motivate2";
+type StepKey = "grade" | "hello" | "achieve" | "goal" | "source" | "placement";
 
 // Sual addımları (dialoq ekranlarının variantı yoxdur).
 const QUESTIONS: Partial<Record<StepKey, { q: string; options: Option[] }>> = {
@@ -50,28 +57,6 @@ const QUESTIONS: Partial<Record<StepKey, { q: string; options: Option[] }>> = {
       { value: "muellim", label: "Müəllimimdən" },
       { value: "xeber", label: "Xəbər, məqalə və ya bloq" },
       { value: "diger", label: "Digər" },
-    ],
-  },
-  reason: {
-    q: "Niyə öyrənmək istəyirsən?",
-    options: [
-      { value: "mekteb", label: "Məktəbdə daha yaxşı olmaq" },
-      { value: "imtahan", label: "İmtahana hazırlaşmaq" },
-      { value: "faydali", label: "Vaxtımı faydalı keçirmək" },
-      { value: "maraq", label: "Sadəcə maraqlı olduğu üçün" },
-      { value: "yaris", label: "Dostlarımla yarışmaq" },
-      { value: "valideyn", label: "Valideynim istədi" },
-      { value: "diger", label: "Digər" },
-    ],
-  },
-  level: {
-    q: "Bu mövzuları nə qədər bilirsən?",
-    options: [
-      { value: "yeni", label: "Təzə başlayıram" },
-      { value: "az", label: "Bəzi şeyləri bilirəm" },
-      { value: "esas", label: "Əsasları bilirəm" },
-      { value: "cox", label: "Çox mövzunu bilirəm" },
-      { value: "hamisi", label: "Demək olar hamısını bilirəm" },
     ],
   },
   goal: {
@@ -110,10 +95,10 @@ function buildDiagnosticItems(subjects: Subject[], grade: number, focus: string)
   return items.slice(0, 6);
 }
 
-const ORDER: StepKey[] = [
-  "grade", "hello", "start", "source", "reason", "level",
-  "achieve", "goal", "notify", "placement", "motivate1", "motivate2",
-];
+// Sıra qəsdən belədir: "grade" ilk gəlir ki, qalan hər şey konkretləşsin;
+// "source" (marketinq sualı, şagirdə faydası yoxdur) məqsəd seçildikdən sonraya
+// qoyulub; "placement" sonuncudur və birbaşa ilk dərsə açılır.
+const ORDER: StepKey[] = ["grade", "hello", "achieve", "goal", "source", "placement"];
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -172,7 +157,7 @@ export default function OnboardingPage() {
 
   function next() {
     if (question && selected == null) return;
-    // "Səviyyəmi tap" seçilibsə, motivasiya ekranlarından əvvəl qısa diaqnostika.
+    // "Səviyyəmi tap" seçilibsə, ilk dərsdən əvvəl qısa diaqnostika.
     if (key === "placement" && selected === "test") {
       const items = buildDiagnosticItems(subjects, Number(answers.grade ?? 5), "");
       if (items.length) {
@@ -181,9 +166,9 @@ export default function OnboardingPage() {
       }
     }
     if (i < ORDER.length - 1) {
-      // Onboarding 12 addımdır və indiyə qədər yalnız SONU ölçülürdü: 3-cü addımda
+      // Onboarding 6 addımdır və bir vaxtlar yalnız SONU ölçülürdü: 3-cü addımda
       // çıxan istifadəçi haqqında heç nə bilmirdik. Addım adı ilə bir hadisə
-      // 12 ayrı hadisədən yaxşıdır — funnel eyni cür qurulur, ad şişmir.
+      // ayrı-ayrı hadisələrdən yaxşıdır — funnel eyni cür qurulur, ad şişmir.
       const nextKey = ORDER[i + 1];
       track("onboarding_step", { step: nextKey, index: i + 1, total: ORDER.length });
       setI((s) => s + 1);
@@ -204,9 +189,11 @@ export default function OnboardingPage() {
       }
       track("diagnostic_completed", { known: r.knownLessonIds.length });
     } finally {
-      setBusy(false);
-      setDiag(null);
-      setI(ORDER.indexOf("motivate1"));
+      // "placement" sonuncu addımdır — diaqnostika bitəndə birbaşa ilk dərsə.
+      // setDiag(null) QƏSDƏN çağırılmır: diaqnostika ekranı router keçidinə qədər
+      // ekranda qalsın, yoxsa artıq cavablanmış "Haradan başlayaq?" sualı bir an
+      // yenidən görünür. busy də true qalır — ikiqat toxunuş bloklanır.
+      void finish();
     }
   }
 
@@ -246,12 +233,8 @@ export default function OnboardingPage() {
         )}
 
         {key === "hello" && <ZefiSay mood="wave" text={<>Salam! Mən <span className="text-brand">Zefi</span>yəm 👋</>} />}
-        {key === "start" && <ZefiSay mood="celebrate" text="Gəl başlayaq!" />}
-        {key === "motivate1" && <ZefiSay mood="thinking" text="Hər gün öyrənməyi davam etdirmək çətin ola bilər..." />}
-        {key === "motivate2" && <ZefiSay mood="celebrate" text="...ona görə Imparo oyun kimi qurulub!" />}
 
         {key === "achieve" && <AchieveScreen />}
-        {key === "notify" && <NotifyScreen onChoose={(v) => { setAnswers((a) => ({ ...a, notify: v })); setGuest({ notify: v }); }} chosen={answers.notify as string | undefined} />}
 
         <ContinueBar
           onClick={next}
@@ -292,51 +275,6 @@ function AchieveScreen() {
             </span>
           </motion.div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Bildiriş icazəsi ───────────────────────────────────────────────────────────
-function NotifyScreen({
-  onChoose,
-  chosen,
-}: {
-  onChoose: (v: "allow" | "block") => void;
-  chosen?: string;
-}) {
-  async function ask() {
-    onChoose("allow");
-    // Brauzer icazəsini yalnız istifadəçi düyməyə basanda soruşuruq (fon sorğusu
-    // brauzerlər tərəfindən bloklanır və pis təcrübədir).
-    try {
-      if (typeof Notification !== "undefined") await Notification.requestPermission();
-    } catch {
-      /* icazə rədd edilsə də onboarding davam edir */
-    }
-  }
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 py-8">
-      <ZefiSay mood="happy" text="Məşq etməyi xatırladım ki, vərdişə çevrilsin!" />
-      <div className="flex w-full flex-col gap-3">
-        <button
-          type="button"
-          onClick={ask}
-          className={`btn-pop rounded-2xl border-2 px-5 py-4 text-lg font-extrabold transition ${
-            chosen === "allow" ? "border-brand bg-brand/10 text-brand" : "border-line bg-panel text-fg hover:border-brand"
-          }`}
-        >
-          Xatırlatmaları aç
-        </button>
-        <button
-          type="button"
-          onClick={() => onChoose("block")}
-          className={`rounded-2xl px-5 py-3 text-base font-bold transition ${
-            chosen === "block" ? "text-brand" : "text-muted hover:text-fg"
-          }`}
-        >
-          İndi yox
-        </button>
       </div>
     </div>
   );

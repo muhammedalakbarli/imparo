@@ -248,8 +248,11 @@ export default function LandingPage() {
             </div>
             <h2 className="mt-4 text-3xl font-extrabold text-white">{t("home.finalTitle")}</h2>
             <p className="mx-auto mt-3 max-w-md text-white/85">{t("home.finalBody")}</p>
+            {/* Yuxarıdakı hero düyməsi ilə eyni yerə: əvvəl sınayır, qeydiyyat sonra.
+                Əvvəl bura "/signup" idi — eyni səhifədə iki fərqli axın vardı və
+                aşağıdan gələn istifadəçi hesabı dəyəri görməmiş yaradırdı. */}
             <Link
-              href="/signup"
+              href="/onboarding"
               className="mt-8 inline-block rounded-2xl bg-white px-8 py-4 text-lg font-extrabold uppercase tracking-wide text-brand btn-pop [--pop:#c9c2f5] hover:bg-white/90"
             >
               {t("home.ctaStart")}
