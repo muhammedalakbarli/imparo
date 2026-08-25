@@ -26,7 +26,8 @@ for (const u of s.units) {
         t.type === "multiple_choice" || t.type === "listening"
           ? `   [${t.options.join(" | ")}]`
           : "";
-      console.log(`  ${has} ${t.id} | ${t.prompt} | → ${ans}${opts}`);
+      const au = "audioText" in t && t.audioText ? ` 🔊"${t.audioText}"` : "";
+      console.log(`  ${has} ${t.id} |${au} ${t.prompt} | → ${ans}${opts}`);
     }
   }
 }
