@@ -86,6 +86,17 @@ export function assignLesson(
     p_min: minScore,
   });
 }
+/** Sinfin bacarıq mənzərəsi (migration 0048). Əsas sütun weak_students. */
+export interface SkillGapRow {
+  skill_id: string;
+  mastery: number;
+  attempts: number;
+  students: number;
+  weak_students: number;
+}
+export const classSkillGaps = (classId: string) =>
+  rpc<SkillGapRow[]>("class_skill_gaps", { p_class_id: classId }).catch(() => []);
+
 export const classAssignments = (classId: string) =>
   rpc<ClassAssignment[]>("class_assignments", { p_class_id: classId }).catch(() => []);
 

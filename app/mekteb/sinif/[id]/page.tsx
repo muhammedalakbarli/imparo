@@ -4,18 +4,21 @@
 
 import { use, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Users, Flame, Star, CircleCheck, AlertTriangle, ClipboardList, Clock } from "lucide-react";
+import { ArrowLeft, Users, Flame, Star, CircleCheck, AlertTriangle, ClipboardList, Clock, Target } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { useContent } from "@/components/ContentProvider";
 import {
   teacherClasses,
   classRoster,
   classAssignments,
+  classSkillGaps,
   assignLesson,
   type TeacherClass,
   type RosterRow,
   type ClassAssignment,
+  type SkillGapRow,
 } from "@/lib/schools";
+import { getSkill } from "@/lib/skills";
 import { PageSkeleton } from "@/components/Skeleton";
 
 export default function ClassPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,6 +28,7 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
   const [cls, setCls] = useState<TeacherClass | null | undefined>(undefined);
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [tasks, setTasks] = useState<ClassAssignment[]>([]);
+  const [gaps, setGaps] = useState<SkillGapRow[]>([]);
   const [lessonId, setLessonId] = useState("");
   const [due, setDue] = useState("");
   const [minScore, setMinScore] = useState(70);
@@ -33,6 +37,7 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
   function reload() {
     classRoster(id).then(setRoster);
     classAssignments(id).then(setTasks);
+    classSkillGaps(id).then(setGaps);
   }
   useEffect(() => {
     if (!user) return;
@@ -177,6 +182,45 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
             </div>
           )}
         </div>
+
+        {/* Sinfin zəif bacarıqları — dərs planlaşdırmaq üçün əsas siqnal.
+            Ortalama YOX, "neçə şagird ilişib" göstərilir: 72%-lik ortalama 28
+            şagirddən 11-nin ilişdiyini gizlədə bilər. */}
+        {gaps.some((g) => g.weak_students > 0) && (
+          <>
+            <h2 className="mt-6 flex items-center gap-2 text-lg font-bold text-fg">
+              <Target size={18} className="text-rose-500" /> Sinfin zəif bacarıqları
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              Ən azı 3 dəfə cəhd edib 70%-dən aşağı qalan şagirdlər sayılır.
+            </p>
+            <div className="mt-3 overflow-hidden rounded-2xl border border-line bg-panel">
+              {gaps
+                .filter((g) => g.weak_students > 0)
+                .slice(0, 5)
+                .map((g) => {
+                  const sk = getSkill(g.skill_id);
+                  const share = g.students ? Math.round((g.weak_students / g.students) * 100) : 0;
+                  return (
+                    <div key={g.skill_id} className="border-b border-line px-4 py-3 last:border-b-0">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="text-sm font-bold text-fg">{sk?.title ?? g.skill_id}</span>
+                        <span className="shrink-0 text-sm font-extrabold tabular-nums text-rose-500">
+                          {g.weak_students}/{g.students} şagird
+                        </span>
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-panel-2">
+                        <div className="h-full rounded-full bg-rose-500" style={{ width: `${share}%` }} />
+                      </div>
+                      <div className="mt-1 text-xs text-muted">
+                        {sk ? `${sk.group} · ` : ""}sinif ortalaması {g.mastery}%
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </>
+        )}
 
         {/* Şagird reyestri */}
         <h2 className="mt-6 text-lg font-bold text-fg">Şagirdlər</h2>
