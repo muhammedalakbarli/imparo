@@ -46,9 +46,14 @@ Pozuntuya görə çıxarılan hal: ___
 
 ## Bacarıq üzrə
 
-| bacarıq | sinif | şagird | baseline | final | fərq |
-|---|---|---|---|---|---|
-| ___ | ___ | ___ | ___% | ___% | ___ |
+| bacarıq | sinif | şagird | baseline | məşq | final | fərq |
+|---|---|---|---|---|---|---|
+| ___ | ___ | ___ | ___% | ___ | ___% | ___ |
+
+«məşq» = müdaxilə dövründə şagird başına orta tapşırıq sayı (B və F hovuzları
+sayılmır). Bu sütun olmadan nəticənin arxasında real müdaxilə olub-olmadığı
+bilinmir: 2 tapşırıq həll edilmiş bacarığın «qazancını» 30 tapşırıq həll
+edilmişlə eyni oxumaq olmaz.
 
 ## Saxlama
 

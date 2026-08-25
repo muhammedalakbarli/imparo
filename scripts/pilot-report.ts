@@ -33,6 +33,15 @@ const DAY = 86_400_000;
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 const math = subjects.filter((s) => s.slug.startsWith("riyaziyyat"));
 
+/** tapşırıq → bacarıqlar. Exposure sayarkən hər cəhdin hansı bacarığa aid
+ *  olduğunu bilmək üçün; DB-yə əlavə join etmirik. */
+const TASK_SKILLS = new Map<string, string[]>();
+for (const s of math)
+  for (const u of s.units)
+    for (const l of u.lessons)
+      for (const t of [...l.tasks, ...(l.bonusTasks ?? [])])
+        if (t.skills?.length) TASK_SKILLS.set(t.id, t.skills);
+
 interface Participant {
   user_id: string;
   grade: number;
@@ -78,6 +87,34 @@ async function novelAccuracy(userId: string, grade: number, skills: string[], fr
   };
 }
 
+/**
+ * Müdaxilə pəncərəsində bacarıq üzrə MƏŞQ sayı.
+ *
+ * Niyə vacib: hədəf seçilmiş, amma cəmi 2 tapşırıq həll edilmiş bacarığın
+ * "qazancını" 30 tapşırıq həll edilmiş bacarıqla eyni oxumaq olmaz. Exposure
+ * olmadan nəticənin arxasında real müdaxilə olub-olmadığı bilinmir.
+ *
+ * B və F hovuzları sayılmır — onlar ölçmədir, məşq deyil.
+ */
+async function exposure(userId: string, grade: number, skills: string[], from: Date, to: Date) {
+  const practiceIds = new Set<string>();
+  for (const id of skills) for (const t of skillPools(math, id, grade).P) practiceIds.add(t.id);
+  const { data } = await sb
+    .from("task_attempts")
+    .select("task_id")
+    .eq("user_id", userId)
+    .gte("created_at", from.toISOString())
+    .lt("created_at", to.toISOString());
+  const counts = new Map<string, number>();
+  for (const r of (data ?? []) as { task_id: string }[]) {
+    if (!practiceIds.has(r.task_id)) continue;
+    for (const sk of TASK_SKILLS.get(r.task_id) ?? []) {
+      if (skills.includes(sk)) counts.set(sk, (counts.get(sk) ?? 0) + 1);
+    }
+  }
+  return counts;
+}
+
 const median = (a: number[]) => {
   if (!a.length) return null;
   const s = [...a].sort((x, y) => x - y);
@@ -115,7 +152,7 @@ async function main() {
 
   const diffs: number[] = [];
   const byGrade = new Map<number, number[]>();
-  const perSkill = new Map<string, { n: number; base: number; fin: number }>();
+  const perSkill = new Map<string, { n: number; base: number; fin: number; exp: number }>();
   let novelT = { c: 0, t: 0 }, novelC = { c: 0, t: 0 }, leaked = 0, excluded = 0;
 
   for (const p of completers) {
@@ -146,12 +183,14 @@ async function main() {
       byGrade.set(p.grade, [...(byGrade.get(p.grade) ?? []), d]);
     }
 
+    // Müdaxilə pəncərəsi: baseline bitəndən final başlayana qədər.
+    const expo = await exposure(p.user_id, p.grade, [...target, ...comparison], bTo, fFrom);
     for (const id of [...target, ...comparison]) {
       const b = input.baseline.get(id);
       const fv = input.final.get(id);
       if (b === undefined || fv === undefined) continue;
-      const r = perSkill.get(id) ?? { n: 0, base: 0, fin: 0 };
-      perSkill.set(id, { n: r.n + 1, base: r.base + b, fin: r.fin + fv });
+      const r = perSkill.get(id) ?? { n: 0, base: 0, fin: 0, exp: 0 };
+      perSkill.set(id, { n: r.n + 1, base: r.base + b, fin: r.fin + fv, exp: r.exp + (expo.get(id) ?? 0) });
     }
 
     const nt = await novelAccuracy(p.user_id, p.grade, target, fFrom, fTo);
@@ -185,13 +224,15 @@ async function main() {
   out.push(`| Müqayisə bacarıqları | ${f(pct(novelC))}% | ${novelC.t} |`);
   out.push(`| Pozuntuya görə çıxarılan element | ${leaked} | |`, "");
 
-  out.push("## Bacarıq üzrə", "", "| bacarıq | şagird | baseline | final | fərq |", "|---|---|---|---|---|");
+  out.push("## Bacarıq üzrə", "", "| bacarıq | şagird | baseline | məşq | final | fərq |", "|---|---|---|---|---|---|");
   for (const [id, r] of [...perSkill].sort((a, b) => b[1].n - a[1].n)) {
     const b = r.base / r.n, fv = r.fin / r.n;
     const mark = LIMITED_ITEM_SKILLS.has(id) ? " ⚠️" : "";
-    out.push(`| ${getSkill(id)?.title ?? id}${mark} | ${r.n} | ${f(b, 0)}% | ${f(fv, 0)}% | ${f(fv - b)} |`);
+    // Məşq sütunu şagird başına ortalamadır — nəticənin arxasında real müdaxilə
+    // olub-olmadığını göstərir.
+    out.push(`| ${getSkill(id)?.title ?? id}${mark} | ${r.n} | ${f(b, 0)}% | ${f(r.exp / r.n, 1)} | ${f(fv, 0)}% | ${f(fv - b)} |`);
   }
-  out.push("", "⚠️ = məşq materialı sərhəddədir, əsas analizə daxil deyil.", "");
+  out.push("", "«məşq» = müdaxilə dövründə şagird başına orta tapşırıq sayı (B və F hovuzları sayılmır).", "⚠️ = məşq materialı sərhəddədir, əsas analizə daxil deyil.", "");
 
   out.push("## Sinif üzrə", "", "| sinif | n | fərq (median) |", "|---|---|---|");
   for (const g of [...byGrade.keys()].sort()) out.push(`| ${g} | ${byGrade.get(g)!.length} | ${f(median(byGrade.get(g)!))} |`);
