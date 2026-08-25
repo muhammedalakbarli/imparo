@@ -3,7 +3,14 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createClient } from "../supabase/server";
 import { SITE_URL } from "../site";
-import { fetchContentTreeWith } from "../content/db";
+import {
+  fetchContentTreeWith,
+  fetchSubjectSummariesWith,
+  fetchSubjectDetailWith,
+  fetchLessonDetailWith,
+  type SubjectSummary,
+  type SubjectDetail,
+} from "../content/db";
 import type { Subject, Lesson } from "../types";
 
 // Bütün fənn ağacını qaytar (DB → yoxsa seed).
@@ -36,4 +43,24 @@ export function findLesson(tree: Subject[], id: string): Lesson | undefined {
       if (l) return l;
     }
   return undefined;
+}
+
+// ── Hədəflənmiş oxumalar ───────────────────────────────────────────────────────
+// Bunlar getTree()-dən fərqli olaraq bütün tapşırıq cədvəlini çəkmir (bax
+// lib/content/db.ts-dəki izah). DB boş/xətalıdırsa null qaytarırlar — çağıran
+// route köhnə tam-ağac yoluna, oradan da seed fallback-ına keçir.
+
+export async function getSubjectSummaries(): Promise<SubjectSummary[] | null> {
+  const supabase = await createClient();
+  return fetchSubjectSummariesWith(supabase);
+}
+
+export async function getSubjectDetail(slug: string): Promise<SubjectDetail | null> {
+  const supabase = await createClient();
+  return fetchSubjectDetailWith(supabase, slug);
+}
+
+export async function getLessonDetail(id: string): Promise<Lesson | null> {
+  const supabase = await createClient();
+  return fetchLessonDetailWith(supabase, id);
 }

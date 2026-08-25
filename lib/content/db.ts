@@ -265,3 +265,229 @@ export async function fetchContentTreeWith(
     return null;
   }
 }
+
+// ── Hədəflənmiş sorğular (route handler-lər üçün) ──────────────────────────────
+//
+// Route-lar əvvəl hamısı fetchContentTreeWith() çağırırdı: BİR fənn siyahısı və ya
+// BİR dərs üçün ~11 700 tapşırıq çəkilib bütöv ağac qurulur, sonra demək olar hamısı
+// atılırdı. Node-da bu sadəcə yavaş idi (~0.8 s), Cloudflare Worker-in CPU büdcəsində
+// isə "Error 1102 — exceededCpu". Tapşırıqlara izah mətni və skill etiketləri əlavə
+// olunandan sonra hər sətir şişdi və limit müntəzəm aşılmağa başladı.
+//
+// İndi hər route yalnız ehtiyacı olanı çəkir. DB boş/xətalıdırsa null qaytarırlar —
+// çağıran tərəf köhnə tam-ağac yoluna (seed fallback-ı ilə) keçir.
+
+// PostgREST bir sorğuda susmaqla 1000 sətir qaytarır. Sayğac sorğuları üçün
+// bu limitə dəyməyək deyə səhifə-səhifə yığırıq.
+async function fetchAllRows<T>(
+  supabase: SupabaseClient,
+  table: string,
+  columns: string,
+): Promise<T[]> {
+  const PAGE = 1000;
+  const all: T[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from(table)
+      .select(columns)
+      .range(from, from + PAGE - 1);
+    if (error || !data) break;
+    all.push(...(data as unknown as T[]));
+    if (data.length < PAGE) break;
+  }
+  return all;
+}
+
+export interface SubjectSummary {
+  id: string;
+  name: string;
+  grade: number;
+  icon: string;
+  color: string;
+  unitCount: number;
+  lessonCount: number;
+}
+
+/** Fənn xülasələri — tapşırıq cədvəlinə heç toxunmur. */
+export async function fetchSubjectSummariesWith(
+  supabase: SupabaseClient,
+): Promise<SubjectSummary[] | null> {
+  try {
+    const subsRes = await supabase
+      .from("subjects")
+      .select("id,name,grade,icon,color")
+      .order("sort_order")
+      .order("id");
+    const subs = subsRes.data as Omit<SubjectRow, "sort_order">[] | null;
+    if (subsRes.error || !subs || subs.length === 0) return null;
+
+    const [units, lessons] = await Promise.all([
+      fetchAllRows<{ id: string; subject_id: string }>(supabase, "units", "id,subject_id"),
+      fetchAllRows<{ id: string; unit_id: string }>(supabase, "lessons", "id,unit_id"),
+    ]);
+
+    const subjectOfUnit = new Map<string, string>();
+    const unitCount = new Map<string, number>();
+    for (const u of units) {
+      subjectOfUnit.set(u.id, u.subject_id);
+      unitCount.set(u.subject_id, (unitCount.get(u.subject_id) ?? 0) + 1);
+    }
+    const lessonCount = new Map<string, number>();
+    for (const l of lessons) {
+      const sid = subjectOfUnit.get(l.unit_id);
+      if (sid) lessonCount.set(sid, (lessonCount.get(sid) ?? 0) + 1);
+    }
+
+    return subs.map((s) => ({
+      id: s.id,
+      name: s.name,
+      grade: s.grade,
+      icon: s.icon ?? "",
+      color: s.color ?? "",
+      unitCount: unitCount.get(s.id) ?? 0,
+      lessonCount: lessonCount.get(s.id) ?? 0,
+    }));
+  } catch {
+    return null;
+  }
+}
+
+export interface SubjectDetail {
+  id: string;
+  name: string;
+  grade: number;
+  icon: string;
+  color: string;
+  units: {
+    id: string;
+    title: string;
+    description: string;
+    lessons: { id: string; title: string; taskCount: number; bonusCount: number }[];
+  }[];
+}
+
+/** Bir fənn: bölmələr + dərs başlıqları + tapşırıq sayları (tapşırıq mətnləri YOX). */
+export async function fetchSubjectDetailWith(
+  supabase: SupabaseClient,
+  slug: string,
+): Promise<SubjectDetail | null> {
+  try {
+    const subRes = await supabase
+      .from("subjects")
+      .select("id,name,grade,icon,color")
+      .eq("id", slug)
+      .maybeSingle();
+    const sub = subRes.data as Omit<SubjectRow, "sort_order"> | null;
+    if (subRes.error || !sub) return null;
+
+    const unitsRes = await supabase
+      .from("units")
+      .select("id,title,description")
+      .eq("subject_id", slug)
+      .order("sort_order")
+      .order("id");
+    const unitRows = (unitsRes.data ?? []) as {
+      id: string;
+      title: string;
+      description: string | null;
+    }[];
+    const unitIds = unitRows.map((u) => u.id);
+
+    const lessonsRes = unitIds.length
+      ? await supabase
+          .from("lessons")
+          .select("id,unit_id,title")
+          .in("unit_id", unitIds)
+          .order("sort_order")
+          .order("id")
+      : { data: [], error: null };
+    const lessonRows = (lessonsRes.data ?? []) as {
+      id: string;
+      unit_id: string;
+      title: string;
+    }[];
+    const lessonIds = lessonRows.map((l) => l.id);
+
+    // Yalnız lesson_id + bonus bayrağı — `data` jsonb-nin qalanı çəkilmir.
+    const counts = new Map<string, { task: number; bonus: number }>();
+    for (let i = 0; i < lessonIds.length; i += 200) {
+      const slice = lessonIds.slice(i, i + 200);
+      const { data } = await supabase
+        .from("tasks")
+        .select("lesson_id,data->bonus")
+        .in("lesson_id", slice);
+      for (const row of (data ?? []) as { lesson_id: string; bonus: unknown }[]) {
+        const c = counts.get(row.lesson_id) ?? { task: 0, bonus: 0 };
+        if (row.bonus === true || row.bonus === "true") c.bonus += 1;
+        else c.task += 1;
+        counts.set(row.lesson_id, c);
+      }
+    }
+
+    const byUnit = new Map<string, SubjectDetail["units"][number]["lessons"]>();
+    for (const l of lessonRows) {
+      const c = counts.get(l.id) ?? { task: 0, bonus: 0 };
+      const arr = byUnit.get(l.unit_id) ?? [];
+      arr.push({ id: l.id, title: l.title, taskCount: c.task, bonusCount: c.bonus });
+      byUnit.set(l.unit_id, arr);
+    }
+
+    return {
+      id: sub.id,
+      name: sub.name,
+      grade: sub.grade,
+      icon: sub.icon ?? "",
+      color: sub.color ?? "",
+      units: unitRows.map((u) => ({
+        id: u.id,
+        title: u.title,
+        description: u.description ?? "",
+        lessons: byUnit.get(u.id) ?? [],
+      })),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Bir dərs + öz tapşırıqları (yalnız bu dərsin sətirləri çəkilir). */
+export async function fetchLessonDetailWith(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<Lesson | null> {
+  try {
+    const lessonRes = await supabase
+      .from("lessons")
+      .select("id,title,intro,kind,visual,sections")
+      .eq("id", id)
+      .maybeSingle();
+    const row = lessonRes.data as Omit<LessonRow, "unit_id" | "sort_order"> | null;
+    if (lessonRes.error || !row) return null;
+
+    const tasksRes = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("lesson_id", id)
+      .order("sort_order")
+      .order("id");
+    const main: Task[] = [];
+    const bonus: Task[] = [];
+    for (const t of (tasksRes.data ?? []) as TaskRow[]) {
+      const parsed = parseTask(t);
+      (parsed.bonus ? bonus : main).push(parsed.task);
+    }
+
+    return {
+      id: row.id,
+      title: row.title,
+      intro: row.intro ?? "",
+      kind: (row.kind as Lesson["kind"]) ?? "lesson",
+      visual: row.visual ?? undefined,
+      sections: row.sections && row.sections.length ? row.sections : undefined,
+      tasks: main,
+      bonusTasks: bonus.length ? bonus : undefined,
+    };
+  } catch {
+    return null;
+  }
+}
