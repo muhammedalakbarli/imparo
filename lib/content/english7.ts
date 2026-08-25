@@ -282,7 +282,7 @@ export const english7: Subject = {
           bonusTasks: [
             { id: "en7-passive-listen-b1", type: "listening", prompt: "Dinlə və cümlənin mənasını seç.", audioText: "Hamlet was written by Shakespeare.", options: ["Hamlet Şekspir tərəfindən yazılıb.", "Şekspir oxudu.", "Hamlet gəldi.", "Şekspir yazır."], correctIndex: 0, xp: 15 },
             { id: "en7-passive-listen-b2", type: "listening", prompt: "Dinlə və cümlənin mənasını seç.", audioText: "The homework is done every day.", options: ["Ev tapşırığı hər gün edilir.", "Ev tapşırığı etdim.", "Ev tapşırığım var.", "Ev tapşırığı çətindir."], correctIndex: 0, xp: 15 },
-            { id: "en7-passive-listen-b3", type: "listening", prompt: "Dinlə və sualın mənasını seç.", audioText: "When was this school built?", options: ["Bu məktəb nə vaxt tikilib?", "Məktəb harададır?", "Məktəb böyükdür?", "Məktəbə gedirsən?"], correctIndex: 0, xp: 15 },
+            { id: "en7-passive-listen-b3", type: "listening", prompt: "Dinlə və sualın mənasını seç.", audioText: "When was this school built?", options: ["Bu məktəb nə vaxt tikilib?", "Məktəb haradadır?", "Məktəb böyükdür?", "Məktəbə gedirsən?"], correctIndex: 0, xp: 15 },
           ],
         },
         {

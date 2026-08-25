@@ -32,9 +32,27 @@ function acc(n: number): string {
   return `${n}-${suf}`;
 }
 
-/** a + b üçün onluq/təklik ayrılışı ilə izah. */
+/** Ədədi mərtəbələrə ayırır: 275 → [200, 70, 5]. */
+function parts(n: number): number[] {
+  const out: number[] = [];
+  let unit = 1;
+  for (let x = n; x > 0; x = Math.floor(x / 10), unit *= 10) {
+    const d = x % 10;
+    if (d) out.unshift(d * unit);
+  }
+  return out;
+}
+
+/** a + b üçün izah: kiçik ədədlərdə onluq/təklik, böyüklərdə mərtəbə üzrə addımlar. */
 function addSteps(a: number, b: number): string {
   const s = a + b;
+  if (a >= 100 || b >= 100) {
+    const ps = parts(b);
+    if (ps.length < 2) return `${a} + ${b} = ${s}.`;
+    let cur = a;
+    const steps = ps.map((p) => `${cur} + ${p} = ${(cur += p)}`);
+    return `${b} ədədini mərtəbələrə ayırırıq: ${ps.join(" + ")}. Ardıcıl toplayırıq: ${steps.join(", ")}.`;
+  }
   if (a < 10 && b < 10) {
     if (s <= 10) return `${a}-ə ${b} əlavə edirik: ${a} + ${b} = ${s}.`;
     const need = 10 - a;
@@ -51,6 +69,13 @@ function addSteps(a: number, b: number): string {
 /** a − b üçün izah. */
 function subSteps(a: number, b: number): string {
   const s = a - b;
+  if (a >= 100 || b >= 100) {
+    const ps = parts(b);
+    if (ps.length < 2) return `${a} − ${b} = ${s}.`;
+    let cur = a;
+    const steps = ps.map((p) => `${cur} − ${p} = ${(cur -= p)}`);
+    return `${b} ədədini mərtəbələrə ayırırıq: ${ps.join(" + ")}. Ardıcıl çıxırıq: ${steps.join(", ")}.`;
+  }
   if (a <= 20 && b < 10) return `${a}-dən ${b} çıxırıq: ${a} − ${b} = ${s}.`;
   const [at, au] = [Math.floor(a / 10) * 10, a % 10];
   const [bt, bu] = [Math.floor(b / 10) * 10, b % 10];
@@ -61,8 +86,20 @@ function subSteps(a: number, b: number): string {
 
 function mulSteps(a: number, b: number): string {
   const s = a * b;
-  if (a <= 5) return `${a} × ${b} — ${acc(b)} ${a} dəfə toplamaq deməkdir: ${Array(a).fill(b).join(" + ")} = ${s}.`;
-  return `${a} × ${b} — ${acc(a)} ${b} dəfə toplamaq deməkdir: ${Array(b).fill(a).join(" + ")} = ${s}.`;
+  const [big, small] = a >= b ? [a, b] : [b, a];
+  // Çoxrəqəmli vuruq varsa, onu mərtəbələrə ayırırıq: 24 × 3 = 20×3 + 4×3
+  if (big >= 10 && small < 10) {
+    const ps = parts(big);
+    if (ps.length >= 2) {
+      const terms = ps.map((p) => `${p} × ${small} = ${p * small}`);
+      return `${big} ədədini mərtəbələrə ayırırıq: ${ps.join(" + ")}. Hər hissəni vururuq: ${terms.join(", ")}. Cəmi: ${ps.map((p) => p * small).join(" + ")} = ${s}.`;
+    }
+  }
+  // Kiçik vuruq 5-ə qədərdirsə, təkrar toplama ilə göstərmək aydındır
+  if (small <= 5) return `${a} × ${b} — ${acc(big)} ${small} dəfə toplamaq deməkdir: ${Array(small).fill(big).join(" + ")} = ${s}.`;
+  // Hər ikisi 6–9 arasındadırsa, 5-ə ayırırıq: 9 × 8 = 9×5 + 9×3
+  if (big < 10) return `${a} × ${b} = ${big} × 5 + ${big} × ${small - 5} = ${big * 5} + ${big * (small - 5)} = ${s}.`;
+  return `${a} × ${b} = ${s}.`;
 }
 
 function divSteps(a: number, b: number): string {

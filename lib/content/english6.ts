@@ -349,7 +349,7 @@ export const english6: Subject = {
             { id: "en6-quant-listen-t15", type: "listening", prompt: "Dinlə və cümlənin mənasını seç.", audioText: "There aren't many apples.", options: ["Çox alma yoxdur.", "Çoxlu alma var.", "Alma yoxdur.", "Alma alıram."], correctIndex: 0, xp: 15 },
           ],
           bonusTasks: [
-            { id: "en6-quant-listen-b1", type: "listening", prompt: "Dinlə və cümlənin mənasını seç.", audioText: "How much does it cost?", options: ["Neçəyədir?", "Neçə dənədir?", "Harададır?", "Nə vaxtdır?"], correctIndex: 0, xp: 15 },
+            { id: "en6-quant-listen-b1", type: "listening", prompt: "Dinlə və cümlənin mənasını seç.", audioText: "How much does it cost?", options: ["Neçəyədir?", "Neçə dənədir?", "Haradadır?", "Nə vaxtdır?"], correctIndex: 0, xp: 15 },
             { id: "en6-quant-listen-b2", type: "listening", prompt: "Dinlə və cümlənin mənasını seç.", audioText: "We have plenty of food.", options: ["Bol yeməyimiz var.", "Yeməyimiz yoxdur.", "Az yeməyimiz var.", "Yemək bişiririk."], correctIndex: 0, xp: 15 },
             { id: "en6-quant-listen-b3", type: "listening", prompt: "Dinlə və sualın mənasını seç.", audioText: "Is there any sugar left?", options: ["Şəkər qalıb?", "Şəkər aldın?", "Şəkər sevirsən?", "Şəkər lazımdır?"], correctIndex: 0, xp: 15 },
           ],
