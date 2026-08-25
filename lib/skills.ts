@@ -34,7 +34,7 @@ export const SKILLS: Skill[] = [
   { id: "number.place_value", title: "Mərtəbələr (onluq, yüzlük, minlik)", group: "Ədədlər", grade: 1, prereqs: ["number.count"] },
   { id: "number.sequence", title: "Ədəd naxışları və sıralar", group: "Ədədlər", grade: 2, prereqs: ["number.count"] },
   { id: "number.rounding", title: "Yuvarlaqlaşdırma", group: "Ədədlər", grade: 4, prereqs: ["number.place_value", "number.compare"] },
-  { id: "number.divisors", title: "Bölənlər və bölünmə əlamətləri", group: "Ədədlər", grade: 4, prereqs: ["arith.div.tables"] },
+  { id: "number.divisors", title: "Bölənlər və bölünmə əlamətləri", group: "Ədədlər", grade: 5, prereqs: ["arith.div.tables"] },
 
   // ── Toplama və çıxma ───────────────────────────────────────────────────────
   { id: "arith.add.basic", title: "Sadə toplama (10 dairəsində)", group: "Toplama və çıxma", grade: 1, prereqs: ["number.count"] },
@@ -87,6 +87,67 @@ export const SKILLS: Skill[] = [
   // əməlyə çevirə bilməyə bilər. Tapşırıq HƏM əməl, HƏM məsələ bacarığı daşıyır.
   { id: "problem.one_step", title: "Bir addımlı mətn məsələsi", group: "Mətn məsələləri", grade: 1, prereqs: ["arith.add.basic"] },
   { id: "problem.multi_step", title: "Çoxaddımlı mətn məsələsi", group: "Mətn məsələləri", grade: 2, prereqs: ["problem.one_step"] },
+
+  // ── 5–8-ci sinif: ədədlər ──────────────────────────────────────────────────
+  { id: "number.primes", title: "Sadə və mürəkkəb ədədlər", group: "Ədədlər", grade: 5, prereqs: ["number.divisors"] },
+  { id: "number.gcd_lcm", title: "ƏBOB və ƏKOB", group: "Ədədlər", grade: 6, prereqs: ["number.primes"] },
+  { id: "integer.concept", title: "Tam ədədlər (mənfi ədədlər)", group: "Ədədlər", grade: 6, prereqs: ["number.compare"] },
+  { id: "integer.ops", title: "Tam ədədlər üzərində əməllər", group: "Ədədlər", grade: 6, prereqs: ["integer.concept", "arith.add.carry", "arith.sub.borrow"] },
+  { id: "rational.concept", title: "Rasional ədədlər", group: "Ədədlər", grade: 6, prereqs: ["integer.concept", "fraction.concept"] },
+  { id: "number.real", title: "Həqiqi ədədlər", group: "Ədədlər", grade: 8, prereqs: ["rational.concept", "root.square"] },
+  { id: "sets.basic", title: "Çoxluqlar", group: "Ədədlər", grade: 5, prereqs: [] },
+
+  // ── Kəsrlər (davamı) ───────────────────────────────────────────────────────
+  { id: "fraction.mixed", title: "Qarışıq ədədlər", group: "Kəsrlər", grade: 5, prereqs: ["fraction.concept"] },
+  { id: "fraction.add_sub_diff", title: "Fərqli məxrəcli kəsrləri toplamaq və çıxmaq", group: "Kəsrlər", grade: 6, prereqs: ["fraction.add_sub_same", "number.gcd_lcm"] },
+  { id: "fraction.mul_div", title: "Kəsrləri vurmaq və bölmək", group: "Kəsrlər", grade: 6, prereqs: ["fraction.concept", "arith.mul.tables"] },
+
+  // ── Faiz və nisbət ─────────────────────────────────────────────────────────
+  { id: "percent.concept", title: "Faiz anlayışı", group: "Faiz və nisbət", grade: 5, prereqs: ["fraction.concept", "decimal.concept"] },
+  { id: "percent.of", title: "Ədədin faizini tapmaq", group: "Faiz və nisbət", grade: 5, prereqs: ["percent.concept", "arith.mul.multi_digit"] },
+  { id: "percent.find_whole", title: "Faizə görə bütövü tapmaq", group: "Faiz və nisbət", grade: 5, prereqs: ["percent.of", "arith.div.multi_digit"] },
+  { id: "ratio.concept", title: "Nisbət", group: "Faiz və nisbət", grade: 5, prereqs: ["fraction.concept"] },
+  { id: "ratio.proportion", title: "Tənasüb", group: "Faiz və nisbət", grade: 6, prereqs: ["ratio.concept"] },
+
+  // ── Cəbr ───────────────────────────────────────────────────────────────────
+  { id: "algebra.expression", title: "Cəbri ifadələr", group: "Cəbr", grade: 7, prereqs: ["arith.order_of_ops", "rational.concept"] },
+  { id: "algebra.simplify", title: "Bənzər hədləri yığmaq", group: "Cəbr", grade: 7, prereqs: ["algebra.expression"] },
+  { id: "equation.linear", title: "Birdəyişənli tənliklər", group: "Cəbr", grade: 7, prereqs: ["algebra.simplify", "arith.inverse"] },
+  { id: "poly.concept", title: "Tək və çoxhədlilər", group: "Cəbr", grade: 7, prereqs: ["algebra.expression"] },
+  { id: "poly.multiply", title: "Çoxhədliləri vurmaq", group: "Cəbr", grade: 7, prereqs: ["poly.concept", "power.natural"] },
+  { id: "poly.formulas", title: "Müxtəsər vurma düsturları", group: "Cəbr", grade: 7, prereqs: ["poly.multiply"] },
+  { id: "algebra.fraction", title: "Cəbri kəsrlər", group: "Cəbr", grade: 8, prereqs: ["fraction.mul_div", "algebra.simplify"] },
+  { id: "equation.quadratic", title: "Kvadrat tənliklər", group: "Cəbr", grade: 8, prereqs: ["equation.linear", "root.square", "poly.formulas"] },
+  { id: "inequality.linear", title: "Xətti bərabərsizliklər", group: "Cəbr", grade: 8, prereqs: ["equation.linear", "number.compare"] },
+
+  // ── Qüvvət və kök ──────────────────────────────────────────────────────────
+  { id: "power.natural", title: "Natural üstlü qüvvət", group: "Qüvvət və kök", grade: 7, prereqs: ["arith.mul.tables"] },
+  { id: "power.rules", title: "Qüvvətin xassələri", group: "Qüvvət və kök", grade: 7, prereqs: ["power.natural"] },
+  { id: "power.integer", title: "Tam üstlü qüvvət", group: "Qüvvət və kök", grade: 8, prereqs: ["power.rules", "integer.ops"] },
+  { id: "power.standard", title: "Standart şəkil", group: "Qüvvət və kök", grade: 8, prereqs: ["power.integer"] },
+  { id: "root.square", title: "Kvadrat kök", group: "Qüvvət və kök", grade: 8, prereqs: ["power.natural"] },
+
+  // ── Funksiya və koordinat ──────────────────────────────────────────────────
+  { id: "coord.plane", title: "Koordinat müstəvisi", group: "Funksiya", grade: 6, prereqs: ["integer.concept"] },
+  { id: "function.concept", title: "Funksiya anlayışı", group: "Funksiya", grade: 7, prereqs: ["coord.plane"] },
+  { id: "function.quadratic", title: "y = x² funksiyası", group: "Funksiya", grade: 8, prereqs: ["function.concept", "power.natural"] },
+  { id: "function.inverse_prop", title: "y = k/x funksiyası", group: "Funksiya", grade: 8, prereqs: ["function.concept", "fraction.mul_div"] },
+
+  // ── Həndəsə (davamı) ───────────────────────────────────────────────────────
+  { id: "geom.angles", title: "Bucaqlar", group: "Həndəsə", grade: 5, prereqs: ["geom.shapes"] },
+  { id: "geom.angle_pairs", title: "Qonşu və qarşılıqlı bucaqlar", group: "Həndəsə", grade: 7, prereqs: ["geom.angles"] },
+  { id: "geom.triangle", title: "Üçbucaqlar", group: "Həndəsə", grade: 6, prereqs: ["geom.angles"] },
+  { id: "geom.triangle_props", title: "Üçbucağın xassələri", group: "Həndəsə", grade: 7, prereqs: ["geom.triangle"] },
+  { id: "geom.circle", title: "Çevrə və dairə", group: "Həndəsə", grade: 6, prereqs: ["geom.shapes"] },
+  { id: "geom.quadrilateral", title: "Dördbucaqlılar", group: "Həndəsə", grade: 8, prereqs: ["geom.triangle_props"] },
+  { id: "geom.pythagoras", title: "Pifaqor teoremi", group: "Həndəsə", grade: 8, prereqs: ["geom.triangle_props", "root.square"] },
+
+  // ── Məlumat və ehtimal ─────────────────────────────────────────────────────
+  { id: "data.read", title: "Cədvəl və diaqramları oxumaq", group: "Məlumat və ehtimal", grade: 5, prereqs: ["number.compare"] },
+  // QEYD: "orta qiymət" bacarığı qrafdan çıxarılıb — məzmunda onu ölçən BİR
+  // tapşırıq belə yoxdur (5-ci sinif kurikulumunda mövzu var, bizdə yazılmayıb).
+  // Məzmun yazılanda bacarıq geri qaytarılmalıdır.
+  { id: "prob.basic", title: "Ehtimal", group: "Məlumat və ehtimal", grade: 5, prereqs: ["fraction.concept"] },
 ];
 
 const BY_ID = new Map(SKILLS.map((s) => [s.id, s]));

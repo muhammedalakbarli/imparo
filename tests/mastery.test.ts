@@ -126,12 +126,9 @@ describe("diaqnostika", () => {
   it("qrafda ölü düyün yoxdur — hər bacarığı ölçən tapşırıq var", () => {
     // Bu test real xəta tutdu: `arith.div.concept` prereq zəncirinin kökü idi,
     // amma heç bir tapşırıq onu ölçmürdü — "geriyə addım" ora çata bilmirdi.
-    // Aşağıdakıların məzmunu 5-ci sinifdədir və hələ etiketlənməyib; 5-ci sinif
-    // etiketlənəndə bu siyahı boşalmalıdır.
-    const NOT_YET_TAGGED = new Set(["number.divisors", "geom.volume"]);
-    const empty = SKILLS.filter(
-      (s) => !NOT_YET_TAGGED.has(s.id) && tasksForSkill(subjects, s.id).length === 0,
-    ).map((s) => s.id);
+    // Siyahı BOŞDUR: 1–8-ci sinif riyaziyyatı tam etiketlidir. Qrafa yeni bacarıq
+    // əlavə edib onu ölçən tapşırıq yazmasan, bu test düşəcək — məqsəd də budur.
+    const empty = SKILLS.filter((s) => tasksForSkill(subjects, s.id).length === 0).map((s) => s.id);
     expect(empty).toEqual([]);
   });
 });

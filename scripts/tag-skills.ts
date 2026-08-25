@@ -114,16 +114,141 @@ const LESSON_DEFAULT: Record<string, string> = {
   "ry4-sahe-l1": "geom.area", "ry4-sahe-l2": "problem.one_step", "ry4-sahe-l3": "arith.order_of_ops",
 };
 
-function skillsFor(t: Task, lessonId: string): string[] {
+/**
+ * BÖLMƏ səviyyəli ehtiyat — 5–8-ci siniflər üçün əsas mexanizm.
+ * O siniflərdə bölmələr mövzu baxımından təmizdir ("Kvadrat tənliklər",
+ * "Pifaqor teoremi"), ona görə dərs-dərs sadalamaq əvəzinə bölmə kifayətdir.
+ * Qaydalar yenə üstündür: bölmə daxilindəki incə fərqləri onlar tutur.
+ */
+const UNIT_DEFAULT: Record<string, string> = {
+  // 5-ci sinif
+  "ry-natural": "number.place_value", "ry-fractions": "fraction.concept",
+  "ry-decimals": "decimal.concept", "ry-percent": "percent.concept",
+  "ry-geometry": "geom.shapes", "ry-data": "data.read",
+  "ry-divis": "number.divisors", "ry-coxluq": "sets.basic",
+  // 6-cı sinif
+  "ry6-bolunme": "number.divisors", "ry6-kesrler": "fraction.mul_div",
+  "ry6-onluq": "decimal.mul_div", "ry6-nisbet": "ratio.concept",
+  "ry6-faiz": "percent.concept", "ry6-tam": "integer.ops",
+  "ry6-rasional": "rational.concept", "ry6-hendese": "geom.angles",
+  // 7-ci sinif
+  "ry7-rasional": "rational.concept", "ry7-cebri": "algebra.expression",
+  "ry7-tenlik": "equation.linear", "ry7-coxhedli": "poly.concept",
+  "ry7-duztur": "poly.formulas", "ry7-quvvet": "power.rules",
+  "ry7-funksiya": "function.concept", "ry7-hendese": "geom.angles",
+  // 8-ci sinif
+  "ry8-kok": "root.square", "ry8-kesr": "algebra.fraction",
+  "ry8-quvvet": "power.integer", "ry8-kvadrat": "equation.quadratic",
+  "ry8-berabersizlik": "inequality.linear", "ry8-funksiya": "function.quadratic",
+  "ry8-dordbucaq": "geom.quadrilateral", "ry8-pifaqor": "geom.pythagoras",
+};
+
+/**
+ * 5–8-ci sinif mövzuları. Bunlar ELEMENTAR qaydalardan ƏVVƏL hesablanır və
+ * uyğun elementar etiketi bağlayır: "(2x+4)/(x+2)" cəbri kəsrdir, adi kəsr yox;
+ * "x² = 25" kvadrat tənlikdir, sadəcə qüvvət deyil.
+ */
+function advancedSkills(p: string): Set<string> {
+  const a = new Set<string>();
+  const has = (re: RegExp) => re.test(p);
+
+  // Ədədlər
+  if (has(/ƏBOB|ƏKOB/i)) a.add("number.gcd_lcm");
+  if (has(/sadə ədəd|mürəkkəb ədəd/i)) a.add("number.primes");
+  if (has(/bölünürmü|bölünürsə|böləni|rəqəmləri cəmi|cütdür|təkdir|bölünmə əlaməti/i)) a.add("number.divisors");
+  if (has(/çoxluğ|çoxluq|[∩∪]/i)) a.add("sets.basic");
+  if (has(/irrasional|həqiqi ədəd/i)) a.add("number.real");
+  if (has(/rasional ədəd/i)) a.add("rational.concept");
+  if (has(/mənfi|modul|əks ədəd|müsbət|\|−|\(−/i)) {
+    // İki operand arasında əməl varsa — hesablama; yoxsa anlayış sualıdır
+    // ("Hansı ədəd mənfidir?"). Anlayış prereq-dir: onu ölçən tapşırıq olmasa,
+    // "geriyə addım" ora çata bilmir.
+    a.add(/[−\-+×÷:·]\s*\(?\s*−?\d/.test(p) && /\d/.test(p) ? "integer.ops" : "integer.concept");
+  }
+
+  // Faiz və nisbət
+  if (has(/%|faiz/i)) {
+    if (has(/Ədəd neçədir|bütöv/i)) a.add("percent.find_whole");
+    else if (has(/-[iıuü]n? \d+%|%-i neçə|endirim|artım/i)) a.add("percent.of");
+    else a.add("percent.concept");
+  }
+  if (has(/tənasüb|\d\s*:\s*\w+\s*=\s*\d|miqyas/i)) a.add("ratio.proportion");
+  else if (has(/nisbət/i)) a.add("ratio.concept");
+
+  // Kəsrlər (davamı)
+  if (has(/qarışıq ədəd|\d+\s+\d+\/\d+/)) a.add("fraction.mixed");
+  if (has(/\d\/\d\s*[·×*:÷]/)) a.add("fraction.mul_div");
+  // Fərqli məxrəcli toplama/çıxma ayrıca bacarıqdır: ortaq məxrəc tapmaq lazımdır.
+  const fr = p.match(/(\d+)\/(\d+)\s*[+\-−]\s*(\d+)\/(\d+)/);
+  if (fr) a.add(fr[2] === fr[4] ? "fraction.add_sub_same" : "fraction.add_sub_diff");
+  if (has(/ortaq məxrəc/i)) a.add("fraction.add_sub_diff");
+
+  // Cəbr
+  if (has(/cəbri kəsr|\([^)]*[a-z][^)]*\)\s*\/\s*\(|[a-z]\/\d+\s*[+\-−:]/i)) a.add("algebra.fraction");
+  if (has(/bərabərsizli|[<>]\s*\d|≥|≤/)) a.add("inequality.linear");
+  if (has(/kvadrat tənlik|x²\s*[+\-−].*=\s*0|x²\s*=|diskriminant/i)) a.add("equation.quadratic");
+  else if (has(/tənli|kökü nədir|kökü\?|x\s*=\s*\?/i)) a.add("equation.linear");
+  if (has(/\(a \+ b\)²|\(a − b\)²|müxtəsər|düsturla|\([^)]+\)²/i)) a.add("poly.formulas");
+  if (has(/çoxhədli|tək həd|əmsal|\)\s*\(/i)) a.add("poly.multiply");
+  if (has(/ifadəsinin qiyməti|olduqda/i)) a.add("algebra.expression");
+  if (has(/bənzər həd|mötərizə(ni)? aç|\d[a-z] [+\-−] \d[a-z]/i)) a.add("algebra.simplify");
+
+  // Qüvvət və kök
+  if (has(/√|kvadrat kök/)) a.add("root.square");
+  // DİQQƏT: bare "üst" işlətmirik — "üstündə" sözünün içinə düşür.
+  // Qüvvət etiketi yalnız sual tənlik/funksiya mövzusu DEYİLSƏ qoyulur: "x² = 25"
+  // kvadrat tənlikdir, "y = x²" funksiyadır — hər ikisində x² sadəcə vasitədir.
+  const powerContext = !a.has("equation.quadratic") && !a.has("function.quadratic") && !a.has("poly.formulas");
+  if (has(/standart şəkil|·\s*10[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]/)) a.add("power.standard");
+  else if (has(/[⁻]\d|⁻[¹²³]|mənfi üstlü|\w[⁰]/)) a.add("power.integer");
+  else if (powerContext && has(/[²³⁴⁵⁶⁷⁸⁹]|qüvvət|üstlü|dərəcəyə yüksəl/i)) {
+    // Sadə hesablama ("2³ = ?") natural üstlü qüvvətdir; xassələr ("x³ · x²",
+    // "(x³)³", "x¹⁰ : x¹⁰") ayrıca bacarıqdır və onun üstünə qurulur.
+    const plainPower = /^\s*\(?\s*−?\d+\s*\)?[²³⁴⁵⁶⁷⁸⁹]\s*=/.test(p);
+    a.add(plainPower ? "power.natural" : "power.rules");
+  }
+
+  // Funksiya və koordinat
+  if (has(/y\s*=\s*[−-]?\s*x²/)) a.add("function.quadratic");
+  else if (has(/y\s*=\s*[−-]?\s*\d*\s*\/\s*x|tərs mütənasib/i)) a.add("function.inverse_prop");
+  else if (has(/funksiya|y\s*=\s*/i)) a.add("function.concept");
+  if (has(/rüb|koordinat|\bO[xy]\b|\(\s*[−-]?\d+\s*;\s*[−-]?\d+\s*\)|absis|ordinat/)) a.add("coord.plane");
+
+  // Həndəsə (davamı)
+  if (has(/pifaqor|katet|hipotenuz/i)) a.add("geom.pythagoras");
+  if (has(/paraleloqram|trapesiya|romb|dördbucaq/i)) a.add("geom.quadrilateral");
+  if (has(/çevrə|radius|diametr|dairənin uzunluğu/i)) a.add("geom.circle");
+  if (has(/qonşu bucaq|qarşılıqlı bucaq|paralel xət|uyğun bucaq/i)) a.add("geom.angle_pairs");
+  else if (has(/üçbucaq/i)) a.add(has(/düzbucaqlı üçbucaq|iti bucaq|xassə|tənyanlı|bərabərtərəfli/i) ? "geom.triangle_props" : "geom.triangle");
+  // "düzbucaqlı" sözü "bucaq" saxlayır, amma sual düzbucaqlının perimetri/sahəsi
+  // ola bilər — bucaq mövzusu deyil.
+  else if (!has(/düzbucaqlı/i) && has(/bucaq|dərəcə|°/i)) a.add("geom.angles");
+
+  // Məlumat və ehtimal
+  if (has(/ehtimal|zər|hadisə|sikkə/i)) a.add("prob.basic");
+  if (has(/orta qiymət|ortalama/i)) a.add("data.average");
+  if (has(/diaqram|cədvəl|sütun|qrafik/i)) a.add("data.read");
+
+  return a;
+}
+
+function skillsFor(t: Task, lessonId: string, unitId: string): string[] {
   const p = P(t);
   const s = new Set<string>();
+
+  // Əvvəl yuxarı sinif mövzuları: onlar varsa elementar qaydalar bağlanır.
+  for (const id of advancedSkills(p)) s.add(id);
+  const advFraction = [...s].some((x) => /^(fraction\.(mixed|mul_div|add_sub_diff)|algebra\.fraction)$/.test(x));
+  const advGeom = [...s].some((x) => /^geom\.(angles|angle_pairs|triangle|triangle_props|circle|quadrilateral|pythagoras)$/.test(x));
+  const advNum = [...s].some((x) => /^(integer\.|rational\.|number\.(primes|gcd_lcm|divisors|real))/.test(x));
+  const advAlg = [...s].some((x) => /^(algebra\.|equation\.|poly\.|power\.|function\.|inequality\.|root\.)/.test(x));
 
   // ── Mövzu açar sözləri (ən spesifikdən ümumiyə) ──────────────────────────
   if (has(t, /yuvarlaqlaşdır/i)) s.add("number.rounding");
   if (has(t, /neçə (onluq|yüzlük|minlik|təklik)|onluq \+|minlik \+|rəqəmlə necə yazılır|mərtəbə/i)) s.add("number.place_value");
   if (has(t, /neçə böləni|bölünür/i)) s.add("number.divisors");
 
-  if (has(t, /kəsr|\d\/\d/)) {
+  if (!advFraction && !advAlg && has(t, /kəsr|\d\/\d/)) {
     if (has(t, /sadələşdir/i)) s.add("fraction.simplify");
     else if (has(t, /bərabərdir|hansı kəsrə/i)) s.add("fraction.equivalent");
     else if (has(t, /\d\/\d\s*[+\-−]/)) s.add("fraction.add_sub_same");
@@ -141,21 +266,27 @@ function skillsFor(t: Task, lessonId: string): string[] {
   if (has(t, /perimetr/i)) s.add("geom.perimeter");
   if (has(t, /sahə/i)) s.add("geom.area");
   if (has(t, /həcm|kub|paralelepiped/i)) s.add("geom.volume");
-  if (has(t, /kvadrat|üçbucaq|düzbucaqlı|dairə|fiqur|tərəf|künc/i)) s.add("geom.shapes");
+  if (!advGeom && has(t, /kvadrat|üçbucaq|düzbucaqlı|dairə|fiqur|tərəf|künc/i)) s.add("geom.shapes");
 
   if (has(t, /saat|dəqiqə|həftə|sutka|fəsil|ay var|gün var|əqrəb|zaman/i)) s.add("measure.time");
   if (has(t, /manat|qəpik|pul/i)) s.add("measure.money");
   if (has(t, /neçə santimetr|neçə metr|neçə qram|sm-dir|metrdir|qramdır|kq neçə|km neçə|kiloqram neçə/i)) s.add("measure.convert");
-  if (has(t, /uzun|qısa|ağır|yüngül|hündür|alçaq|geniş|tərəzi|xətkeş/i)) s.add("measure.compare");
+  // Həndəsə sualında "hündürlük" ölçü müqayisəsi deyil, düsturun tərəfidir.
+  if (!advGeom && !s.has("geom.area") && has(t, /uzun|qısa|ağır|yüngül|hündür|alçaq|geniş|tərəzi|xətkeş/i))
+    s.add("measure.compare");
   if (has(t, /ölçülür|ölçü vahidi|litr/i)) s.add("measure.units");
 
-  if (has(t, /qalıq/i) && has(t, /[÷:]|bölmə/i)) s.add("arith.div.remainder");
+  if (!advNum && has(t, /qalıq/i) && has(t, /[÷:]|bölmə/i)) s.add("arith.div.remainder");
   if (has(t, /mötərizə|əməl birinci|əməllər sırası/i)) s.add("arith.order_of_ops");
   // Qarışıq prioritet (× və ya : ilə birlikdə + və ya −) yaxud mötərizə — YALNIZ onda
   // əməllər sırası yoxlanılır. "1 + 1 + 1" bu deyil: orada sıra əhəmiyyətsizdir.
-  // Mötərizə YALNIZ içində əməl varsa qruplaşdırmadır. "(kq ilə)" vahid qeydidir.
-  if (/\([^)]*[+\-−×÷:][^)]*\)/.test(p) && /=\s*\?/.test(p)) s.add("arith.order_of_ops");
-  if (/[×÷:]/.test(p) && /[+\-−]/.test(p) && /=\s*\?/.test(p)) s.add("arith.order_of_ops");
+  // Mötərizə qruplaşdırma sayılsın deyə İÇİNDƏ iki operand olmalıdır: "(2 + 3)".
+  // "(−3)" isə sadəcə mənfi ədədin yazılışıdır — 6–7-ci sinifdə belələri yüzlərlədir.
+  // Cəbr/tam ədəd mövzusu varsa bu qaydalar ümumiyyətlə işə düşmür.
+  if (!advAlg && !advNum) {
+    if (/\([^)]*\d[^)]*[+\-−×÷:][^)]*\d[^)]*\)/.test(p) && /=\s*\?/.test(p)) s.add("arith.order_of_ops");
+    if (/[×÷:]/.test(p) && /[+\-−]/.test(p) && /=\s*\?/.test(p)) s.add("arith.order_of_ops");
+  }
   if (has(t, /\?\s*[+\-−×:]|[+\-−×:]\s*\?|naməlum|yoxlamaq olar|yoxlayırıq/i)) s.add("arith.inverse");
 
   if (has(t, /növbəti ədəd/i)) s.add("number.sequence");
@@ -164,12 +295,17 @@ function skillsFor(t: Task, lessonId: string): string[] {
     s.add("number.compare");
 
   // ── Xalis ifadə: "34 + 25 = ?" ───────────────────────────────────────────
-  const e = expr(p);
+  const e = advAlg ? null : expr(p);
   if (e) {
     const op = NORM[e.op] ?? e.op;
     const f = OP_SKILL[op];
     if (f) s.add(f(e.a, e.b));
-  } else if (/=\s*\?/.test(p) && ![...s].some((x) => /^(number\.place_value|fraction\.|decimal\.|measure\.|geom\.)/.test(x))) {
+  } else if (
+    /=\s*\?/.test(p) &&
+    !advAlg &&
+    !advNum &&
+    ![...s].some((x) => /^(number\.place_value|fraction\.|decimal\.|measure\.|geom\.)/.test(x))
+  ) {
     // Mövzu etiketi varsa bura düşmür: "1/5 + 2/5" kəsr bacarığıdır, sadə toplama yox;
     // "2 minlik + 3 yüzlük" isə mərtəbə sualıdır.
     // Çoxhədli eyni əməl ("1 + 1 + 1 = ?") — zəncir boyu keçid olub-olmadığına bax.
@@ -242,7 +378,7 @@ function skillsFor(t: Task, lessonId: string): string[] {
   const always = LESSON_ALWAYS[lessonId];
   if (always) s.add(always);
   if (!s.size) {
-    const d = LESSON_DEFAULT[lessonId];
+    const d = LESSON_DEFAULT[lessonId] ?? UNIT_DEFAULT[unitId];
     if (d) s.add(d);
   }
   return [...s].filter((id) => {
@@ -265,7 +401,7 @@ for (const u of subj.units)
     if (l.kind === "test") continue;
     for (const t of [...l.tasks, ...(l.bonusTasks ?? [])]) {
       total++;
-      const sk = skillsFor(t, l.id);
+      const sk = skillsFor(t, l.id, u.id);
       if (sk.length) map[t.id] = sk;
       else untagged.push(`${t.id} | ${t.prompt}`);
     }
