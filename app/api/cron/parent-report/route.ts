@@ -95,6 +95,16 @@ export async function GET(req: Request) {
       continue;
     }
 
+    // Bacarıq səviyyəsində zəiflik (0049) ayrıca funksiyadadır — bax
+    // lib/parentReport.ts `weakLabel`. Uğursuz olsa hesabat bölmə səviyyəsində
+    // göstərilir: məktub HEÇ VAXT bu üzdən dayanmamalıdır.
+    const { data: ws } = await supabase.rpc("parent_weak_skill", {
+      p_user_id: row.user_id,
+      p_from: from.toISOString(),
+      p_to: to.toISOString(),
+    });
+    if (ws) (data as Record<string, unknown>).weakSkill = ws;
+
     const links = reportLinks(row.view_token, row.unsub_token);
     const mail = renderReportEmail(data as ReportData, links);
     const res = await sendEmail({

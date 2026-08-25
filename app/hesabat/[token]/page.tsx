@@ -15,6 +15,7 @@ import {
   formatDuration,
   formatRange,
   hasActivity,
+  weakLabel,
   type ReportData,
 } from "@/lib/parentReport";
 
@@ -63,6 +64,16 @@ export default async function ReportPage({
 
   const r = data as ReportData | null;
   if (!r) notFound();
+
+  // Bacarıq zəifliyi (0049) — varsa bölmə əvəzinə o göstərilir.
+  const { data: ws } = await admin.rpc("parent_weak_skill", {
+    p_user_id: row.user_id,
+    p_from: from.toISOString(),
+    p_to: to.toISOString(),
+  });
+  if (ws) r.weakSkill = ws as ReportData["weakSkill"];
+  // Bacarıq varsa onu, yoxsa bölməni göstəririk (məktubla eyni məntiq).
+  const weak = weakLabel(r);
 
   const name = r.child?.trim() || "Uşağınız";
   const acc = accuracy(r);
@@ -148,16 +159,16 @@ export default async function ReportPage({
               </>
             )}
 
-            {(r.improved || r.weakest) && (
+            {(r.improved || weak) && (
               <div className="mt-10 space-y-3">
                 {r.improved && (
                   <Note icon="📈" title="Ən böyük inkişaf">
                     {r.improved.subject} — əvvəlki dövrə görə +{r.improved.delta} faiz bənd.
                   </Note>
                 )}
-                {r.weakest && (
+                {weak && (
                   <Note icon="🎯" title="Diqqət tələb edir">
-                    {r.weakest.unit} — bu mövzuda düzgün cavab nisbəti {r.weakest.pct}%.
+                    {weak.label} — bu bacarıqda düzgün cavab nisbəti {weak.pct}%.
                   </Note>
                 )}
               </div>

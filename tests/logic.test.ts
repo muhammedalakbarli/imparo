@@ -13,6 +13,7 @@ import {
   accuracy,
   hasActivity,
   renderReportEmail,
+  weakLabel,
   reportLinks,
   type ReportData,
 } from "@/lib/parentReport";
@@ -321,5 +322,33 @@ describe("legal notice", () => {
 
   it("bağlama açarı tarixə bağlıdır — yeni dəyişiklikdə banner qayıdır", () => {
     expect(LEGAL_DISMISS_KEY).toContain(LEGAL_UPDATED);
+  });
+});
+
+describe("hesabatda zəiflik etiketi", () => {
+  it("bacarıq varsa onun ADI göstərilir, bölmə yox", () => {
+    const r = weakLabel({
+      weakest: { unit: "Kəsrlər", pct: 67 },
+      weakSkill: { skillId: "fraction.add_sub_diff", pct: 41 },
+    });
+    expect(r).toEqual({ label: "Fərqli məxrəcli kəsrləri toplamaq və çıxmaq", pct: 41 });
+  });
+
+  it("bacarıq yoxdursa bölməyə qayıdır", () => {
+    expect(weakLabel({ weakest: { unit: "Kəsrlər", pct: 67 }, weakSkill: null })).toEqual({
+      label: "Kəsrlər",
+      pct: 67,
+    });
+  });
+
+  it("qrafda olmayan ID bölməni bloklamır", () => {
+    // Bacarıq qrafdan silinsə, hesabat sınmamalı — bölmə səviyyəsinə düşməlidir.
+    expect(
+      weakLabel({ weakest: { unit: "Kəsrlər", pct: 67 }, weakSkill: { skillId: "yoxdur.belə", pct: 10 } }),
+    ).toEqual({ label: "Kəsrlər", pct: 67 });
+  });
+
+  it("heç nə yoxdursa null", () => {
+    expect(weakLabel({ weakest: null })).toBeNull();
   });
 });

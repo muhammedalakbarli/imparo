@@ -5,6 +5,7 @@
 // yarımçıq tətbiq edir. Saytın Tailwind sinifləri burada işləməz.
 
 import { SITE_URL } from "@/lib/site";
+import { getSkill } from "@/lib/skills";
 
 export interface SubjectStat {
   name: string;
@@ -26,6 +27,20 @@ export interface ReportData {
   subjects: SubjectStat[];
   improved: { subject: string; delta: number } | null;
   weakest: { unit: string; pct: number } | null;
+  // Bacarıq səviyyəsində zəiflik (migration 0049). Varsa, bölmə əvəzinə BU
+  // göstərilir: "Kəsrlər 67%" valideynə nə edəcəyini demir, "ortaq məxrəcə
+  // gətirmə 41%" deyir. Bacarığın adı `lib/skills.ts`-dən gəlir — DB yalnız
+  // sabit ID saxlayır.
+  weakSkill?: { skillId: string; pct: number } | null;
+}
+
+/** Hesabatda göstəriləcək zəiflik: bacarıq varsa o, yoxsa bölmə. */
+export function weakLabel(d: Pick<ReportData, "weakest" | "weakSkill">): { label: string; pct: number } | null {
+  if (d.weakSkill) {
+    const sk = getSkill(d.weakSkill.skillId);
+    if (sk) return { label: sk.title, pct: d.weakSkill.pct };
+  }
+  return d.weakest ? { label: d.weakest.unit, pct: d.weakest.pct } : null;
 }
 
 const BRAND = "#e8622c";
@@ -124,10 +139,11 @@ export function renderReportEmail(d: ReportData, links: ReportLinks) {
       </p>`,
     );
   }
-  if (d.weakest) {
+  const weak = weakLabel(d);
+  if (weak) {
     notes.push(
       `<p style="margin:0 0 10px;font:400 15px/1.6 Arial,Helvetica,sans-serif;color:${INK};">
-        🎯 <b>Diqqət tələb edir:</b> ${esc(d.weakest.unit)} — bu mövzuda düzgün cavab nisbəti ${d.weakest.pct}%.
+        🎯 <b>Diqqət tələb edir:</b> ${esc(weak.label)} — bu bacarıqda düzgün cavab nisbəti ${weak.pct}%.
       </p>`,
     );
   }
@@ -210,7 +226,7 @@ export function renderReportEmail(d: ReportData, links: ReportLinks) {
         `Aktiv gün: ${d.activeDays}`,
         ...(d.subjects.length ? [``, `Fənlər üzrə:`, ...d.subjects.map((s) => `  ${s.name}: ${s.pct}%`)] : []),
         ...(d.improved ? [``, `Ən böyük inkişaf: ${d.improved.subject} (+${d.improved.delta} faiz bənd)`] : []),
-        ...(d.weakest ? [`Diqqət tələb edir: ${d.weakest.unit} (${d.weakest.pct}%)`] : []),
+        ...(() => { const w = weakLabel(d); return w ? [`Diqqət tələb edir: ${w.label} (${w.pct}%)`] : []; })(),
         ``,
         `Ətraflı: ${links.viewUrl}`,
         `Məktubları dayandır: ${links.unsubUrl}`,
