@@ -1,7 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { subjects } from "@/lib/content";
 import { SKILLS } from "@/lib/skills";
+import { scheduleCorrect, applyCorrect, INTERVALS_DAYS, MAX_BOX } from "@/lib/srs";
+import type { Task } from "@/lib/types";
 import {
+  srsFactor,
+  weakestMastery,
+  orderByWeakness,
   diagnosticSkills,
   buildDiagnosticSet,
   targetSkills,
@@ -128,5 +133,61 @@ describe("diaqnostika", () => {
       (s) => !NOT_YET_TAGGED.has(s.id) && tasksForSkill(subjects, s.id).length === 0,
     ).map((s) => s.id);
     expect(empty).toEqual([]);
+  });
+});
+
+const task = (id: string, skills: string[]): Task =>
+  ({ id, type: "numeric", prompt: "x", answer: 1, xp: 10, skills }) as unknown as Task;
+
+describe("SRS-in bacarığa həssaslığı", () => {
+  it("tapşırığın ƏN ZƏİF bacarığı qərar verir", () => {
+    const m = M({ "arith.add.carry": [90, 10], "arith.sub.borrow": [30, 10] });
+    expect(weakestMastery(task("t", ["arith.add.carry", "arith.sub.borrow"]), m)).toBe(30);
+  });
+
+  it("məlumat yoxdursa əmsal neytraldır", () => {
+    expect(srsFactor(task("t", ["arith.add.carry"]), new Map())).toBe(1);
+    expect(srsFactor(task("t", []), M({ "arith.add.carry": [10, 10] }))).toBe(1);
+  });
+
+  it("zəif bacarıqda təkrar TEZ qayıdır, güclüdə gecikir", () => {
+    const weak = srsFactor(task("t", ["arith.sub.borrow"]), M({ "arith.sub.borrow": [30, 10] }));
+    const strong = srsFactor(task("t", ["arith.sub.borrow"]), M({ "arith.sub.borrow": [92, 10] }));
+    expect(weak).toBeLessThan(1);
+    expect(strong).toBeGreaterThan(1);
+
+    const now = 1_000_000;
+    const item = { id: "t", box: 3, dueAt: 0 };
+    const dWeak = scheduleCorrect(item, now, weak).dueAt - now;
+    const dStrong = scheduleCorrect(item, now, strong).dueAt - now;
+    expect(dWeak).toBeLessThan(dStrong);
+    // box 4 → 16 gün; zəif halda gözləmə qısalmalıdır
+    expect(dWeak).toBeLessThan(INTERVALS_DAYS[4] * 86_400_000);
+  });
+
+  it("əmsalsız davranış dəyişmir (geriyə uyğunluq)", () => {
+    const now = 1_000_000;
+    const item = { id: "t", box: 2, dueAt: 0 };
+    expect(scheduleCorrect(item, now)).toEqual(scheduleCorrect(item, now, 1));
+  });
+
+  it("zəif bacarıqda bir düz cavab item-i BAĞLAMIR", () => {
+    // MAX_BOX-da düz cavab normalda item-i siyahıdan çıxarır. Bacarıq zəifdirsə
+    // çıxarılmır — bir sual bacarığı mənimsənilmiş etmir.
+    const items = [{ id: "t", box: MAX_BOX, dueAt: 0 }];
+    expect(applyCorrect(items, "t", 5, 1)).toEqual([]);
+    const kept = applyCorrect(items, "t", 5, 0.4);
+    expect(kept).toHaveLength(1);
+    expect(kept[0].box).toBe(MAX_BOX - 1);
+  });
+
+  it("təkrar siyahısı zəifdən başlayır, məlumatsızlar sonda", () => {
+    const m = M({ "arith.add.carry": [90, 10], "arith.sub.borrow": [30, 10] });
+    const list = [
+      task("guclu", ["arith.add.carry"]),
+      task("melumatsiz", ["geom.area"]),
+      task("zeif", ["arith.sub.borrow"]),
+    ];
+    expect(orderByWeakness(list, m).map((t) => t.id)).toEqual(["zeif", "guclu", "melumatsiz"]);
   });
 });

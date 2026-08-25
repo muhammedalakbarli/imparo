@@ -16,6 +16,7 @@ import { completeLesson, loadProgress } from "@/lib/progress";
 import { loadHearts, loseHeart, MAX_HEARTS } from "@/lib/hearts";
 import { loadPlus } from "@/lib/plus";
 import { addWrong as addMistake, markCorrect as removeMistake } from "@/lib/srs";
+import { getMasteryCached, srsFactor } from "@/lib/mastery";
 import { recordAttempt, flushAttempts } from "@/lib/attempts";
 import { addGuestLesson } from "@/lib/guest";
 import RewardChain from "@/components/onboarding/RewardChain";
@@ -163,7 +164,7 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
     // Təkrar mərhələsi — XP/combo/statistika dəyişmir, yalnız düz cavab tələb olunur.
     if (inRetry) {
       if (result.correct) {
-        if (!guest) removeMistake(task.id);
+        if (!guest) advanceReview(task);
         playCorrect();
         vibrateCorrect();
       } else {
@@ -183,7 +184,7 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
       setComboBonus(bonus);
       setEarnedXp((x) => x + XP_PER_CORRECT + bonus);
       setCorrectCount((c) => c + 1);
-      if (!guest) removeMistake(task.id);
+      if (!guest) advanceReview(task);
       bumpQuest("correct", 1);
       playCorrect();
       if (nextCombo >= 2) playCombo(nextCombo);
@@ -637,6 +638,14 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
 // Şagirdin SEÇDİYİ cavabı mətn kimi qaytarır (jurnal üçün). Çoxseçimlidə indeks
 // YOX, mətn saxlanılır: balance.ts variantları qarışdırdığı üçün eyni indeks
 // re-seed-dən sonra tamam başqa cavabı göstərər və köhnə jurnal yalan danışar.
+// SRS-i bacarığa görə irəli apar: zəif bacarıqda təkrar tez qayıtsın.
+// Fire-and-forget — dərsin axıcılığını gözlətmir; keş sayəsində çox vaxt sorğu getmir.
+function advanceReview(task: Task): void {
+  void getMasteryCached()
+    .then((m) => removeMistake(task.id, srsFactor(task, m)))
+    .catch(() => {});
+}
+
 function chosenAnswerText(task: Task, answer: UserAnswer): string | null {
   if (task.type === "multiple_choice" || task.type === "listening") {
     return task.options[Number(answer)] ?? null;

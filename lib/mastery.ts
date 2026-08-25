@@ -31,6 +31,23 @@ export const WEAK_BELOW = 70;
 /** Bu qədər cəhd olmadan zəiflik barədə hökm verilmir (az data = etibarsız). */
 export const MIN_ATTEMPTS = 3;
 
+// Qısa ömürlü keş: dərs içində hər düz cavabda RPC göndərməmək üçün. Mənimsəmə
+// bir neçə dəqiqədə kəskin dəyişmir, ona görə köhnəlik zərərsizdir.
+let cache: { at: number; map: MasteryMap } | null = null;
+const CACHE_TTL = 5 * 60_000;
+
+export async function getMasteryCached(): Promise<MasteryMap> {
+  if (cache && Date.now() - cache.at < CACHE_TTL) return cache.map;
+  const map = await fetchMastery();
+  cache = { at: Date.now(), map };
+  return map;
+}
+
+/** Cəhdlər göndəriləndən sonra çağırılır — növbəti oxu təzə olsun. */
+export function invalidateMastery(): void {
+  cache = null;
+}
+
 export async function fetchMastery(): Promise<MasteryMap> {
   const sb = createClient();
   const { data, error } = await sb.rpc("my_skill_mastery");
@@ -181,4 +198,49 @@ export function buildDiagnosticSet(
     }
   }
   return out;
+}
+
+// ── SRS-in bacarığa həssaslığı ──────────────────────────────────────────────
+// Unutma əyrisi bacarığın xassəsidir. Tapşırıq bir neçə bacarıq daşıyırsa,
+// qərarı ƏN ZƏİF olan verir: zəncir ən zəif halqası qədər möhkəmdir.
+
+/** Tapşırığın bacarıqları arasında ən aşağı mənimsəmə. Məlumat yoxdursa null. */
+export function weakestMastery(task: Task, m: MasteryMap): number | null {
+  let min: number | null = null;
+  for (const id of task.skills ?? []) {
+    const st = m.get(id);
+    if (!st) continue;
+    if (min === null || st.mastery < min) min = st.mastery;
+  }
+  return min;
+}
+
+/**
+ * SRS interval əmsalı. Zəif bacarıqda təkrar tez qayıdır, güclüdə gecikir.
+ * Məlumat yoxdursa 1 (neytral) — bilmədiyimiz şeyə görə cədvəli dəyişmirik.
+ */
+export function srsFactor(task: Task, m: MasteryMap): number {
+  const w = weakestMastery(task, m);
+  if (w === null) return 1;
+  if (w < 40) return 0.4;
+  if (w < 55) return 0.6;
+  if (w < WEAK_BELOW) return 0.8;
+  if (w < 85) return 1;
+  return 1.3;
+}
+
+/**
+ * Təkrar siyahısını zəiflikdən başlayaraq sırala. Şagird sessiyanı yarımçıq
+ * qoysa belə, ən çox ehtiyacı olan material artıq keçilmiş olur.
+ * Məlumatı olmayan tapşırıqlar sona düşür (onlar barədə hökm vermirik).
+ */
+export function orderByWeakness(tasks: Task[], m: MasteryMap): Task[] {
+  return [...tasks].sort((a, b) => {
+    const wa = weakestMastery(a, m);
+    const wb = weakestMastery(b, m);
+    if (wa === null && wb === null) return 0;
+    if (wa === null) return 1;
+    if (wb === null) return -1;
+    return wa - wb;
+  });
 }

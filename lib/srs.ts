@@ -3,6 +3,12 @@
 // və növbəti təkrar vaxtı (dueAt) var; beləcə yalnız "vaxtı çatmış" itemlər təkrara düşür
 // (unutma əyrisi). Saxlanc: Supabase user_metadata.reviews (hər cihazda qalır).
 //
+// BACARIQ HƏSSASLIĞI: unutma əyrisi tapşırığın yox, BACARIĞIN xassəsidir.
+// Şagird `arith.sub.borrow`-da zəifdirsə, bir keçidli çıxma sualına düz cavab
+// vermək 16 günlük fasilə qazandırmamalıdır — bacarıq hələ oturmayıb. Ona görə
+// interval `factor` ilə vurulur: zəif bacarıqda qısalır, güclüdə uzanır.
+// Faktoru hesablamaq `lib/mastery.ts`-in işidir (bu modul saf qalsın).
+//
 // Saf funksiyalar (aşağıda) DB-siz test edilir; async qat yalnız oxu/yazı edir.
 
 import { createClient } from "./supabase/client";
@@ -27,10 +33,20 @@ function intervalMs(box: number): number {
 
 // ── Saf planlaşdırma məntiqi (test edilir) ──
 
+/** İntervalın bacarığa görə vurulduğu əmsalın hədləri. */
+export const MIN_FACTOR = 0.3;
+export const MAX_FACTOR = 1.5;
+
+export function clampFactor(f: number): number {
+  if (!Number.isFinite(f)) return 1;
+  return Math.min(MAX_FACTOR, Math.max(MIN_FACTOR, f));
+}
+
 // Düz cavab: qutunu bir irəli apar, növbəti təkrarı gələcəyə planla.
-export function scheduleCorrect(item: SrsItem, now: number): SrsItem {
+// `factor` bacarıq üzrə mənimsəmədən gəlir (1 = neytral).
+export function scheduleCorrect(item: SrsItem, now: number, factor = 1): SrsItem {
   const box = Math.min(item.box + 1, MAX_BOX);
-  return { id: item.id, box, dueAt: now + intervalMs(box) };
+  return { id: item.id, box, dueAt: now + Math.round(intervalMs(box) * clampFactor(factor)) };
 }
 
 // Səhv cavab: qutunu sıfırla, dərhal təkrara qoy.
@@ -46,12 +62,17 @@ export function upsertWrong(items: SrsItem[], id: string, now: number): SrsItem[
 
 // Düz cavabı tətbiq et. MAX_BOX-a çatıb düz cavablanıbsa item "mənimsənilmiş"
 // sayılır və siyahıdan çıxarılır (siyahı sonsuz böyüməsin).
-export function applyCorrect(items: SrsItem[], id: string, now: number): SrsItem[] {
+export function applyCorrect(items: SrsItem[], id: string, now: number, factor = 1): SrsItem[] {
   const found = items.find((it) => it.id === id);
   if (!found) return items;
   const rest = items.filter((it) => it.id !== id);
-  if (found.box >= MAX_BOX) return rest; // mənimsənildi → çıxar
-  return [...rest, scheduleCorrect(found, now)];
+  // Bacarıq zəifdirsə item MAX_BOX-da olsa belə "mənimsənildi" saymırıq: bir düz
+  // cavab zəif bacarığı bağlamamalıdır. Əvəzinə bir qutu geri qaytarılır.
+  if (found.box >= MAX_BOX) {
+    if (factor >= 1) return rest;
+    return [...rest, { id, box: MAX_BOX - 1, dueAt: now + Math.round(intervalMs(MAX_BOX - 1) * clampFactor(factor)) }];
+  }
+  return [...rest, scheduleCorrect(found, now, factor)];
 }
 
 // Vaxtı çatmış (təkrara hazır) itemlər — ən erkəndən başlayaraq.
@@ -112,11 +133,11 @@ export async function addWrong(taskId: string): Promise<void> {
 }
 
 // Düz cavablanan tapşırığı irəli apar (və ya mənimsənilibsə çıxar).
-export async function markCorrect(taskId: string): Promise<void> {
+export async function markCorrect(taskId: string, factor = 1): Promise<void> {
   try {
     const { reviews } = await readRaw();
     if (!reviews.some((it) => it.id === taskId)) return;
-    await write(applyCorrect(reviews, taskId, Date.now()));
+    await write(applyCorrect(reviews, taskId, Date.now(), factor));
   } catch {
     // sükutla ötür
   }

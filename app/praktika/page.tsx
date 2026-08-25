@@ -15,6 +15,9 @@ import {
   buildAdaptiveSet,
   diagnosticSkills,
   buildDiagnosticSet,
+  srsFactor,
+  orderByWeakness,
+  invalidateMastery,
   type MasteryMap,
 } from "@/lib/mastery";
 import { getSkill, SKILLS } from "@/lib/skills";
@@ -108,9 +111,15 @@ export default function PracticePage() {
     [subjects, mastery, user],
   );
 
+  // Təkrar siyahısı zəif bacarıqdan başlayır: sessiya yarımçıq qalsa belə,
+  // ən çox ehtiyac duyulan material keçilmiş olur.
   const mistakeTasks = useMemo(
-    () => mistakes.map(getTaskById).filter((t): t is Task => !!t && !isPassageTask(t)),
-    [mistakes, getTaskById],
+    () =>
+      orderByWeakness(
+        mistakes.map(getTaskById).filter((t): t is Task => !!t && !isPassageTask(t)),
+        mastery,
+      ),
+    [mistakes, getTaskById, mastery],
   );
 
   if (!ready || !state) return <PageSkeleton />;
@@ -130,11 +139,18 @@ export default function PracticePage() {
               // ƏVVƏL buferi serverə göndər, SONRA mənimsəməni oxu — əks halda
               // yeni cəhdlər hələ bazada olmur və hədəflər köhnə qalır.
               flushAttempts()
-                .then(() => fetchMastery())
+                .then(() => {
+                  invalidateMastery();
+                  return fetchMastery();
+                })
                 .then(setMastery)
                 .catch(() => {});
             }}
-            onCorrect={(id) => markCorrect(id)}
+            onCorrect={(id) => {
+              // SRS intervalı bacarığa görə: zəifdirsə tez qayıdır, güclüdə gecikir.
+              const task = getTaskById(id);
+              markCorrect(id, task ? srsFactor(task, mastery) : 1);
+            }}
             onWrong={(id) => addWrong(id)}
             onFinish={() => {
               // Praktika bitəndə canları tam bərpa et (məşq mükafatı).
