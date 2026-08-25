@@ -21,6 +21,13 @@ import {
   type MasteryMap,
 } from "@/lib/mastery";
 import { getSkill, SKILLS } from "@/lib/skills";
+import {
+  fetchPilot,
+  assignPilotSkills,
+  makeFinalPoolGuard,
+  PILOT_SKILLS,
+  type PilotInfo,
+} from "@/lib/pilot";
 import { loadDueTaskIds, markCorrect, addWrong } from "@/lib/srs";
 import { refillHearts } from "@/lib/hearts";
 import { flushAttempts } from "@/lib/attempts";
@@ -47,6 +54,7 @@ export default function PracticePage() {
   const [session, setSession] = useState<Session | null>(null);
   const [dailyDone, setDailyDone] = useState(false);
   const [mastery, setMastery] = useState<MasteryMap>(new Map());
+  const [pilot, setPilot] = useState<PilotInfo | null>(null);
   const t = useT();
 
   // Yalnız istifadəçinin sinfinin fənləri (əks halda "Riyaziyyat" hər sinif üçün təkrarlanır).
@@ -61,6 +69,10 @@ export default function PracticePage() {
   // Bacarıq üzrə mənimsəmə (migration 0047) — adaptiv məşqin əsasıdır.
   useEffect(() => {
     if (user) fetchMastery().then(setMastery);
+  }, [user]);
+  // Pilot iştirakı — varsa hədəf seçimi təsadüfi olur və final hovuzu bağlanır.
+  useEffect(() => {
+    if (user) fetchPilot().then(setPilot);
   }, [user]);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -90,14 +102,30 @@ export default function PracticePage() {
 
   // Adaptiv dəst: zəif bacarıqlar (prereq-i də zəifdirsə — onun KÖKÜ) üzrə
   // tapşırıqlar. Sinif həddi qoyulur ki, şagirdə hələ keçmədiyi mövzu düşməsin.
-  const targets = useMemo(() => targetSkills(mastery), [mastery]);
+  // PİLOT REJİMİ (bax docs/pilot/measurement-design.md §7):
+  //  · hədəf zəif bacarıqlar arasından TƏSADÜFİ seçilir, "ən zəif" deyil — əks
+  //    halda hədəf dəsti müqayisə dəstindən sistematik zəif olur və ortaya
+  //    qayıdış effekti təkbaşına "artım" yaradır;
+  //  · final hovuzundakı (F) tapşırıqlar məşqə buraxılmır — yoxsa "şagird bunu
+  //    əvvəl görməmişdi" iddiası yalan olur.
+  const targets = useMemo(() => {
+    if (!pilot || !pilot.adaptive_enabled || !user) return targetSkills(mastery);
+    return assignPilotSkills(subjects, mastery, PILOT_SKILLS[pilot.grade] ?? [], pilot.grade, user.id).target;
+  }, [pilot, mastery, subjects, user]);
+
+  const excludeTask = useMemo(() => {
+    if (!pilot) return isPassageTask;
+    const guard = makeFinalPoolGuard(subjects, PILOT_SKILLS[pilot.grade] ?? [], pilot.grade);
+    return (t: Task) => isPassageTask(t) || guard(t);
+  }, [pilot, subjects]);
+
   const adaptiveTasks = useMemo(
     () =>
       buildAdaptiveSet(subjects, targets, 10, {
         maxGrade: userGrade(user),
-        exclude: isPassageTask,
+        exclude: excludeTask,
       }),
-    [subjects, targets, user],
+    [subjects, targets, user, excludeTask],
   );
 
   // Diaqnostika: bacarıqları ƏHATƏ etmək üçün — hər bacarıqdan 2 sual, 20 hədd.
@@ -106,9 +134,9 @@ export default function PracticePage() {
       buildDiagnosticSet(subjects, diagnosticSkills(mastery, SKILLS, userGrade(user)), 2, {
         maxGrade: userGrade(user),
         limit: 20,
-        exclude: isPassageTask,
+        exclude: excludeTask,
       }),
-    [subjects, mastery, user],
+    [subjects, mastery, user, excludeTask],
   );
 
   // Təkrar siyahısı zəif bacarıqdan başlayır: sessiya yarımçıq qalsa belə,

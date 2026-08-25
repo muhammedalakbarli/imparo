@@ -199,3 +199,24 @@ export function differenceInGains(input: GainInput, a: PilotAssignment): number 
   const c = meanGain(input, a.comparison);
   return t === null || c === null ? null : t - c;
 }
+
+// ── Pilot iştirakı (runtime) ────────────────────────────────────────────────
+
+export interface PilotInfo {
+  pilot_id: string;
+  grade: number;
+  adaptive_enabled: boolean;
+  skill_srs_enabled: boolean;
+  baseline_done_at: string | null;
+  final_done_at: string | null;
+  status: string;
+}
+
+/** Cari istifadəçi pilotdadırmı? Deyilsə null. Xəta halında da null — pilot
+ *  məlumatı əlçatmaz olsa app adi rejimdə işləməyə davam etməlidir. */
+export async function fetchPilot(): Promise<PilotInfo | null> {
+  const { createClient } = await import("./supabase/client");
+  const { data, error } = await createClient().rpc("my_pilot");
+  if (error || !Array.isArray(data) || !data.length) return null;
+  return data[0] as PilotInfo;
+}
