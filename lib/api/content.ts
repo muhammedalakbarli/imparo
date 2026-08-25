@@ -1,19 +1,28 @@
 // Route handler-lər üçün məzmun oxuma. DB-dən çəkir, boş olsa TS seed-ə fallback.
 
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createClient } from "../supabase/server";
+import { SITE_URL } from "../site";
 import { fetchContentTreeWith } from "../content/db";
 import type { Subject, Lesson } from "../types";
 
 // Bütün fənn ağacını qaytar (DB → yoxsa seed).
-// Seed STATİK import edilmir: Worker soyuq başlanğıcında 25 məzmun faylının
-// qiymətləndirilməsi (~500 ms CPU) resurs limitini aşırdı (Error 1102). Yalnız DB
-// cavab verməyəndə lazy yüklənir.
+//
+// Seed BURADA import EDİLMİR — nə statik, nə `import()` ilə. `@/lib/content` 25 fənn
+// faylını (~11700 tapşırıq) daşıyır:
+//   1) qiymətləndirilməsi ~500 ms CPU tutur → Worker soyuq başlanğıcda Error 1102;
+//   2) `import()` olsa belə Turbopack onu server chunk-ına qoyur (2.1 MB) və bu,
+//      3 MiB-lıq Worker yükünə sayılır.
+// Ona görə fallback statik JSON-u ASSETS binding-i ilə oxuyur. JSON-u
+// `scripts/gen-content-seed.ts` yaradır (`npm run build` avtomatik çağırır).
 export async function getTree(): Promise<Subject[]> {
   const supabase = await createClient();
   const tree = await fetchContentTreeWith(supabase);
   if (tree) return tree;
-  const { subjects: seedSubjects } = await import("../content");
-  return seedSubjects;
+  const { env } = await getCloudflareContext({ async: true });
+  const res = await env.ASSETS.fetch(new URL("/content-seed.json", SITE_URL));
+  if (!res.ok) throw new Error(`content-seed.json: ${res.status}`);
+  return (await res.json()) as Subject[];
 }
 
 export function findSubject(tree: Subject[], id: string): Subject | undefined {

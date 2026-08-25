@@ -19,7 +19,8 @@
     "typecheck": "tsc --noEmit",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "prebuild": "tsx scripts/gen-content-seed.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -46,6 +47,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.3.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5",
     "vitest": "^4.1.10",
     "wrangler": "^4.122.0"

@@ -60,3 +60,6 @@ mobile/.expo
 # Ekran şəkilləri / iş qeydləri
 *.jpeg
 /supabase*.png
+
+# Build zamanı yaranır (scripts/gen-content-seed.ts)
+/public/content-seed.json

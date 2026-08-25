@@ -4,11 +4,14 @@
 // `@/lib/content` API-nin eynisi). Məzmun DB-dən yüklənir; DB boş/əlçatmaz olsa TS seed-ə
 // fallback edilir.
 //
-// VACİB: TS seed (`@/lib/content`) STATİK import EDİLMİR. O, 25 fənn faylını (~9500
-// tapşırıq) daşıyır və qiymətləndirilməsi ~500 ms CPU + 23 MB heap tutur — bu, həm
-// brauzerdə ilk açılışı ləngidir, həm də Cloudflare Worker-də soyuq başlanğıcda
-// "Error 1102 — Worker exceeded resource limits" verirdi. İndi seed yalnız DB
-// cavab vermədikdə lazy `import()` ilə yüklənir (offline/fallback halı).
+// VACİB: TS seed (`@/lib/content`) BURADA HEÇ CÜR import EDİLMİR — nə statik, nə də
+// `import()` ilə. O, 25 fənn faylını (~11700 tapşırıq) daşıyır:
+//   1) qiymətləndirilməsi ~500 ms CPU + 23 MB heap tutur → Worker-də soyuq başlanğıcda
+//      "Error 1102 — Worker exceeded resource limits";
+//   2) `import()` olsa belə Next onu HƏM server, HƏM ssr chunk-ına qoyurdu (2.1 MB × 2)
+//      və hər ikisi 3 MiB-lıq Worker yükünə sayılırdı.
+// Ona görə fallback statik JSON-u (`/content-seed.json`, ASSETS-dən) fetch edir.
+// JSON-u `scripts/gen-content-seed.ts` yaradır, `npm run build` onu avtomatik çağırır.
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Subject, Task } from "@/lib/types";
@@ -78,8 +81,10 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
           setSubjects(tree);
           return;
         }
-        // DB boş/əlçatmazdır → yalnız İNDİ ağır TS seed-i yüklə (offline ehtiyatı).
-        const { subjects: seedSubjects } = await import("@/lib/content");
+        // DB boş/əlçatmazdır → statik seed JSON-una fallback et (offline ehtiyatı).
+        const res = await fetch("/content-seed.json");
+        if (!res.ok) throw new Error(`seed ${res.status}`);
+        const seedSubjects = (await res.json()) as Subject[];
         if (alive) setSubjects(seedSubjects);
       })
       .catch(() => {

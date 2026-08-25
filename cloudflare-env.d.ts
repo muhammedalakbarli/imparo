@@ -12,6 +12,9 @@ declare global {
     VAPID_SUBJECT?: string;
     LEMONSQUEEZY_WEBHOOK_SECRET?: string;
     RESEND_API_KEY?: string;
+    // wrangler.jsonc-dəki statik asset binding-i. `lib/api/content.ts` DB boş olanda
+    // /content-seed.json-u bununla oxuyur (məzmunu Worker bundle-ına salmamaq üçün).
+    ASSETS: { fetch: (req: Request | URL | string) => Promise<Response> };
   }
 }
 export {};
