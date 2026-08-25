@@ -4,13 +4,23 @@
 // İstənilən tapşırıq dəstini PracticeRunner ilə həll etdirir (dərsi tamamlamır).
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, Shuffle, Timer, ChevronRight, Check } from "lucide-react";
+import { AlertCircle, Shuffle, Timer, ChevronRight, Check, Target, Stethoscope } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { loadProgress, type ProgressState } from "@/lib/progress";
 import { useContent } from "@/components/ContentProvider";
-import { subjectsForGrade } from "@/lib/grade";
+import { subjectsForGrade, userGrade } from "@/lib/grade";
+import {
+  fetchMastery,
+  targetSkills,
+  buildAdaptiveSet,
+  diagnosticSkills,
+  buildDiagnosticSet,
+  type MasteryMap,
+} from "@/lib/mastery";
+import { getSkill, SKILLS } from "@/lib/skills";
 import { loadDueTaskIds, markCorrect, addWrong } from "@/lib/srs";
 import { refillHearts } from "@/lib/hearts";
+import { flushAttempts } from "@/lib/attempts";
 // DİQQƏT: "@/lib/content"-dən YOX — o, 25 fənn faylını (~500 ms CPU) bundle-a çəkir.
 import { isPassageTask } from "@/lib/content/helpers";
 import { isDailyDone, markDailyDone } from "@/lib/daily";
@@ -23,7 +33,7 @@ import Mascot from "@/components/Mascot";
 const shuffle = <T,>(a: T[]): T[] => [...a].sort(() => Math.random() - 0.5);
 const sample = <T,>(a: T[], n: number): T[] => shuffle(a).slice(0, n);
 
-type Session = { tasks: Task[]; title: string; timed?: boolean; daily?: boolean };
+type Session = { tasks: Task[]; title: string; timed?: boolean; daily?: boolean; silent?: boolean };
 
 export default function PracticePage() {
   const { user, ready } = useAuthUser();
@@ -33,6 +43,7 @@ export default function PracticePage() {
   const [activeSlug, setActiveSlug] = useState("");
   const [session, setSession] = useState<Session | null>(null);
   const [dailyDone, setDailyDone] = useState(false);
+  const [mastery, setMastery] = useState<MasteryMap>(new Map());
   const t = useT();
 
   // Yalnız istifadəçinin sinfinin fənləri (əks halda "Riyaziyyat" hər sinif üçün təkrarlanır).
@@ -44,6 +55,10 @@ export default function PracticePage() {
   useEffect(() => {
     loadDueTaskIds().then(setMistakes);
   }, []);
+  // Bacarıq üzrə mənimsəmə (migration 0047) — adaptiv məşqin əsasıdır.
+  useEffect(() => {
+    if (user) fetchMastery().then(setMastery);
+  }, [user]);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (user) setDailyDone(isDailyDone(user.user_metadata));
@@ -70,6 +85,29 @@ export default function PracticePage() {
       .filter((t) => !isPassageTask(t)); // mətnə bağlı reading suallarını praktikaya salma
   }, [state, shown]);
 
+  // Adaptiv dəst: zəif bacarıqlar (prereq-i də zəifdirsə — onun KÖKÜ) üzrə
+  // tapşırıqlar. Sinif həddi qoyulur ki, şagirdə hələ keçmədiyi mövzu düşməsin.
+  const targets = useMemo(() => targetSkills(mastery), [mastery]);
+  const adaptiveTasks = useMemo(
+    () =>
+      buildAdaptiveSet(subjects, targets, 10, {
+        maxGrade: userGrade(user),
+        exclude: isPassageTask,
+      }),
+    [subjects, targets, user],
+  );
+
+  // Diaqnostika: bacarıqları ƏHATƏ etmək üçün — hər bacarıqdan 2 sual, 20 hədd.
+  const diagnosticTasks = useMemo(
+    () =>
+      buildDiagnosticSet(subjects, diagnosticSkills(mastery, SKILLS, userGrade(user)), 2, {
+        maxGrade: userGrade(user),
+        limit: 20,
+        exclude: isPassageTask,
+      }),
+    [subjects, mastery, user],
+  );
+
   const mistakeTasks = useMemo(
     () => mistakes.map(getTaskById).filter((t): t is Task => !!t && !isPassageTask(t)),
     [mistakes, getTaskById],
@@ -85,9 +123,16 @@ export default function PracticePage() {
             tasks={session.tasks}
             title={session.title}
             timed={session.timed}
+            silent={session.silent}
             onExit={() => {
               setSession(null);
               loadDueTaskIds().then(setMistakes);
+              // ƏVVƏL buferi serverə göndər, SONRA mənimsəməni oxu — əks halda
+              // yeni cəhdlər hələ bazada olmur və hədəflər köhnə qalır.
+              flushAttempts()
+                .then(() => fetchMastery())
+                .then(setMastery)
+                .catch(() => {});
             }}
             onCorrect={(id) => markCorrect(id)}
             onWrong={(id) => addWrong(id)}
@@ -167,6 +212,20 @@ export default function PracticePage() {
             }
           />
           <ModeCard
+            Icon={Target}
+            tint="text-rose-500"
+            title={t("practice.adaptive")}
+            desc={
+              targets.length
+                ? (getSkill(targets[0])?.title ?? t("practice.adaptiveDesc"))
+                : t("practice.adaptiveNone")
+            }
+            disabled={adaptiveTasks.length === 0}
+            onClick={() =>
+              setSession({ tasks: adaptiveTasks, title: t("practice.adaptive") })
+            }
+          />
+          <ModeCard
             Icon={Shuffle}
             tint="text-brand"
             title={t("practice.mixed")}
@@ -174,6 +233,20 @@ export default function PracticePage() {
             disabled={completedTasks.length === 0}
             onClick={() =>
               setSession({ tasks: sample(completedTasks, 10), title: t("practice.mixed") })
+            }
+          />
+          <ModeCard
+            Icon={Stethoscope}
+            tint="text-sky-500"
+            title={t("practice.diagnostic")}
+            desc={t("practice.diagnosticDesc")}
+            disabled={diagnosticTasks.length === 0}
+            onClick={() =>
+              setSession({
+                tasks: diagnosticTasks,
+                title: t("practice.diagnostic"),
+                silent: true,
+              })
             }
           />
           <ModeCard

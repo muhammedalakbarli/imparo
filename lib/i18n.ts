@@ -411,6 +411,37 @@ const DICT: Dict = {
   "practice.byUnit": { az: "Bölmə üzrə praktika", en: "Practice by unit", ru: "Практика по разделам" },
   "practice.tasks": { az: "tapşırıq", en: "tasks", ru: "заданий" },
   "practice.noMistakes": { az: "Təkrar yoxdur — əla!", en: "Nothing to review — great!", ru: "Нечего повторять — отлично!" },
+  "practice.adaptive": { az: "Zəif bacarıqlar", en: "Weak skills", ru: "Слабые навыки" },
+  "practice.adaptiveDesc": {
+    az: "Ən çətin gələn bacarıq üzrə fərdi məşq",
+    en: "Personalised practice on your weakest skill",
+    ru: "Персональная практика по самому слабому навыку",
+  },
+  "practice.adaptiveNone": {
+    az: "Bir neçə dərs həll et — zəif tərəfin müəyyən olunsun",
+    en: "Complete a few lessons so we can find your weak spots",
+    ru: "Пройдите несколько уроков, чтобы найти слабые места",
+  },
+  "map.title": { az: "Bilik Xəritəsi", en: "Knowledge Map", ru: "Карта знаний" },
+  "map.subtitle": {
+    az: "Hansı bacarığı nə qədər mənimsədiyini göstərir",
+    en: "Shows how well you have mastered each skill",
+    ru: "Показывает, насколько вы освоили каждый навык",
+  },
+  "map.empty": {
+    az: "Hələ məlumat yoxdur. Bir neçə dərs həll et, xəritə dolmağa başlasın.",
+    en: "No data yet. Complete a few lessons and the map will fill in.",
+    ru: "Пока нет данных. Пройдите несколько уроков, и карта заполнится.",
+  },
+  "map.attempts": { az: "cəhd", en: "attempts", ru: "попыток" },
+  "map.weakest": { az: "Diqqət tələb edir", en: "Needs attention", ru: "Требует внимания" },
+  "map.practise": { az: "Bu bacarığı məşq et", en: "Practise this skill", ru: "Тренировать навык" },
+  "practice.diagnostic": { az: "Diaqnostika", en: "Diagnostic", ru: "Диагностика" },
+  "practice.diagnosticDesc": {
+    az: "20 sual — hansı bacarıqda harada olduğunu ölçür",
+    en: "20 questions — measures where you stand on each skill",
+    ru: "20 вопросов — измеряет ваш уровень по каждому навыку",
+  },
 
   // Profil
   "profile.progress": { az: "Fənlər üzrə irəliləyiş", en: "Progress by subject", ru: "Прогресс по предметам" },

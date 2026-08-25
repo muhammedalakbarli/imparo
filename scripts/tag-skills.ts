@@ -70,6 +70,17 @@ const ADD_WORDS = /də aldı|da aldı|əlavə|gəldi|açdı|gətir|əkil|cəmi|b
 const SUB_WORDS = /uçdu|getdi|verdi|yedi|düşdü|qaldı|satıl|xərclə|sındı|götür|yığdıq|köçürül|soldu|partladı|çıxart|azaldı/i;
 
 /**
+ * Dərsin MÖVZUSU anlayışın özüdürsə, etiket qayda nəticəsindən ASILI OLMADAN
+ * əlavə olunur. Səbəb: "12 : 3 = ?" ifadə qaydası ilə `div.tables` alır və
+ * `div.concept` heç vaxt işə düşmür — nəticədə prereq zəncirinin kökü qrafda
+ * ölü düyünə çevrilir (heç bir tapşırıq onu ölçmür).
+ */
+const LESSON_ALWAYS: Record<string, string> = {
+  "ry2-bolme-l1": "arith.div.concept",
+  "ry2-vurma-l1": "arith.mul.concept",
+};
+
+/**
  * Dərs səviyyəli ehtiyat: qaydalar heç nə tapmayanda tapşırıq heç olmasa dərsin
  * əsas bacarığını daşısın (etiketsiz tapşırıq mastery hesabından tamamilə düşür).
  */
@@ -228,6 +239,8 @@ function skillsFor(t: Task, lessonId: string): string[] {
     }
   }
 
+  const always = LESSON_ALWAYS[lessonId];
+  if (always) s.add(always);
   if (!s.size) {
     const d = LESSON_DEFAULT[lessonId];
     if (d) s.add(d);

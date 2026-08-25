@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import type { Task, MultipleChoiceTask } from "@/lib/types";
 import { gradeTask, type UserAnswer } from "@/lib/grading";
+import { recordAttempt, flushAttempts } from "@/lib/attempts";
 import { playCorrect, playWrong, playComplete, playStreak } from "@/lib/sound";
 import { vibrateCelebrate } from "@/lib/haptics";
 import { useCountUp } from "@/lib/useCountUp";
@@ -20,6 +21,17 @@ import QuestionFeedback from "@/components/lesson/QuestionFeedback";
 
 const shuffle = <T,>(a: T[]): T[] => [...a].sort(() => Math.random() - 0.5);
 
+// Praktikada tapşırıq dərsdən qopardılıb — cəhd jurnalında (`task_attempts`)
+// lesson_id sütunu isə boş buraxıla bilmir. Sintetik dəyər qoyulur: analitikada
+// praktika cəhdlərini dərs cəhdlərindən ayırd etmək də bununla mümkündür.
+// (Sütunda FK yoxdur — bax migration 0044.)
+const PRACTICE_LESSON = "practice";
+
+function chosenText(task: Task, answer: UserAnswer): string | null {
+  if (task.type === "multiple_choice" || task.type === "listening") return task.options[Number(answer)] ?? null;
+  return String(answer);
+}
+
 interface Props {
   tasks: Task[];
   title: string;
@@ -28,6 +40,11 @@ interface Props {
   onCorrect?: (taskId: string) => void;
   onWrong?: (taskId: string) => void; // səhv cavab → zəif mövzu (SRS) qeydi
   onFinish?: () => void; // dəst bitəndə (nəticə ekranı) çağırılır
+  // Diaqnostika rejimi: cavabdan sonra NƏ düzgün cavab, NƏ də izah göstərilmir —
+  // dərhal növbəti suala keçilir. Səbəb: diaqnostikanın işi ÖLÇMƏKDİR. Cavabı
+  // göstərsək, test öyrətməyə başlayır və sonrakı sualların (və pilotdakı
+  // son testin) nəticəsi korlanır.
+  silent?: boolean;
 }
 
 export default function PracticeRunner(props: Props) {
@@ -35,7 +52,7 @@ export default function PracticeRunner(props: Props) {
 }
 
 // ── Adi praktika ──────────────────────────────────────────────
-function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish }: Props) {
+function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish, silent }: Props) {
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState<UserAnswer | null>(null);
   const [checked, setChecked] = useState(false);
@@ -44,9 +61,16 @@ function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish }: Props) {
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [done, setDone] = useState(false);
+  // Cəhd jurnalı üçün: sual göründüyü an və eyni tapşırığa neçənci cəhd.
+  const shownAtRef = useRef(Date.now());
+  const attemptNoRef = useRef<Record<string, number>>({});
 
   const task = tasks[index];
   const total = tasks.length;
+
+  useEffect(() => {
+    shownAtRef.current = Date.now();
+  }, [index]);
 
   // İrəli-yükləmə (LessonRunner ilə eyni səbəb): növbəti 2 tapşırığın
   // İngilis audiosu şagird ora çatmamış hazır olsun.
@@ -58,8 +82,30 @@ function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish }: Props) {
   function check() {
     if (answer === null || answer === "") return;
     const r = gradeTask(task, answer);
-    setChecked(true);
+    // Xam cəhdi jurnala yaz — mənimsəmə (mastery) məhz bundan hesablanır.
+    // BUNSUZ praktika və diaqnostika heç nə ölçmür.
+    const attemptNo = (attemptNoRef.current[task.id] ?? 0) + 1;
+    attemptNoRef.current[task.id] = attemptNo;
+    recordAttempt({
+      task_id: task.id,
+      lesson_id: PRACTICE_LESSON,
+      correct: r.correct,
+      chosen: chosenText(task, answer),
+      ms_taken: Date.now() - shownAtRef.current,
+      attempt_no: attemptNo,
+      is_review: !silent, // diaqnostika ilk ölçmədir, təkrar deyil
+    });
+    setChecked(!silent);
     setLastCorrect(r.correct);
+    if (silent) {
+      // Cavab yazılır (task_attempts → mastery), amma şagirdə göstərilmir.
+      if (r.correct) {
+        setCorrect((c) => c + 1);
+        onCorrect?.(task.id);
+      } else onWrong?.(task.id);
+      advance();
+      return;
+    }
     if (r.correct) {
       setCorrect((c) => c + 1);
       const n = streak + 1;
@@ -74,15 +120,20 @@ function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish }: Props) {
     }
   }
 
-  function next() {
+  function advance() {
     setAnswer(null);
     setChecked(false);
     if (index + 1 < total) setIndex((i) => i + 1);
     else {
       setDone(true);
       playComplete();
+      void flushAttempts();
       onFinish?.();
     }
+  }
+
+  function next() {
+    advance();
   }
 
   function restart() {
@@ -227,6 +278,13 @@ function SpeedRunner({ tasks, onExit, onFinish }: Props) {
   function pick(idx: number) {
     if (picked !== null || done) return;
     const r = gradeTask(task, idx);
+    recordAttempt({
+      task_id: task.id,
+      lesson_id: PRACTICE_LESSON,
+      correct: r.correct,
+      chosen: chosenText(task, idx),
+      is_review: true,
+    });
     setPicked(idx);
     if (r.correct) {
       setCorrect((c) => c + 1);

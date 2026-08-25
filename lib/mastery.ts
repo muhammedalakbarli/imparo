@@ -135,3 +135,50 @@ export function knowledgeMap(m: MasteryMap, skills: Skill[], maxGrade?: number):
   for (const list of byGroup.values()) list.sort((a, b) => (a.stat!.mastery - b.stat!.mastery));
   return byGroup;
 }
+
+// ── Diaqnostika ─────────────────────────────────────────────────────────────
+// Diaqnostikanın işi ÖLÇMƏKDİR, öyrətmək yox. Ona görə:
+//  · sual seçimi mənimsəməyə görə yox, ƏHATƏYƏ görə aparılır — hər bacarığa
+//    bərabər sayda sual düşür;
+//  · əvvəlcə HEÇ SINANMAMIŞ bacarıqlar gəlir: ən az bildiyimiz yer oradır;
+//  · runner `silent` rejimində işləyir (cavab göstərilmir), yoxsa test öyrədir.
+//
+// Nəticə ayrıca hesablanmır: cəhdlər `task_attempts`-a düşür, `my_skill_mastery()`
+// isə onları oxuyur. Yəni diaqnostikadan sonra Bilik Xəritəsi elə baseline-dır.
+
+/** Ölçüləcək bacarıqlar: sınanmamışlar əvvəl, sonra yuxarı sinifdən aşağıya. */
+export function diagnosticSkills(m: MasteryMap, skills: Skill[], maxGrade: number): string[] {
+  return skills
+    .filter((s) => s.grade <= maxGrade)
+    .sort((a, b) => {
+      const ua = m.has(a.id) ? 1 : 0;
+      const ub = m.has(b.id) ? 1 : 0;
+      if (ua !== ub) return ua - ub;
+      return b.grade - a.grade;
+    })
+    .map((s) => s.id);
+}
+
+/** Hər bacarıqdan bərabər sayda sual; ümumi hədd aşılmır. */
+export function buildDiagnosticSet(
+  subjects: Subject[],
+  skillIds: string[],
+  perSkill: number,
+  opts: { maxGrade?: number; limit?: number; exclude?: (t: Task) => boolean } = {},
+): Task[] {
+  const seen = new Set<string>();
+  const out: Task[] = [];
+  const limit = opts.limit ?? Infinity;
+  for (const id of skillIds) {
+    if (out.length >= limit) break;
+    const pool = tasksForSkill(subjects, id, opts.maxGrade).filter(
+      (t) => !seen.has(t.id) && !(opts.exclude?.(t) ?? false),
+    );
+    for (const t of pool.slice(0, perSkill)) {
+      if (out.length >= limit) break;
+      seen.add(t.id);
+      out.push(t);
+    }
+  }
+  return out;
+}

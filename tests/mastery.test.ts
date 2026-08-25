@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { subjects } from "@/lib/content";
 import { SKILLS } from "@/lib/skills";
 import {
+  diagnosticSkills,
+  buildDiagnosticSet,
   targetSkills,
   isWeak,
   tasksForSkill,
@@ -87,5 +89,44 @@ describe("bilik xəritəsi", () => {
     const map = knowledgeMap(M({ "arith.add.carry": [80, 10], "arith.sub.borrow": [40, 10] }), SKILLS);
     const list = map.get("Toplama və çıxma")!;
     expect(list[0].id).toBe("arith.sub.borrow");
+  });
+});
+
+describe("diaqnostika", () => {
+  it("sınanmamış bacarıqlar əvvəl ölçülür", () => {
+    // arith.add.carry sınanıb, arith.sub.borrow yox → əvvəl sub.borrow gəlməlidir.
+    const order = diagnosticSkills(M({ "arith.add.carry": [80, 10] }), SKILLS, 4);
+    expect(order.indexOf("arith.sub.borrow")).toBeLessThan(order.indexOf("arith.add.carry"));
+  });
+
+  it("şagirdin sinfindən yuxarı bacarıq ölçülmür", () => {
+    const ids = diagnosticSkills(new Map(), SKILLS, 2);
+    for (const id of ids) expect(SKILLS.find((s) => s.id === id)!.grade).toBeLessThanOrEqual(2);
+  });
+
+  it("hədd aşılmır və təkrar sual olmur", () => {
+    const set = buildDiagnosticSet(subjects, diagnosticSkills(new Map(), SKILLS, 4), 2, { limit: 20 });
+    expect(set.length).toBe(20);
+    expect(new Set(set.map((t) => t.id)).size).toBe(20);
+  });
+
+  it("tapşırığı olan hər bacarıqdan sual düşür", () => {
+    const ids = diagnosticSkills(new Map(), SKILLS, 4)
+      .filter((id) => tasksForSkill(subjects, id, 4).length > 0)
+      .slice(0, 3);
+    const set = buildDiagnosticSet(subjects, ids, 2, { maxGrade: 4 });
+    for (const id of ids) expect(set.filter((t) => t.skills?.includes(id)).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("qrafda ölü düyün yoxdur — hər bacarığı ölçən tapşırıq var", () => {
+    // Bu test real xəta tutdu: `arith.div.concept` prereq zəncirinin kökü idi,
+    // amma heç bir tapşırıq onu ölçmürdü — "geriyə addım" ora çata bilmirdi.
+    // Aşağıdakıların məzmunu 5-ci sinifdədir və hələ etiketlənməyib; 5-ci sinif
+    // etiketlənəndə bu siyahı boşalmalıdır.
+    const NOT_YET_TAGGED = new Set(["number.divisors", "geom.volume"]);
+    const empty = SKILLS.filter(
+      (s) => !NOT_YET_TAGGED.has(s.id) && tasksForSkill(subjects, s.id).length === 0,
+    ).map((s) => s.id);
+    expect(empty).toEqual([]);
   });
 });
