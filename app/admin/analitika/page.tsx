@@ -142,6 +142,13 @@ export default function AdminAnalyticsPage() {
             <Link href="/admin/feedback" className="hover:text-fg">Rəylər</Link>
           </div>
         </div>
+        {/* Kiçik nümunə xəbərdarlığı — panel yalan danışmasın. Bax MIN_N. */}
+        <p className="mt-2 text-xs text-muted">
+          Etibarlı faiz üçün ən azı 10 uğur, 10 uğursuzluq və 30 müşahidə lazımdır. Bu şərt pozulanda
+          göstərici <span className="font-bold text-amber-500">az data</span> kimi işarələnir və boz
+          verilir: məsələn «8.6% · 3/35»-də bir istifadəçinin qayıtması rəqəmi 11.4% edir. Kiçik bazada
+          faiz dəyişməsi əvəzinə mütləq fərq göstərilir.
+        </p>
 
         {/* Əsas göstəricilər */}
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -319,17 +326,36 @@ function Stat({ label, value, small }: { label: string; value: number; small?: b
   );
 }
 
+// Faizin ETİBARLI sayılması üçün şərtlər.
+//
+// Yalnız məxrəcə baxmaq AZDIR: "8.6% · 3/35"-də məxrəc 35-dir, amma uğur cəmi
+// 3 nəfərdir və bir istifadəçi rəqəmi 11.4%-ə qaldırır. Ona görə normal
+// yaxınlaşmanın standart şərti işlədilir: ən azı 10 uğur VƏ 10 uğursuzluq
+// (əlavə olaraq məxrəc ən azı 30). Bu şərtlər pozulanda faiz boz göstərilir və
+// "az data" kimi işarələnir — belə rəqəmə əsasən qərar vermək olmaz.
+const MIN_N = 30;
+const MIN_SUCCESSES = 10;
+
+function isWeakSample(num: number, den: number): boolean {
+  return den < MIN_N || num < MIN_SUCCESSES || den - num < MIN_SUCCESSES;
+}
+
 // Nisbət kartı — faiz + xam rəqəmlər (məs. "45% · 12/27"), incə bar ilə.
 function Ratio({ label, num, den, hint }: { label: string; num: number; den: number; hint?: string }) {
   const pct = den > 0 ? Math.round((num / den) * 1000) / 10 : 0;
+  const weak = isWeakSample(num, den);
   return (
-    <div className="rounded-[10px] border border-line bg-panel p-4" title={hint}>
+    <div
+      className="rounded-[10px] border border-line bg-panel p-4"
+      title={weak ? `${hint ? hint + " · " : ""}Az data: ${num}/${den}. Etibarlı faiz üçün ən azı ${MIN_SUCCESSES} uğur, ${MIN_SUCCESSES} uğursuzluq və ${MIN_N} müşahidə lazımdır.` : hint}
+    >
       <div className="flex items-baseline gap-1.5">
-        <span className="text-xl font-semibold text-brand">{pct}%</span>
+        <span className={`text-xl font-semibold ${weak ? "text-muted" : "text-brand"}`}>{pct}%</span>
         <span className="text-xs font-semibold text-muted">{num}/{den}</span>
+        {weak && <span className="text-[10px] font-bold text-amber-500" title="nümunə kiçikdir">az data</span>}
       </div>
       <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-panel-2">
-        <div className="h-full rounded-full bg-brand" style={{ width: `${Math.min(pct, 100)}%` }} />
+        <div className={`h-full rounded-full ${weak ? "bg-line" : "bg-brand"}`} style={{ width: `${Math.min(pct, 100)}%` }} />
       </div>
       <div className="mt-1 text-xs text-muted">{label}</div>
     </div>
@@ -338,15 +364,27 @@ function Ratio({ label, num, den, hint }: { label: string; num: number; den: num
 
 // Cari vs əvvəlki dövr müqayisəsi.
 function Compare({ label, cur, prev }: { label: string; cur: number; prev: number }) {
-  const delta = prev > 0 ? Math.round(((cur - prev) / prev) * 1000) / 10 : cur > 0 ? 100 : 0;
   const up = cur >= prev;
+  // Kiçik bazada FAİZ göstərilmir: 6 → 16 "↑166.7%" olur, halbuki bu, cəmi 10
+  // nəfərdir və bir məktəb qrupu ola bilər. Belə halda mütləq fərq verilir və
+  // rəng neytral qalır — yaşıl ox olmayan uğuru varmış kimi göstərir.
+  const weak = prev < MIN_N || cur < MIN_N;
+  const delta = prev > 0 ? Math.round(((cur - prev) / prev) * 1000) / 10 : cur > 0 ? 100 : 0;
+  const diff = cur - prev;
   return (
     <div className="rounded-[10px] border border-line bg-panel p-4">
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-semibold text-fg">{cur.toLocaleString("az-AZ")}</span>
-        <span className={`text-xs font-bold ${up ? "text-emerald-600" : "text-red-500"}`}>
-          {up ? "↑" : "↓"} {Math.abs(delta)}%
-        </span>
+        {weak ? (
+          <span className="text-xs font-bold text-muted" title={`Nümunə kiçikdir (< ${MIN_N}) — faiz dəyişməsi etibarsızdır.`}>
+            {diff >= 0 ? "+" : "−"}
+            {Math.abs(diff)}
+          </span>
+        ) : (
+          <span className={`text-xs font-bold ${up ? "text-emerald-600" : "text-red-500"}`}>
+            {up ? "↑" : "↓"} {Math.abs(delta)}%
+          </span>
+        )}
       </div>
       <div className="mt-0.5 text-xs text-muted">{label}</div>
       <div className="text-[11px] text-muted">əvvəlki dövr: {prev.toLocaleString("az-AZ")}</div>
