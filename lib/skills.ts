@@ -148,6 +148,109 @@ export const SKILLS: Skill[] = [
   // tapşırıq belə yoxdur (5-ci sinif kurikulumunda mövzu var, bizdə yazılmayıb).
   // Məzmun yazılanda bacarıq geri qaytarılmalıdır.
   { id: "prob.basic", title: "Ehtimal", group: "Məlumat və ehtimal", grade: 5, prereqs: ["fraction.concept"] },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // AZƏRBAYCAN DİLİ (az.*)
+  // Riyaziyyatdan AYRI ailədir: burada zəncir hesab deyil, dilin qatlarıdır —
+  // səs → söz → söz qrupu → cümlə → mətn. Şagird cümlə üzvlərində ilişəndə
+  // kökü nitq hissələrində, oradan da sözün mənasında ola bilər.
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // ── Fonetika ───────────────────────────────────────────────────────────────
+  { id: "az.phon.letters", title: "Səs və hərf", group: "Fonetika", grade: 1, prereqs: [] },
+  { id: "az.phon.vowels", title: "Saitlər", group: "Fonetika", grade: 1, prereqs: ["az.phon.letters"] },
+  { id: "az.phon.consonants", title: "Samitlər", group: "Fonetika", grade: 1, prereqs: ["az.phon.letters"] },
+  { id: "az.phon.syllable", title: "Heca", group: "Fonetika", grade: 1, prereqs: ["az.phon.vowels"] },
+  { id: "az.phon.alphabet", title: "Əlifba sırası", group: "Fonetika", grade: 2, prereqs: ["az.phon.letters"] },
+  { id: "az.phon.harmony", title: "Ahəng qanunu", group: "Fonetika", grade: 2, prereqs: ["az.phon.vowels"] },
+  { id: "az.phon.stress", title: "Vurğu", group: "Fonetika", grade: 3, prereqs: ["az.phon.syllable"] },
+
+  // ── Leksika ────────────────────────────────────────────────────────────────
+  { id: "az.lex.meaning", title: "Sözün mənası", group: "Leksika", grade: 2, prereqs: [] },
+  { id: "az.lex.synonym", title: "Sinonimlər", group: "Leksika", grade: 2, prereqs: ["az.lex.meaning"] },
+  { id: "az.lex.antonym", title: "Antonimlər", group: "Leksika", grade: 2, prereqs: ["az.lex.meaning"] },
+  { id: "az.lex.homonym", title: "Omonimlər və çoxmənalı sözlər", group: "Leksika", grade: 6, prereqs: ["az.lex.meaning"] },
+  { id: "az.lex.origin", title: "Alınma və köhnəlmiş sözlər", group: "Leksika", grade: 6, prereqs: ["az.lex.meaning"] },
+
+  // ── Sözün quruluşu ─────────────────────────────────────────────────────────
+  { id: "az.morph.root", title: "Kök və şəkilçi", group: "Sözün quruluşu", grade: 3, prereqs: ["az.phon.syllable"] },
+  { id: "az.morph.derivation", title: "Söz yaradıcılığı", group: "Sözün quruluşu", grade: 3, prereqs: ["az.morph.root"] },
+  { id: "az.morph.compound", title: "Mürəkkəb sözlər", group: "Sözün quruluşu", grade: 6, prereqs: ["az.morph.root"] },
+
+  // ── Nitq hissələri ─────────────────────────────────────────────────────────
+  { id: "az.pos.noun", title: "İsim", group: "Nitq hissələri", grade: 2, prereqs: [] },
+  { id: "az.pos.adjective", title: "Sifət", group: "Nitq hissələri", grade: 2, prereqs: ["az.pos.noun"] },
+  { id: "az.pos.verb", title: "Feil", group: "Nitq hissələri", grade: 2, prereqs: [] },
+  { id: "az.pos.numeral", title: "Say", group: "Nitq hissələri", grade: 3, prereqs: ["az.pos.noun"] },
+  { id: "az.pos.verb_tense", title: "Feilin zamanları", group: "Nitq hissələri", grade: 3, prereqs: ["az.pos.verb"] },
+  { id: "az.pos.noun_case", title: "İsmin halları", group: "Nitq hissələri", grade: 4, prereqs: ["az.pos.noun"] },
+  { id: "az.pos.noun_possess", title: "Kəmiyyət və mənsubiyyət", group: "Nitq hissələri", grade: 4, prereqs: ["az.pos.noun"] },
+  { id: "az.pos.pronoun", title: "Əvəzlik", group: "Nitq hissələri", grade: 4, prereqs: ["az.pos.noun"] },
+  { id: "az.pos.adverb", title: "Zərf", group: "Nitq hissələri", grade: 4, prereqs: ["az.pos.verb"] },
+  { id: "az.pos.verb_voice", title: "Feilin növləri", group: "Nitq hissələri", grade: 7, prereqs: ["az.pos.verb_tense"] },
+  { id: "az.pos.verb_nonfinite", title: "Təsriflənməyən feillər", group: "Nitq hissələri", grade: 7, prereqs: ["az.pos.verb_tense"] },
+  { id: "az.pos.auxiliary", title: "Köməkçi nitq hissələri", group: "Nitq hissələri", grade: 7, prereqs: ["az.pos.noun", "az.pos.verb"] },
+  { id: "az.pos.modal", title: "Modal sözlər və nida", group: "Nitq hissələri", grade: 7, prereqs: ["az.pos.auxiliary"] },
+
+  // ── Sintaksis ──────────────────────────────────────────────────────────────
+  { id: "az.syn.sentence", title: "Cümlə anlayışı", group: "Sintaksis", grade: 1, prereqs: [] },
+  { id: "az.syn.sentence_type", title: "Cümlə növləri", group: "Sintaksis", grade: 3, prereqs: ["az.syn.sentence"] },
+  { id: "az.syn.main_parts", title: "Cümlənin baş üzvləri", group: "Sintaksis", grade: 3, prereqs: ["az.syn.sentence", "az.pos.noun", "az.pos.verb"] },
+  { id: "az.syn.secondary_parts", title: "İkinci dərəcəli üzvlər", group: "Sintaksis", grade: 4, prereqs: ["az.syn.main_parts"] },
+  { id: "az.syn.phrase", title: "Söz birləşmələri", group: "Sintaksis", grade: 8, prereqs: ["az.syn.secondary_parts"] },
+  { id: "az.syn.simple", title: "Sadə cümlə", group: "Sintaksis", grade: 8, prereqs: ["az.syn.main_parts"] },
+  { id: "az.syn.homogeneous", title: "Həmcins üzvlər", group: "Sintaksis", grade: 8, prereqs: ["az.syn.secondary_parts"] },
+
+  // ── Orfoqrafiya və durğu işarələri ─────────────────────────────────────────
+  { id: "az.orth.capital", title: "Böyük hərf", group: "Orfoqrafiya", grade: 1, prereqs: ["az.phon.letters"] },
+  { id: "az.orth.spelling", title: "Orfoqrafiya", group: "Orfoqrafiya", grade: 2, prereqs: ["az.phon.harmony"] },
+  { id: "az.orth.punctuation", title: "Durğu işarələri", group: "Orfoqrafiya", grade: 3, prereqs: ["az.syn.sentence_type"] },
+
+  // ── Mətn və nitq ───────────────────────────────────────────────────────────
+  { id: "az.text.genre", title: "Nağıl, şeir, atalar sözü", group: "Mətn və nitq", grade: 1, prereqs: [] },
+  { id: "az.text.etiquette", title: "Nitq mədəniyyəti və nəzakət", group: "Mətn və nitq", grade: 1, prereqs: [] },
+  { id: "az.text.structure", title: "Mətnin quruluşu", group: "Mətn və nitq", grade: 4, prereqs: ["az.syn.sentence"] },
+  // QEYD: "oxuduğunu anlama" bacarığı qrafdan çıxarılıb — Azərbaycan dili
+  // məzmununda BİR DƏNƏ də oxu mətni (passage) yoxdur, halbuki İngilis dilində
+  // 397 belə tapşırıq var. Məzmun yazılanda bacarıq geri qaytarılmalıdır.
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // İNGİLİS DİLİ (en.*)
+  // Zəncir qrammatik quruluşlar üzrədir: sadə zamanlardan mürəkkəbə. Şagird
+  // Present Perfect Continuous-da ilişəndə kök Present Perfect və ya Continuous
+  // ola bilər — qraf məhz bunu göstərir.
+  // ══════════════════════════════════════════════════════════════════════════
+
+  { id: "en.vocab.basic", title: "Əsas lüğət", group: "İngilis: lüğət", grade: 1, prereqs: [] },
+  { id: "en.vocab.topic", title: "Tematik lüğət", group: "İngilis: lüğət", grade: 2, prereqs: ["en.vocab.basic"] },
+  { id: "en.listen", title: "Dinləyib anlama", group: "İngilis: lüğət", grade: 1, prereqs: ["en.vocab.basic"] },
+  { id: "en.read", title: "Oxuyub anlama", group: "İngilis: lüğət", grade: 5, prereqs: ["en.vocab.topic"] },
+
+  { id: "en.gram.plural", title: "Cəm forması", group: "İngilis: qrammatika", grade: 2, prereqs: ["en.vocab.basic"] },
+  { id: "en.gram.demonstrative", title: "this / that", group: "İngilis: qrammatika", grade: 2, prereqs: ["en.vocab.basic"] },
+  { id: "en.gram.prepositions", title: "Sözönləri", group: "İngilis: qrammatika", grade: 3, prereqs: ["en.vocab.basic"] },
+  { id: "en.gram.have", title: "have got", group: "İngilis: qrammatika", grade: 3, prereqs: ["en.vocab.basic"] },
+  { id: "en.gram.can", title: "can / can't", group: "İngilis: qrammatika", grade: 3, prereqs: ["en.vocab.basic"] },
+  { id: "en.gram.present_simple", title: "Present Simple", group: "İngilis: qrammatika", grade: 3, prereqs: ["en.vocab.basic"] },
+  { id: "en.gram.present_cont", title: "Present Continuous", group: "İngilis: qrammatika", grade: 4, prereqs: ["en.gram.present_simple"] },
+  { id: "en.gram.past_simple", title: "Past Simple", group: "İngilis: qrammatika", grade: 4, prereqs: ["en.gram.present_simple"] },
+  { id: "en.gram.there_is", title: "there is / there are", group: "İngilis: qrammatika", grade: 4, prereqs: ["en.gram.plural"] },
+  { id: "en.gram.comparison", title: "Müqayisə dərəcələri", group: "İngilis: qrammatika", grade: 4, prereqs: ["en.vocab.topic"] },
+  { id: "en.gram.questions", title: "Sual sözləri və sual quruluşu", group: "İngilis: qrammatika", grade: 4, prereqs: ["en.gram.present_simple"] },
+  { id: "en.gram.future", title: "will / going to", group: "İngilis: qrammatika", grade: 6, prereqs: ["en.gram.present_simple"] },
+  { id: "en.gram.present_perfect", title: "Present Perfect", group: "İngilis: qrammatika", grade: 6, prereqs: ["en.gram.past_simple"] },
+  { id: "en.gram.quantifiers", title: "some / any / much / many", group: "İngilis: qrammatika", grade: 6, prereqs: ["en.gram.plural"] },
+  { id: "en.gram.adverbs", title: "Zərflər", group: "İngilis: qrammatika", grade: 6, prereqs: ["en.gram.present_simple"] },
+  { id: "en.gram.past_cont", title: "Past Continuous", group: "İngilis: qrammatika", grade: 7, prereqs: ["en.gram.present_cont", "en.gram.past_simple"] },
+  { id: "en.gram.past_perfect", title: "Past Perfect", group: "İngilis: qrammatika", grade: 7, prereqs: ["en.gram.past_simple"] },
+  { id: "en.gram.passive", title: "Passive Voice", group: "İngilis: qrammatika", grade: 7, prereqs: ["en.gram.past_simple"] },
+  { id: "en.gram.cond_first", title: "First Conditional (şərt cümlələri)", group: "İngilis: qrammatika", grade: 7, prereqs: ["en.gram.future"] },
+  { id: "en.gram.modals", title: "Modal feillər", group: "İngilis: qrammatika", grade: 7, prereqs: ["en.gram.can"] },
+  { id: "en.gram.reported", title: "Reported speech", group: "İngilis: qrammatika", grade: 7, prereqs: ["en.gram.past_simple"] },
+  { id: "en.gram.present_perfect_cont", title: "Present Perfect Continuous", group: "İngilis: qrammatika", grade: 8, prereqs: ["en.gram.present_perfect", "en.gram.present_cont"] },
+  { id: "en.gram.cond_second", title: "Second Conditional (qeyri-real şərt)", group: "İngilis: qrammatika", grade: 8, prereqs: ["en.gram.cond_first"] },
+  { id: "en.gram.relative", title: "Relative clauses", group: "İngilis: qrammatika", grade: 8, prereqs: ["en.gram.questions"] },
+  { id: "en.gram.used_to", title: "used to", group: "İngilis: qrammatika", grade: 8, prereqs: ["en.gram.past_simple"] },
 ];
 
 const BY_ID = new Map(SKILLS.map((s) => [s.id, s]));

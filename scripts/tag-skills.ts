@@ -232,9 +232,172 @@ function advancedSkills(p: string): Set<string> {
   return a;
 }
 
-function skillsFor(t: Task, lessonId: string, unitId: string): string[] {
+// ══════════════════════════════════════════════════════════════════════════════
+// DİL FƏNLƏRİ
+// Riyaziyyat qaydaları burada İŞLƏMƏMƏLİDİR: "tərəf" həm həndəsədə, həm
+// qrammatikada ("qarşı tərəflər" / "müraciət tərəfi") var; "neçə hərf var?"
+// sayma bacarığı deyil. Ona görə etiketləmə FƏNN AİLƏSİNƏ görə ayrılır.
+// ══════════════════════════════════════════════════════════════════════════════
+
+type Family = "math" | "az" | "en" | "other";
+
+function familyOf(slug: string): Family {
+  if (slug.startsWith("riyaziyyat")) return "math";
+  if (slug.startsWith("azerbaycan-dili")) return "az";
+  if (slug.startsWith("ingilis-dili")) return "en";
+  return "other";
+}
+
+const UNIT_DEFAULT_LANG: Record<string, string> = {
+  // Azərbaycan dili
+  "az1-sesler": "az.phon.letters", "az1-sozler": "az.phon.syllable",
+  "az1-oxunitq": "az.text.etiquette", "az1-yazi": "az.orth.capital", "az1-nagil": "az.text.genre",
+  "az2-elifba": "az.phon.alphabet", "az2-sait": "az.phon.vowels", "az2-isim": "az.pos.noun",
+  "az2-sifet": "az.pos.adjective", "az2-feil": "az.pos.verb", "az2-mena": "az.lex.meaning",
+  "az3-fonetika": "az.phon.vowels", "az3-qurulus": "az.morph.root", "az3-isim": "az.pos.noun",
+  "az3-sifetsay": "az.pos.adjective", "az3-feil": "az.pos.verb_tense", "az3-cumle": "az.syn.sentence_type",
+  "az4-isim": "az.pos.noun_case", "az4-evezlik": "az.pos.pronoun", "az4-zerf": "az.pos.adverb",
+  "az4-uzvler": "az.syn.main_parts", "az4-soz": "az.morph.derivation", "az4-metn": "az.text.structure",
+  "az-grammar": "az.phon.harmony", "az-parts-of-speech": "az.pos.noun",
+  "az-writing": "az.orth.spelling", "az-speech": "az.text.etiquette",
+  "az6-fonetika": "az.phon.vowels", "az6-leksika": "az.lex.meaning", "az6-terkib": "az.morph.derivation",
+  "az6-nitq1": "az.pos.noun", "az6-nitq2": "az.pos.verb", "az6-orfoqrafiya": "az.orth.spelling",
+  "az7-feil": "az.pos.verb_tense", "az7-nov": "az.pos.verb_voice", "az7-tesrif": "az.pos.verb_nonfinite",
+  "az7-zerf": "az.pos.adverb", "az7-komekci": "az.pos.auxiliary", "az7-modal": "az.pos.modal",
+  "az8-birlesme": "az.syn.phrase", "az8-bas": "az.syn.main_parts", "az8-ikinci": "az.syn.secondary_parts",
+  "az8-nov": "az.syn.sentence_type", "az8-sade": "az.syn.simple", "az8-hemcins": "az.syn.homogeneous",
+  // İngilis dili
+  "en1-hello": "en.vocab.basic", "en1-numcolor": "en.vocab.basic", "en1-animals": "en.vocab.basic",
+  "en1-famschool": "en.vocab.basic", "en1-body": "en.vocab.basic", "en1-food": "en.vocab.basic",
+  "en2-numbers": "en.vocab.topic", "en2-days": "en.vocab.topic", "en2-food": "en.vocab.topic",
+  "en2-things": "en.gram.demonstrative", "en2-actions": "en.vocab.topic", "en2-body": "en.vocab.topic",
+  "en3-present": "en.gram.present_simple", "en3-havegot": "en.gram.have", "en3-can": "en.gram.can",
+  "en3-prep": "en.gram.prepositions", "en3-routine": "en.vocab.topic", "en3-jobs": "en.vocab.topic",
+  "en4-continuous": "en.gram.present_cont", "en4-was": "en.gram.past_simple", "en4-past": "en.gram.past_simple",
+  "en4-there": "en.gram.there_is", "en4-comp": "en.gram.comparison", "en4-questions": "en.gram.questions",
+  "en-u1": "en.gram.present_simple", "en-u2": "en.gram.present_cont", "en-u3": "en.gram.past_simple",
+  "en-u4": "en.gram.questions", "en-u5": "en.vocab.topic", "en-u6": "en.gram.there_is",
+  "en-u7": "en.gram.comparison", "en-u8": "en.gram.can", "en-nouns": "en.gram.plural", "en-vocab": "en.vocab.topic",
+  "en6-pp": "en.gram.present_perfect", "en6-future": "en.gram.future", "en6-quant": "en.gram.quantifiers",
+  "en6-adv": "en.gram.adverbs", "en6-comp": "en.gram.comparison", "en6-theme": "en.vocab.topic",
+  "en7-past": "en.gram.past_cont", "en7-pastperf": "en.gram.past_perfect", "en7-passive": "en.gram.passive",
+  "en7-cond": "en.gram.cond_first", "en7-modal": "en.gram.modals", "en7-reported": "en.gram.reported",
+  "en8-ppc": "en.gram.present_perfect_cont", "en8-cond2": "en.gram.cond_second",
+  "en8-relative": "en.gram.relative", "en8-usedto": "en.gram.used_to", "en8-reported": "en.gram.reported",
+  "en8-theme": "en.vocab.topic",
+};
+
+/** Azərbaycan dili — mətn qaydaları (bölmə daxilindəki incə fərqlər üçün). */
+function azSkills(t: Task): Set<string> {
+  const p = t.prompt;
+  const a = new Set<string>();
+  const has = (re: RegExp) => re.test(p);
+
+  if (has(/sait/i)) a.add("az.phon.vowels");
+  if (has(/samit/i)) a.add("az.phon.consonants");
+  if (has(/heca/i)) a.add("az.phon.syllable");
+  if (has(/ahəng|qalın.*incə|incə.*qalın/i)) a.add("az.phon.harmony");
+  if (has(/vurğu/i)) a.add("az.phon.stress");
+  if (has(/əlifba/i)) a.add("az.phon.alphabet");
+  if (has(/hərf|səs/i) && !a.size) a.add("az.phon.letters");
+
+  if (has(/sinonim|yaxın mənalı/i)) a.add("az.lex.synonym");
+  if (has(/antonim|əksi|əks mənalı/i)) a.add("az.lex.antonym");
+  if (has(/omonim|çoxmənalı/i)) a.add("az.lex.homonym");
+  if (has(/alınma söz|köhnəlmiş|arxaizm|neologizm/i)) a.add("az.lex.origin");
+
+  if (has(/kök|şəkilçi/i)) a.add("az.morph.root");
+  if (has(/düzəltmə|söz yarad/i)) a.add("az.morph.derivation");
+  if (has(/mürəkkəb söz/i)) a.add("az.morph.compound");
+
+  if (has(/ismin hal|adlıq|yiyəlik|yönlük|təsirlik|yerlik|çıxışlıq/i)) a.add("az.pos.noun_case");
+  if (has(/mənsubiyyət|kəmiyyət kateqoriya|cəm şəkilçi/i)) a.add("az.pos.noun_possess");
+  if (has(/əvəzlik/i)) a.add("az.pos.pronoun");
+  if (has(/zərf/i)) a.add("az.pos.adverb");
+  if (has(/feilin növ|məchul|qayıdış|icbar|qarşılıq/i)) a.add("az.pos.verb_voice");
+  if (has(/məsdər|feili sifət|feili bağlama|təsriflənmə/i)) a.add("az.pos.verb_nonfinite");
+  if (has(/qoşma|bağlayıcı|ədat/i)) a.add("az.pos.auxiliary");
+  if (has(/modal söz|nida/i) && !has(/nida cümlə|nida işarə/i)) a.add("az.pos.modal");
+  if (has(/zaman|keçmiş|indiki|gələcək/i) && has(/feil|cavab verir/i)) a.add("az.pos.verb_tense");
+  if (has(/\bsay\b|miqdar say|sıra say|neçənci/i)) a.add("az.pos.numeral");
+  if (has(/sifət|əlamət bildir/i)) a.add("az.pos.adjective");
+  if (has(/isim|əşyanın adı/i)) a.add("az.pos.noun");
+  if (has(/feil|hərəkət bildir/i) && !a.has("az.pos.verb_tense")) a.add("az.pos.verb");
+
+  if (has(/söz birləşmə/i)) a.add("az.syn.phrase");
+  if (has(/həmcins/i)) a.add("az.syn.homogeneous");
+  if (has(/mübtəda|xəbər/i)) a.add("az.syn.main_parts");
+  if (has(/tamamlıq|təyin|zərflik|ikinci dərəcəli/i)) a.add("az.syn.secondary_parts");
+  if (has(/nəqli|sual cümlə|nida cümlə|əmr cümlə|cümlə növ/i)) a.add("az.syn.sentence_type");
+  if (has(/sadə cümlə|cüttərkibli|təktərkibli/i)) a.add("az.syn.simple");
+  if (has(/cümlə/i) && !a.size) a.add("az.syn.sentence");
+
+  if (has(/böyük hərflə|xüsusi isim.*yazıl/i)) a.add("az.orth.capital");
+  if (has(/vergül|nöqtə|durğu işarə|tire|dırnaq/i)) a.add("az.orth.punctuation");
+  if (has(/düzgün yazıl|orfoqrafi/i)) a.add("az.orth.spelling");
+
+  if (has(/nağıl|şeir|tapmaca|atalar sözü|qafiyə|misra|şair/i)) a.add("az.text.genre");
+  if (has(/nəzakət|salam|təşəkkür|üzr istə|müraciət ed/i)) a.add("az.text.etiquette");
+  if (has(/mətn|abzas|başlıq|giriş|nəticə/i)) a.add("az.text.structure");
+  return a;
+}
+
+/** İngilis dili — mətn qaydaları. */
+function enSkills(t: Task): Set<string> {
+  const p = t.prompt;
+  const a = new Set<string>();
+  const has = (re: RegExp) => re.test(p);
+
+  // Dinləmə və oxu STRUKTUR siqnalıdır — mətndən daha etibarlıdır.
+  if (t.type === "listening") a.add("en.listen");
+  if (/-read-/.test(t.id)) a.add("en.read");
+
+  if (has(/used to/i)) a.add("en.gram.used_to");
+  if (has(/who|which|that\b/i) && has(/relative|budaq|əlaqələndir/i)) a.add("en.gram.relative");
+  if (has(/reported|dolayı nitq|said that|asked/i)) a.add("en.gram.reported");
+  if (has(/have been|has been|Perfect Continuous/i)) a.add("en.gram.present_perfect_cont");
+  else if (has(/have\s+\w+ed|has\s+\w+ed|Present Perfect|ever|never|already|yet|just/i)) a.add("en.gram.present_perfect");
+  if (has(/would|Second Conditional/i)) a.add("en.gram.cond_second");
+  else if (has(/First Conditional|if .*will/i)) a.add("en.gram.cond_first");
+  if (has(/passive|məchul|was .*ed by|is .*ed by/i)) a.add("en.gram.passive");
+  if (has(/Past Perfect|had \w+/i)) a.add("en.gram.past_perfect");
+  if (has(/Past Continuous|was \w+ing|were \w+ing/i)) a.add("en.gram.past_cont");
+  if (has(/must|should|might|have to|modal/i)) a.add("en.gram.modals");
+  if (has(/will|going to|gələcək/i)) a.add("en.gram.future");
+  if (has(/some|any|much|many|sayıla bil/i)) a.add("en.gram.quantifiers");
+  if (has(/comparative|superlative|-er than|the .*est|müqayisə/i)) a.add("en.gram.comparison");
+  if (has(/there is|there are|there was|there were/i)) a.add("en.gram.there_is");
+  if (has(/have got|has got/i)) a.add("en.gram.have");
+  if (has(/\bcan\b|can't|cannot|bacarıq/i)) a.add("en.gram.can");
+  if (has(/what|where|when|who|why|how|sual söz/i)) a.add("en.gram.questions");
+  if (has(/\bin\b|\bon\b|\bunder\b|next to|behind|between|sözön/i)) a.add("en.gram.prepositions");
+  if (has(/cəmi hansı|plural|-s əlavə/i)) a.add("en.gram.plural");
+  if (has(/this|that|these|those/i)) a.add("en.gram.demonstrative");
+  return a;
+}
+
+function skillsFor(t: Task, lessonId: string, unitId: string, family: Family): string[] {
   const p = P(t);
   const s = new Set<string>();
+
+  if (family === "az" || family === "en") {
+    const found = family === "az" ? azSkills(t) : enSkills(t);
+    // Dinləmə AYRI bacarıqdır və qrammatikanı əvəz etmir: "Present Perfect
+    // Continuous" dinləmə sualı hər iki bacarığı yoxlayır. Ona görə onu kənara
+    // qoyub qrammatika boş qalıbsa bölmə ehtiyatını işlədirik.
+    const listens = found.delete("en.listen");
+    for (const id of found) s.add(id);
+    if (!s.size) {
+      const d = UNIT_DEFAULT_LANG[unitId];
+      if (d) s.add(d);
+    }
+    if (listens) s.add("en.listen");
+    return [...s].filter((id) => {
+      if (getSkill(id)) return true;
+      throw new Error(`qrafda olmayan bacarıq: ${id}`);
+    });
+  }
+  if (family === "other") return [];
 
   // Əvvəl yuxarı sinif mövzuları: onlar varsa elementar qaydalar bağlanır.
   for (const id of advancedSkills(p)) s.add(id);
@@ -401,7 +564,7 @@ for (const u of subj.units)
     if (l.kind === "test") continue;
     for (const t of [...l.tasks, ...(l.bonusTasks ?? [])]) {
       total++;
-      const sk = skillsFor(t, l.id, u.id);
+      const sk = skillsFor(t, l.id, u.id, familyOf(slug));
       if (sk.length) map[t.id] = sk;
       else untagged.push(`${t.id} | ${t.prompt}`);
     }
