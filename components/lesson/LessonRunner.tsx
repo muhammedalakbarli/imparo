@@ -90,6 +90,8 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
   // Cəhd jurnalı (migration 0044): sual göründüyü an + eyni tapşırığa neçənci cəhd.
   const shownAtRef = useRef<number>(Date.now());
   const attemptNoRef = useRef<Record<string, number>>({});
+  // Dərs başına bir dəfə "ilk cavab" hadisəsi göndərmək üçün.
+  const firstAnswerRef = useRef(false);
 
   // Level-up aşkarı üçün dərsə başlamazdan əvvəlki XP.
   useEffect(() => {
@@ -109,6 +111,7 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
 
   // Analitika: dərs başlandı (funnel — signup→onboarding→dərs).
   useEffect(() => {
+    firstAnswerRef.current = false;
     track("lesson_started", { lessonId: lesson.id, subject: slug });
   }, [lesson.id, slug]);
 
@@ -144,6 +147,13 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
   function handleCheck() {
     if (answer === null || answer === "") return;
     const result = gradeTask(task, answer);
+    // Dərsdə İLK cavab. Bu olmadan "dərsi açdı, amma bir suala belə cavab
+    // vermədi" ilə "cavab verdi, sonda buraxdı" halları ayırd edilmirdi —
+    // halbuki bunlar tamam fərqli problemlərdir.
+    if (!firstAnswerRef.current) {
+      firstAnswerRef.current = true;
+      track("lesson_first_answer", { lessonId: lesson.id, subject: slug, correct: result.correct });
+    }
     setChecked(true);
     setLastCorrect(result.correct);
 

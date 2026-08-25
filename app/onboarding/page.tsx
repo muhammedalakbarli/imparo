@@ -180,8 +180,14 @@ export default function OnboardingPage() {
         return;
       }
     }
-    if (i < ORDER.length - 1) setI((s) => s + 1);
-    else void finish();
+    if (i < ORDER.length - 1) {
+      // Onboarding 12 addımdır və indiyə qədər yalnız SONU ölçülürdü: 3-cü addımda
+      // çıxan istifadəçi haqqında heç nə bilmirdik. Addım adı ilə bir hadisə
+      // 12 ayrı hadisədən yaxşıdır — funnel eyni cür qurulur, ad şişmir.
+      const nextKey = ORDER[i + 1];
+      track("onboarding_step", { step: nextKey, index: i + 1, total: ORDER.length });
+      setI((s) => s + 1);
+    } else void finish();
   }
 
   async function onDiagnostic(r: DiagnosticResult) {

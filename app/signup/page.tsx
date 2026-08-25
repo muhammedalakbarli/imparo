@@ -92,6 +92,10 @@ function SignupInner() {
     setLoading(false);
 
     if (!res.ok) {
+      // Uğursuz qeydiyyat indiyə qədər ümumiyyətlə ölçülmürdü: "email artıq var",
+      // "parol zəifdir" kimi maneələr funnel-də görünmürdü. Səbəb mətnini deyil,
+      // yalnız qısa açarını göndəririk (şəxsi məlumat sızmasın).
+      track("signup_failed", { reason: (res.error || "unknown").slice(0, 60) });
       setError(res.error || t("auth.err.signupFailed"));
       return;
     }
