@@ -99,13 +99,148 @@ function mulSteps(a: number, b: number): string {
   if (small <= 5) return `${a} × ${b} — ${acc(big)} ${small} dəfə toplamaq deməkdir: ${Array(small).fill(big).join(" + ")} = ${s}.`;
   // Hər ikisi 6–9 arasındadırsa, 5-ə ayırırıq: 9 × 8 = 9×5 + 9×3
   if (big < 10) return `${a} × ${b} = ${big} × 5 + ${big} × ${small - 5} = ${big * 5} + ${big * (small - 5)} = ${s}.`;
+  // Hər iki vuruq çoxrəqəmlidir: kiçiyini mərtəbələrə ayırırıq (18 × 12 = 18×10 + 18×2)
+  const ps = parts(small);
+  if (ps.length >= 2) {
+    const terms = ps.map((p) => `${big} × ${p} = ${big * p}`);
+    return `${small} vuruğunu mərtəbələrə ayırırıq: ${ps.join(" + ")}. ${terms.join(", ")}. Cəmi: ${ps.map((p) => big * p).join(" + ")} = ${s}.`;
+  }
   return `${a} × ${b} = ${s}.`;
 }
 
 function divSteps(a: number, b: number): string {
   const s = a / b;
   if (!Number.isInteger(s)) return "";
+  // Qismət çoxrəqəmlidirsə, hissə-hissə bölmə daha aydındır: 945 : 35 → 35×20, 35×7
+  const ps = parts(s);
+  if (ps.length >= 2) {
+    const terms = ps.map((p) => `${b} × ${p} = ${b * p}`);
+    return `Hissə-hissə bölürük: ${terms.join(", ")}. Bu hissələrin cəmi ${ps.map((p) => b * p).join(" + ")} = ${a}, deməli qismət ${ps.join(" + ")} = ${s}-dir.`;
+  }
   return `${acc(a)} ${b} bərabər hissəyə bölürük. Hər hissəyə ${s} düşür, çünki ${b} × ${s} = ${a}.`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Riyazi ifadənin addım-addım hesablanması: "2 + 3 × 4" → "əvvəl 3 × 4 = 12,
+// sonra 2 + 12 = 14". Əməllər sırasını (mötərizə → vurma/bölmə → toplama/çıxma)
+// şagirdə göstərmək üçün — cavabı yox, YOLU izah edir.
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Tok = number | string;
+
+function tokenize(src: string): Tok[] | null {
+  const out: Tok[] = [];
+  const t = src.replace(/[×*]/g, "*").replace(/[÷:]/g, "/").replace(/[−–—]/g, "-").replace(/\s+/g, "");
+  for (let i = 0; i < t.length; ) {
+    const c = t[i];
+    if (/\d/.test(c)) {
+      let j = i;
+      while (j < t.length && /\d/.test(t[j])) j++;
+      out.push(Number(t.slice(i, j)));
+      i = j;
+    } else if ("+-*/()".includes(c)) {
+      out.push(c);
+      i++;
+    } else return null;
+  }
+  return out;
+}
+
+const SIGN: Record<string, string> = { "+": "+", "-": "−", "*": "×", "/": ":" };
+
+function show(toks: Tok[]): string {
+  return toks.map((x) => (typeof x === "number" ? String(x) : x === "(" || x === ")" ? x : ` ${SIGN[x]} `)).join("").replace(/\(\s+/g, "(").replace(/\s+\)/g, ")");
+}
+
+function apply(a: number, op: string, b: number): number | null {
+  if (op === "+") return a + b;
+  if (op === "-") return a - b;
+  if (op === "*") return a * b;
+  if (b === 0 || a % b !== 0) return null; // 4-cü sinif səviyyəsində qalıqsız bölmə gözlənilir
+  return a / b;
+}
+
+/** Bir addım yerinə yetirir; sırası: mötərizə → vurma/bölmə → toplama/çıxma. */
+function step(toks: Tok[]): { toks: Tok[]; text: string; label: string } | null {
+  // ən daxili mötərizə
+  let open = -1;
+  for (let i = 0; i < toks.length; i++) {
+    if (toks[i] === "(") open = i;
+    else if (toks[i] === ")" && open >= 0) {
+      const inner = toks.slice(open + 1, i);
+      if (inner.length === 1 && typeof inner[0] === "number")
+        return { toks: [...toks.slice(0, open), inner[0], ...toks.slice(i + 1)], text: "", label: "" };
+      const st = step(inner);
+      if (!st) return null;
+      return { toks: [...toks.slice(0, open), "(", ...st.toks, ")", ...toks.slice(i + 1)], text: st.text, label: "mötərizə" };
+    }
+  }
+  for (const ops of [["*", "/"], ["+", "-"]]) {
+    for (let i = 1; i < toks.length - 1; i++) {
+      const op = toks[i];
+      if (typeof op !== "string" || !ops.includes(op)) continue;
+      const a = toks[i - 1];
+      const b = toks[i + 1];
+      if (typeof a !== "number" || typeof b !== "number") continue;
+      const r = apply(a, op, b);
+      if (r === null) return null;
+      return {
+        toks: [...toks.slice(0, i - 1), r, ...toks.slice(i + 2)],
+        text: `${a} ${SIGN[op]} ${b} = ${r}`,
+        label: ops[0] === "*" ? (op === "*" ? "vurma" : "bölmə") : op === "+" ? "toplama" : "çıxma",
+      };
+    }
+  }
+  return null;
+}
+
+/** "2 + 3 × 4" kimi ifadəni addım-addım izah edir. Tanımasa boş qaytarır. */
+function exprSteps(src: string): string {
+  let toks = tokenize(src);
+  if (!toks || toks.length < 3) return "";
+  const parts: string[] = [];
+  let guard = 0;
+  while (toks.length > 1) {
+    if (++guard > 40) return "";
+    const st = step(toks);
+    if (!st) return "";
+    toks = st.toks;
+    if (st.text) parts.push(st.label ? `${st.label}: ${st.text}` : st.text);
+  }
+  if (!parts.length || typeof toks[0] !== "number") return "";
+  const head = src.includes("(") ? "Mötərizə birinci, sonra vurma/bölmə, ən sonda toplama/çıxma." : "Əvvəl vurma/bölmə, sonra toplama/çıxma.";
+  return `${head} ${parts.map((p, i) => (i === 0 ? `Əvvəl ${p}` : `sonra ${p}`)).join(", ")}.`;
+}
+
+/** Onluğa/yüzlüyə/minliyə yuvarlaqlaşdırma. */
+function roundSteps(n: number, unit: number, unitName: string): string {
+  const rem = n % unit;
+  const down = n - rem;
+  const up = down + unit;
+  const digit = Math.floor(rem / (unit / 10));
+  const res = rem * 2 >= unit ? up : down;
+  return `${unitName} yuvarlaqlaşdırarkən ondan sonrakı rəqəmə baxırıq: ${digit}. ${digit >= 5 ? `5-dən kiçik deyil, ona görə yuxarı qalxırıq` : `5-dən kiçikdir, ona görə aşağı qalırıq`}: ${n} → ${res}.`;
+}
+
+/** Eyni məxrəcli kəsrlərin toplanması/çıxılması. */
+function fracSteps(a: number, b: number, op: string, c: number, d: number): string {
+  if (b !== d) return "";
+  const num = op === "+" ? a + c : a - c;
+  return `Məxrəclər eynidir (${b}), ona görə yalnız sayları ${op === "+" ? "toplayırıq" : "çıxırıq"}: ${a} ${op === "+" ? "+" : "−"} ${c} = ${num}. Məxrəc dəyişmir: ${num}/${b}.`;
+}
+
+/** Onluq kəsrlərin toplanması/çıxılması — onda bir/yüzdə bir üzərindən. */
+function decSteps(a: string, op: string, b: string): string {
+  const dec = (x: string) => (x.split(/[.,]/)[1] ?? "").length;
+  const k = Math.max(dec(a), dec(b));
+  if (k === 0 || k > 2) return "";
+  const m = 10 ** k;
+  const ai = Math.round(Number(a.replace(",", ".")) * m);
+  const bi = Math.round(Number(b.replace(",", ".")) * m);
+  const r = op === "+" ? ai + bi : ai - bi;
+  const unit = k === 1 ? "onda bir" : "yüzdə bir";
+  const fmt = (v: number) => (v / m).toFixed(k).replace(".", ",");
+  return `Hər ikisini ${unit} kimi sayırıq: ${a.replace(".", ",")} = ${ai} ${unit}, ${b.replace(".", ",")} = ${bi} ${unit}. ${ai} ${op === "+" ? "+" : "−"} ${bi} = ${r} ${unit}, yəni ${fmt(r)}.`;
 }
 
 type Rule = { re: RegExp; fn: (m: RegExpMatchArray, t: Task) => string };
@@ -130,6 +265,22 @@ const rules: Rule[] = [
   { re: new RegExp(`^${N}-[dD](an|ən) əvvəl`), fn: (m) => { const n = num(m[1]); return `«Əvvəl gələn» 1 az deməkdir: ${n} − 1 = ${n - 1}.`; } },
   { re: new RegExp(`^${N}-[iıuü]n sağ qonşusu`), fn: (m) => { const n = num(m[1]); return `Sağ qonşu ədəddən 1 böyükdür: ${n} + 1 = ${n + 1}.`; } },
   { re: new RegExp(`^${N}-[iıuü]n sol qonşusu`), fn: (m) => { const n = num(m[1]); return `Sol qonşu ədəddən 1 kiçikdir: ${n} − 1 = ${n - 1}.`; } },
+  // Eyni məxrəcli kəsrlər: 2/5 + 1/5
+  { re: /^(\d+)\/(\d+)\s*([+\-−])\s*(\d+)\/(\d+)\s*=/, fn: (m) => fracSteps(+m[1], +m[2], m[3] === "+" ? "+" : "-", +m[4], +m[5]) },
+  // Onluq kəsrlər: 2,5 + 1,3
+  { re: /^(\d+[.,]\d+)\s*([+\-−])\s*(\d+[.,]?\d*)\s*=/, fn: (m) => decSteps(m[1], m[2] === "+" ? "+" : "-", m[3]) },
+  { re: /^(\d+)\s*([+\-−])\s*(\d+[.,]\d+)\s*=/, fn: (m) => decSteps(m[1], m[2] === "+" ? "+" : "-", m[3]) },
+  // Yuvarlaqlaşdırma
+  { re: /^([\d\s]+) ədədini onluğa yuvarlaqlaşdır/, fn: (m) => roundSteps(+m[1].replace(/\s/g, ""), 10, "Onluğa") },
+  { re: /^([\d\s]+) ədədini yüzlüyə yuvarlaqlaşdır/, fn: (m) => roundSteps(+m[1].replace(/\s/g, ""), 100, "Yüzlüyə") },
+  { re: /^([\d\s]+) ədədini minliyə yuvarlaqlaşdır/, fn: (m) => roundSteps(+m[1].replace(/\s/g, ""), 1000, "Minliyə") },
+  // Mərtəbələr: "3456 ədədində neçə minlik var?"
+  { re: /^(\d+) ədədində neçə (minlik|yüzlük) var\?/, fn: (m) => { const n = +m[1], u = m[2] === "minlik" ? 1000 : 100; const ps = parts(n); return `${n} = ${ps.join(" + ")}. ${m[2][0].toUpperCase() + m[2].slice(1)}lərin sayı ${Math.floor(n / u) % 10 === 0 && n < u ? 0 : Math.floor(n / u)}-dir.`; } },
+  // Vahid çevirmələri
+  { re: /^(\d+) m neçə sm-dir\?|^(\d+) metr neçə santimetrdir\?/, fn: (m) => { const n = +(m[1] ?? m[2]); return `1 m = 100 sm, deməli ${n} × 100 = ${n * 100} sm.`; } },
+  { re: /^(\d+) km neçə metrdir\?/, fn: (m) => `1 km = 1000 m, deməli ${+m[1]} × 1000 = ${+m[1] * 1000} m.` },
+  { re: /^(\d+) kq neçə qramdır\?|^(\d+) kiloqram neçə qramdır\?/, fn: (m) => { const n = +(m[1] ?? m[2]); return `1 kq = 1000 q, deməli ${n} × 1000 = ${n * 1000} q.`; } },
+  { re: /^(\d+) saat neçə dəqiqədir\?/, fn: (m) => `1 saat = 60 dəqiqə, deməli ${+m[1]} × 60 = ${+m[1] * 60} dəqiqə.` },
   {
     re: new RegExp(`^${N},\\s*${N},\\s*${N}(,\\s*${N})?\\s*,?\\s*\\.\\.\\.`),
     fn: (m) => {
@@ -172,6 +323,12 @@ function explain(t: Task): string {
       const out = r.fn(m, t);
       if (out) return out;
     }
+  }
+  // Ümumi ifadə: "2 + 3 × 4 = ?", "(12 ÷ 4 + 2) × 3 = ?" — əməllər sırası ilə
+  const expr = p.match(/^([\d\s+\-−×÷*:()]+?)\s*=\s*\?/);
+  if (expr) {
+    const out = exprSteps(expr[1]);
+    if (out) return out;
   }
   return "";
 }
