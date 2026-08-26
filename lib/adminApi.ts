@@ -2,7 +2,7 @@
 // Oxuma üçün lib/content/db.ts fetchContentTree istifadə olunur.
 
 import { createClient } from "./supabase/client";
-import type { Task, TaskType, RuleSection } from "./types";
+import type { Task, TaskType, RuleSection, LessonVideo } from "./types";
 
 // Cari istifadəçi admindirmi?
 export async function checkIsAdmin(): Promise<boolean> {
@@ -76,6 +76,7 @@ export interface LessonInput {
   intro: string;
   visual: string | null;
   sections: RuleSection[] | null;
+  video: LessonVideo | null;
   sort_order: number;
 }
 export function upsertLesson(row: LessonInput): Promise<Res> {

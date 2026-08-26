@@ -31,7 +31,7 @@ import { PageSkeleton } from "@/components/Skeleton";
 type Editing =
   | { kind: "subject"; mode: "new" | "edit"; data: Partial<Subject> }
   | { kind: "unit"; mode: "new" | "edit"; data: Partial<Unit> }
-  | { kind: "lesson"; mode: "new" | "edit"; data: Partial<Lesson> }
+  | { kind: "lesson"; mode: "new" | "edit"; data: Partial<LessonForm> }
   | { kind: "task"; mode: "new" | "edit"; data: Partial<TaskForm> }
   | null;
 
@@ -228,7 +228,7 @@ export default function AdminPage() {
                 title={l.title}
                 sub={`${l.tasks.length} tapşırıq${l.bonusTasks?.length ? ` + ${l.bonusTasks.length} bonus` : ""}`}
                 onOpen={() => setSel({ s: subj!.slug, u: unit.id, l: l.id })}
-                onEdit={() => setEditing({ kind: "lesson", mode: "edit", data: l })}
+                onEdit={() => setEditing({ kind: "lesson", mode: "edit", data: lessonToForm(l) })}
                 onDelete={() => del("lesson", l.id, "İstifadəçilərin bu dərsdəki proqresi də silinəcək!")}
                 onUp={() => move("lessons", unit.lessons.map((x) => x.id), i, -1)}
                 onDown={() => move("lessons", unit.lessons.map((x) => x.id), i, 1)}
@@ -288,6 +288,27 @@ function taskList(l: Lesson): { t: Task; bonus: boolean }[] {
   ];
 }
 
+/**
+ * Dərs formasının düz (flat) forması: `video` obyekti üç ayrı sətir sahəsinə
+ * açılır ki, admin panelində sadə input-larla redaktə oluna bilsin. Saxlayanda
+ * geri obyektə yığılır (bax upsertLesson çağırışı).
+ */
+type LessonForm = Omit<Lesson, "video"> & {
+  videoSrc?: string;
+  videoPoster?: string;
+  videoCaptions?: string;
+};
+
+function lessonToForm(l: Lesson): Partial<LessonForm> {
+  const { video, ...rest } = l;
+  return {
+    ...rest,
+    videoSrc: video?.src ?? "",
+    videoPoster: video?.poster ?? "",
+    videoCaptions: video?.captions ?? "",
+  };
+}
+
 function taskToForm(t: Task, bonus: boolean, l: Lesson): Partial<TaskForm> {
   const base: Partial<TaskForm> = {
     id: t.id,
@@ -340,7 +361,7 @@ async function saveEditing(
       }),
     );
   } else if (editing.kind === "lesson" && unit && subj) {
-    const d = data as Partial<Lesson>;
+    const d = data as Partial<LessonForm>;
     const id = editing.mode === "edit" ? (d.id as string) : genId(`${unit.id}-l`);
     await run(() =>
       upsertLesson({
@@ -350,6 +371,15 @@ async function saveEditing(
         intro: (d.intro || "").trim(),
         visual: (d.visual as string) || null,
         sections: (d.sections as RuleSection[])?.length ? (d.sections as RuleSection[]) : null,
+        // Video: yalnız ünvan yazılır, qalanı könüllüdür. Ünvan boşdursa dərsdə
+        // video yoxdur və giriş ekranında köhnəki kimi şəkil göstərilir.
+        video: d.videoSrc?.trim()
+          ? {
+              src: d.videoSrc.trim(),
+              poster: d.videoPoster?.trim() || undefined,
+              captions: d.videoCaptions?.trim() || undefined,
+            }
+          : null,
         sort_order: editing.mode === "edit" ? unit.lessons.findIndex((l) => l.id === id) : unit.lessons.length,
       }),
     );
@@ -556,6 +586,11 @@ function EditForm({
               <Field label="Başlıq" value={form.title} onChange={(v) => set("title", v)} />
               <Field label="Giriş (intro)" value={form.intro} onChange={(v) => set("intro", v)} textarea />
               <Field label="Şəkil açarı (visual, məs. 'place-value')" value={form.visual} onChange={(v) => set("visual", v)} />
+              {/* Video — scripts/encode-video.sh çıxardığı ünvanı bura yazırsan.
+                  Poster və altyazı könüllüdür. */}
+              <Field label="Video ünvanı (məs. /videos/ry1-sayma-l1.mp4)" value={form.videoSrc as string} onChange={(v) => set("videoSrc", v)} />
+              <Field label="Poster şəkli (könüllü, məs. /videos/ry1-sayma-l1.jpg)" value={form.videoPoster as string} onChange={(v) => set("videoPoster", v)} />
+              <Field label="Altyazı .vtt (könüllü)" value={form.videoCaptions as string} onChange={(v) => set("videoCaptions", v)} />
               <SectionsEditor value={(form.sections as RuleSection[]) ?? []} onChange={(v) => set("sections", v)} />
             </>
           )}

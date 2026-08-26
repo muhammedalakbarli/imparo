@@ -1,4 +1,5 @@
-// GET /api/lessons/{id} — bir dərs: giriş, qaydalar (sections) + bütün tapşırıqlar.
+// GET /api/lessons/{id} — bir dərs: giriş, video, qaydalar (sections) + tapşırıqlar.
+// Mobil app da bu marşrutdan oxuyur, ona görə yeni sahələr BURADA da qaytarılmalıdır.
 
 import type { NextRequest } from "next/server";
 import { ok, fail } from "@/lib/api/http";
@@ -21,6 +22,7 @@ export async function GET(
     title: lesson.title,
     intro: lesson.intro,
     visual: lesson.visual ?? null,
+    video: lesson.video ?? null,
     sections: lesson.sections ?? [],
     tasks: lesson.tasks,
     bonusTasks: lesson.bonusTasks ?? [],

@@ -102,12 +102,31 @@ export interface RuleSection {
 export type LessonKind = "lesson" | "chest" | "test";
 
 // Lesson = "project": bir mövzu, öz qaydaları, tapşırıqları və son tarixi ilə.
+/**
+ * Dərs videosu — sofatutor modeli: əvvəl izlə, sonra məşq et.
+ *
+ * `src` QƏSDƏN sadə URL-dir, host identifikatoru deyil. Hazırda videolar Worker
+ * static assets-dən verilir (fayl başına 25 MiB limit → 3-4 dəqiqəlik izah videosu),
+ * amma həcm artanda R2-yə və ya xarici axına keçmək lazım gələcək. URL saxladığımıza
+ * görə həmin keçid yalnız ünvanı dəyişir — kod və məlumat modeli toxunulmaz qalır.
+ *
+ * `captions` uşaq məhsulunda vacibdir: səssiz mühitdə izləmək, eşitmə çətinliyi və
+ * oxumağı yenicə öyrənən şagird üçün mətnlə səsi eyni vaxtda görmək.
+ */
+export interface LessonVideo {
+  src: string; // MP4/WebM ünvanı (nisbi və ya tam)
+  poster?: string; // ilk kadr — yüklənənə qədər göstərilir
+  durationSec?: number; // "3 dəq" etiketi üçün; pleyer onsuz da özü bilir
+  captions?: string; // .vtt altyazı faylının ünvanı
+}
+
 export interface Lesson {
   id: string;
   title: string;
   intro: string; // qısa giriş cümləsi (uşaq dilində, sadə)
   kind?: LessonKind; // yoxdursa "lesson"
   visual?: string; // hero illüstrasiyanın açarı (bax LessonVisual)
+  video?: LessonVideo; // varsa giriş ekranında şəkilin yerinə pleyer göstərilir
   sections?: RuleSection[]; // ətraflı qaydalar (şəkil altında)
   tasks: Task[]; // 15 əsas tapşırıq (chest üçün boş, test üçün avtomatik doldurulur)
   bonusTasks?: Task[]; // 5 bonus tapşırıq

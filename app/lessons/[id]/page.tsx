@@ -16,6 +16,7 @@ import { useT } from "@/lib/i18n";
 import LessonRunner from "@/components/lesson/LessonRunner";
 import QuitDialog from "@/components/lesson/QuitDialog";
 import LessonVisual from "@/components/LessonVisual";
+import LessonVideo from "@/components/lesson/LessonVideo";
 import Mascot from "@/components/Mascot";
 import SpeechBubble from "@/components/SpeechBubble";
 import { PageSkeleton } from "@/components/Skeleton";
@@ -117,8 +118,13 @@ export default function LessonPage({
         </div>
         <h1 className="mt-1 text-3xl font-bold text-fg">{lesson.title}</h1>
 
-        {/* Şəkil */}
-        <LessonVisual visual={lesson.visual} />
+        {/* Video varsa şəkilin YERİNƏ pleyer: ikisi birlikdə giriş ekranını
+            şişirdir və uşağın diqqətini bölür. Video yoxdursa köhnə davranış. */}
+        {lesson.video ? (
+          <LessonVideo video={lesson.video} />
+        ) : (
+          <LessonVisual visual={lesson.visual} />
+        )}
 
         {/* Qaydalar — dostyana kartlar */}
         {lesson.sections && lesson.sections.length > 0 && (

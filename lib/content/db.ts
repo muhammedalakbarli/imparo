@@ -10,6 +10,7 @@ import type {
   Task,
   TaskFigure,
   RuleSection,
+  LessonVideo,
 } from "../types";
 
 // QEYD: əvvəl burada TS seed-dən dərs id → {intro, sections, visual} xəritəsi qurulurdu
@@ -43,6 +44,7 @@ interface LessonRow {
   kind?: string | null;
   visual: string | null;
   sections: RuleSection[] | null;
+  video: LessonVideo | null;
   sort_order: number;
 }
 interface TaskRow {
@@ -231,6 +233,7 @@ export async function fetchContentTreeWith(
         kind: (row.kind as Lesson["kind"]) ?? "lesson",
         visual: row.visual ?? undefined,
         sections: row.sections && row.sections.length ? row.sections : undefined,
+        video: row.video ?? undefined,
         tasks: t.main,
         bonusTasks: t.bonus.length ? t.bonus : undefined,
       };
@@ -458,7 +461,7 @@ export async function fetchLessonDetailWith(
   try {
     const lessonRes = await supabase
       .from("lessons")
-      .select("id,title,intro,kind,visual,sections")
+      .select("id,title,intro,kind,visual,sections,video")
       .eq("id", id)
       .maybeSingle();
     const row = lessonRes.data as Omit<LessonRow, "unit_id" | "sort_order"> | null;
@@ -484,6 +487,7 @@ export async function fetchLessonDetailWith(
       kind: (row.kind as Lesson["kind"]) ?? "lesson",
       visual: row.visual ?? undefined,
       sections: row.sections && row.sections.length ? row.sections : undefined,
+      video: row.video ?? undefined,
       tasks: main,
       bonusTasks: bonus.length ? bonus : undefined,
     };
