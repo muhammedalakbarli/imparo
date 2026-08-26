@@ -19,8 +19,10 @@
     "typecheck": "tsc --noEmit",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "prebuild": "tsx scripts/gen-content-seed.ts"
+    "cf:deploy": "npm run guard && opennextjs-cloudflare build && opennextjs-cloudflare deploy && npm run guard:smoke",
+    "prebuild": "tsx scripts/gen-content-seed.ts",
+    "guard": "tsx scripts/guard.ts",
+    "guard:smoke": "tsx scripts/guard.ts --smoke"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

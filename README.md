@@ -166,10 +166,34 @@ tests/               # Vitest testləri (96)
 | `npm run lint` | ESLint |
 | `npm run test` | Vitest testləri |
 | `npm run typecheck` | TypeScript tip yoxlaması |
+| `npm run guard` | Marşrut büdcəsi — Worker CPU limitindən qorunma (deploy-dan əvvəl) |
+| `npm run guard:smoke` | Canlı marşrut yoxlaması (deploy-dan sonra) |
+
+## Marşrut büdcəsi (mühafiz)
+
+Cloudflare Worker-də bir sorğunun CPU büdcəsi kiçikdir. Bir marşrut ehtiyacından
+çox məlumat çəkirsə (məs. bir siyahı üçün bütün tapşırıq cədvəlini), Node-da bu
+sadəcə yavaş görünür — canlıda isə `Error 1102: Worker exceeded resource limits`
+verir. Belə bir hadisə real baş verdi: üç məzmun marşrutu bütün ağacı (~11 700
+tapşırıq) çəkirdi və tapşırıq sətirləri böyüdükcə (izah mətnləri, skill etiketləri)
+bir gün limit aşıldı — **kod dəyişmədən**.
+
+`npm run guard` bunun qarşısını alır. Supabase URL-i lokal sayğac proxy-sinə
+yönləndirilir və hər marşrutun endirdiyi bayt/subrequest sayı ölçülüb büdcəyə
+qarşı yoxlanılır (Worker daxilində CPU ölçmək mümkün deyil — Cloudflare-də
+`performance.now()` sinxron kodda donur, ona görə həcm ən dürüst göstəricidir).
+
+Üç yoxlama: **əhatə** (hər marşrut `scripts/guard.ts`-də elan olunmalıdır — yeni
+marşrut büdcəsiz əlavə edilə bilməz), **büdcə** (limitdən aşağı olmalıdır),
+**smoke** (deploy-dan sonra canlı marşrutlar 5xx qaytarmamalıdır).
+
+Hər üçü `npm run cf:deploy` zəncirinə bağlıdır, yəni yan keçmək olmur.
+Büdcə aşılıbsa deploy başlamır.
 
 ## Deploy
 
-Cloudflare Workers-ə deploy olunur (OpenNext adapteri): `npm run cf:deploy`. Mühit dəyişənləri
+Cloudflare Workers-ə deploy olunur (OpenNext adapteri): `npm run cf:deploy` —
+bu əmr mühafizi işə salır, build edir, deploy edir və canlı smoke ilə bitirir. Mühit dəyişənləri
 `wrangler secret put <AD>` ilə Worker secret kimi qoyulur (Cloudflare dashboard-da da görünür).
 Custom domain: `imparo.app` (+ `www.imparo.app` → 301 redirect, bax `middleware.ts`).
 
