@@ -43,6 +43,10 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  // Google Search Console — sayt sahibliyinin təsdiqi.
+  // DNS/OAuth əvəzinə meta teq seçildi: qeyd repoda versiyalanır, heç bir xarici
+  // servisə DNS icazəsi verilmir. SİLMƏ — silinsə təsdiq düşür.
+  verification: { google: "fbtII8eu_lL8qGB82r40no0Qz_fZmhCLlVflwKiBBh0" },
   title: {
     default: "Imparo — 1–8-ci siniflər üçün interaktiv öyrənmə",
     template: "%s · Imparo",
