@@ -33,12 +33,13 @@
 // İSTİFADƏ
 //   npm run guard          — əhatə + büdcə (deploy-dan ƏVVƏL)
 //   npm run guard:smoke    — canlı yoxlama (deploy-dan SONRA)
+//   npm run guard:pages    — sitemap-dakı ünvanlar prerender olunurmu (build-dən SONRA)
 //   npm run guard -- --measure  — cari həcmləri göstər (büdcə təyin etmək üçün)
 
 import { config } from "dotenv";
 import { spawn, type ChildProcess } from "node:child_process";
 import http from "node:http";
-import { readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 
 config({ path: ".env.local" });
@@ -479,7 +480,12 @@ async function runSmoke(): Promise<number> {
 async function main() {
   const args = process.argv.slice(2);
   const smoke = args.includes("--smoke");
+  const pages = args.includes("--pages");
   const measureOnly = args.includes("--measure");
+
+  if (pages) {
+    process.exit(checkPages());
+  }
 
   if (smoke) {
     process.exit(await runSmoke());
@@ -496,4 +502,73 @@ async function main() {
   process.exit(await runBudget(measureOnly));
 }
 
+
+// ── Səhifə mühafizi (build-dən SONRA işləyir) ─────────────────────────────────
+//
+// NİYƏ ƏLAVƏ OLUNDU
+// Yuxarıdakı büdcə yoxlaması yalnız app/api altına baxır. Amma 1102 ikinci dəfə
+// SƏHİFƏdən gəldi: /subjects/[slug] "use client" idi və generateStaticParams
+// yox idi, yəni Next onu HƏR SORĞUDA Worker-də render edirdi. Canlıda ölçüldü —
+// `outcome: exceededCpu`. Sitemap-dakı ünvan gəziciyə göndəriləndə yük artır və
+// səhifə sınır.
+//
+// Qayda: sitemap-da olan HƏR ünvan build zamanı hazırlanmalıdır. Sitemap-da olmaq
+// "gəzicini bura göndəririk" deməkdir; oraya Worker render qoymaq özünə tələ qurmaqdır.
+//
+// İstisna üçün DYNAMIC_OK-a səbəb yazılmalıdır.
+
+/** Sitemap-da olduğu halda qəsdən dinamik qalan ünvanlar — hər biri səbəbi ilə. */
+const DYNAMIC_OK: Record<string, string> = {};
+
+function checkPages(): number {
+  let manifest: { routes?: Record<string, unknown> };
+  try {
+    manifest = JSON.parse(readFileSync(".next/prerender-manifest.json", "utf8"));
+  } catch {
+    console.error(
+      "\n.next/prerender-manifest.json tapılmadı — bu yoxlama BUILD-dən sonra işləməlidir.",
+    );
+    return 1;
+  }
+  const prerendered = new Set(Object.keys(manifest.routes ?? {}));
+
+  // Sitemap-ı build çıxışından oxuyuruq: canlıya sorğu göndərməkdən asılı olmasın.
+  let xml: string;
+  try {
+    xml = readFileSync(".open-next/assets/sitemap.xml", "utf8");
+  } catch {
+    try {
+      xml = readFileSync(".next/server/app/sitemap.xml.body", "utf8");
+    } catch {
+      console.error("\nsitemap tapılmadı — səhifə yoxlaması buraxıldı.");
+      return 0;
+    }
+  }
+
+  const paths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)]
+    .map((m) => new URL(m[1].trim()).pathname)
+    .map((p) => (p !== "/" && p.endsWith("/") ? p.slice(0, -1) : p));
+
+  const missing = paths.filter((p) => !prerendered.has(p) && !(p in DYNAMIC_OK));
+
+  console.log(`\nSəhifə mühafizi: sitemap-da ${paths.length} ünvan, ${prerendered.size} prerender.`);
+  if (missing.length === 0) {
+    console.log("✓ Hamısı build zamanı hazırlanır.");
+    return 0;
+  }
+
+  console.error(
+    `\n✗ Bu ünvanlar sitemap-dadır, amma HƏR SORĞUDA Worker-də render olunur:\n` +
+      missing.map((p) => "  " + p).join("\n") +
+      `\n\n  Gəzici bura göndərilir — Worker CPU limitini aşa bilər (Error 1102).\n` +
+      `  Həll: səhifəyə generateStaticParams əlavə et (dinamik seqment varsa),\n` +
+      `  və ya scripts/guard.ts-dəki DYNAMIC_OK-a SƏBƏBİ ilə yaz.`,
+  );
+  return 1;
+}
+
+// Giriş nöqtəsi faylın ƏN SONUNDADIR: yuxarıdakı funksiyalar hoist olunur, amma
+// `const` elanları yox. Əvvəl `void main()` ortada idi və aşağıdakı DYNAMIC_OK-a
+// çatanda çökürdü — üstəlik uğurlu halda `&&` qısa-qapanma etdiyi üçün xəta heç
+// görünmür, yoxlama SƏSSİZCƏ keçirdi.
 void main();
