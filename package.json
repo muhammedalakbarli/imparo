@@ -22,7 +22,8 @@
     "cf:deploy": "npm run guard && opennextjs-cloudflare build && opennextjs-cloudflare deploy && npm run guard:smoke",
     "prebuild": "tsx scripts/gen-content-seed.ts",
     "guard": "tsx scripts/guard.ts",
-    "guard:smoke": "tsx scripts/guard.ts --smoke"
+    "guard:smoke": "tsx scripts/guard.ts --smoke",
+    "indexnow": "tsx scripts/indexnow.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
