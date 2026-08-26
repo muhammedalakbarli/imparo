@@ -441,7 +441,23 @@ async function runBudget(measureOnly: boolean): Promise<number> {
 // buna görə workers.dev-dən çağırılır). middleware.ts /api/ yollarını qəsdən
 // yönləndirmir, ona görə API marşrutları oradan birbaşa cavab verir.
 
+const SITE = "https://imparo.app";
 const SMOKE_HOST = "https://imparo.m-alakbarli2007.workers.dev";
+
+// Səhifələr workers.dev-dən YOXLANMIR: middleware.ts onları kanonik hosta 301
+// yönləndirir. Ona görə səhifə smoke-u birbaşa imparo.app-a gedir.
+//
+// NİYƏ SƏHİFƏ SMOKE-U ƏLAVƏ OLUNDU: /subjects/* statikləşdiriləndə canlıda 404
+// verdi (prerender faylları ASSETS-ə düşmürdü) və mövcud yoxlamaların HEÇ BİRİ
+// bunu tutmadı — büdcə API-yə baxır, səhifə mühafizi isə yalnız build
+// manifestinə. Manifest "hazırdır" deyirdi, canlı isə 404 qaytarırdı.
+const PAGE_SMOKE = [
+  "/",
+  "/onboarding",
+  "/yardim",
+  "/subjects/riyaziyyat-1", // dinamik seqmentli, prerender olunan marşrut
+  "/subjects/riyaziyyat",   // 5-ci sinif — prefiksiz slug
+];
 
 async function runSmoke(): Promise<number> {
   const probes = BUDGETS.filter((b) => b.probe);
@@ -472,6 +488,27 @@ async function runSmoke(): Promise<number> {
       exitCode = 1;
     }
   }
+
+  console.log(`\nSəhifə smoke — ${SITE}\n`);
+  for (const path of PAGE_SMOKE) {
+    let status = 0;
+    const t0 = Date.now();
+    try {
+      const res = await fetch(`${SITE}${path}`, { signal: AbortSignal.timeout(30_000) });
+      status = res.status;
+      await res.arrayBuffer();
+    } catch {
+      status = 0;
+    }
+    const ms = Date.now() - t0;
+    const bad = status !== 200;
+    console.log(`${bad ? "✗" : "✓"} ${path.padEnd(34)}${status || "timeout"}  ${ms} ms`);
+    if (bad) {
+      console.error(`  ${path} → ${status || "cavab yoxdur"}, gözlənilən 200.`);
+      exitCode = 1;
+    }
+  }
+
   return exitCode;
 }
 
