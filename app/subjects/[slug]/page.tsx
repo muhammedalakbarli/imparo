@@ -88,6 +88,7 @@ export default function SubjectPage({
               state: lessonState(order, l.id, completed),
               href: guest ? `/lessons/${l.id}?onboarding=1` : `/lessons/${l.id}`,
               unitTitle: li === 0 ? u.title : undefined,
+              unitGoal: li === 0 ? u.description || undefined : undefined,
             })),
           );
 

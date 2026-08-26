@@ -103,6 +103,7 @@ export default function DashboardPage() {
         state: lessonState(order, l.id, completed),
         href: `/lessons/${l.id}`,
         unitTitle: li === 0 ? u.title : undefined,
+        unitGoal: li === 0 ? u.description || undefined : undefined,
       })),
     );
     const currentLesson = lessons.find((l) => !completed.includes(l.id)) ?? null;

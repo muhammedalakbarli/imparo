@@ -25,6 +25,9 @@ export interface PathNode {
   state: NodeState;
   href?: string;
   unitTitle?: string; // dolu isə bu düyün yeni bölmənin başıdır (banner tetikləyir)
+  // Bölmənin nə öyrətdiyi (məzmunda `unit.description`). Başlıq tək başına
+  // uşağa az şey deyir: "Ədədlər 0-10" bölmənin ADIdır, MƏQSƏDİ deyil.
+  unitGoal?: string;
 }
 
 // Sabit en; zigzag amplitudası (Duolingo kimi orta).
@@ -52,10 +55,12 @@ const SPECIAL_STYLE: Record<"chest" | "test", { bg: string; depth: string }> = {
 // Bölmə banneri — rəngli gradient, ikon + başlıq; keçilmişsə kubok. Görünəndə səs.
 function UnitBanner({
   title,
+  goal,
   index,
   reached,
 }: {
   title: string;
+  goal?: string;
   index: number;
   reached: boolean;
 }) {
@@ -81,6 +86,13 @@ function UnitBanner({
           <div className="truncate text-sm font-extrabold leading-tight text-white">
             {title}
           </div>
+          {goal && (
+            // Qəsdən `truncate` YOXDUR: məqsəd cümləsi kəsilsə mənasını itirir,
+            // başlıqdan fərqli olaraq burada iki sətir qalması normaldır.
+            <div className="mt-0.5 text-xs font-semibold leading-snug text-white/85">
+              {goal}
+            </div>
+          )}
         </div>
         {reached && <Trophy size={18} className="shrink-0 text-white/90" />}
       </div>
@@ -301,6 +313,7 @@ export default function LearningPath({ nodes }: { nodes: PathNode[] }) {
         <UnitBanner
           key={`b-${node.id}`}
           title={node.unitTitle}
+          goal={node.unitGoal}
           index={unitIndex}
           reached={node.state !== "locked"}
         />,
