@@ -11,10 +11,10 @@ export type ZefiEmotion =
   | "worried"
   | "thinking";
 
-// ?v=3 — keş-bust: təmizlənmiş asetlər üçün brauzer/SW köhnə keşlənmiş (tozlu/kəsik) PNG-ni
+// ?v=4 — keş-bust: təmizlənmiş asetlər üçün brauzer/SW köhnə keşlənmiş (tozlu/kəsik) PNG-ni
 // atıb təzəsini çəksin. Asetlər dəyişəndə bu rəqəmi artır.
-const V = "3";
-const SRC: Record<ZefiEmotion, string> = {
+const V = "4";
+export const SRC: Record<ZefiEmotion, string> = {
   welcome: `/assets/images/zefi/zefi_welcome.png?v=${V}`,
   happy: `/assets/images/zefi/zefi_happy.png?v=${V}`,
   learning: `/assets/images/zefi/zefi_learning.png?v=${V}`,
@@ -22,6 +22,17 @@ const SRC: Record<ZefiEmotion, string> = {
   worried: `/assets/images/zefi/zefi_worried.png?v=${V}`,
   thinking: `/assets/images/zefi/zefi_thinking.png?v=${V}`,
 };
+
+/**
+ * Zefi şəklinin ünvanı — keş-bust versiyası ilə.
+ *
+ * Bu komponentdən KƏNARDA (məs. FooterScene) da şəkil lazım olur. Ünvanı orada
+ * əl ilə yazsaq, aset yenilənəndə `V` burada artır, orada isə köhnə qalır və
+ * brauzer köhnə şəkli göstərməyə davam edir — məhz bu baş verdi. Tək mənbə.
+ */
+export function zefiSrc(emotion: ZefiEmotion): string {
+  return SRC[emotion];
+}
 
 export default function ZefiMascot({
   emotion = "happy",

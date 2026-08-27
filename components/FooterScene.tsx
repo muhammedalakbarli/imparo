@@ -14,8 +14,8 @@
 // Zefi PNG-dir və səhnənin QARŞISINDA dayanır: onu SVG ilə çəkmək cəhdi əl-kodlanmış
 // maskot səviyyəsində olardı, mövcud peşəkar render isə hazırdır.
 
-import Image from "next/image";
 import { useT } from "@/lib/i18n";
+import { zefiSrc } from "@/components/ZefiMascot";
 
 export default function FooterScene() {
   const t = useT();
@@ -69,13 +69,15 @@ export default function FooterScene() {
         {/* Zefi — səhnənin qarşısında, təpənin üstündə. `zefi_welcome` əl qaldırıb
             salamlayır: səhifənin sonu üçün doğru poza. */}
         <div className="absolute bottom-[1%] left-1/2 h-[92%] w-auto -translate-x-1/2">
-          <Image
-            src="/assets/images/zefi/zefi_welcome.png"
+          {/* next/image YOX: aset ünvanı keş-bust sorğu sətri daşıyır və
+              next/image lokal ünvanda onu `images.localPatterns` konfiqurasiyası
+              olmadan rədd edir. ZefiMascot da eyni səbəbdən adi <img> işlədir. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={zefiSrc("welcome")}
             alt={t("scene.zefi")}
-            width={512}
-            height={512}
             className="h-full w-auto drop-shadow-[0_10px_18px_rgba(0,0,0,0.18)]"
-            sizes="(max-width: 640px) 190px, 320px"
+            draggable={false}
           />
         </div>
       </div>
