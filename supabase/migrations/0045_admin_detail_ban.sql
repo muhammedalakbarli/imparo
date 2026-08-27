@@ -57,6 +57,7 @@ begin
   where u.id = p_uid;
   return result;
 end; $$;
+revoke execute on function admin_user_detail(uuid) from public, anon;
 grant execute on function admin_user_detail(uuid) to authenticated;
 
 -- Bot işarəsi də moderasiya əməliyyatıdır — audit jurnalında iz qoymalıdır
@@ -71,4 +72,5 @@ begin
     'user', p_uid::text, null
   );
 end; $$;
+revoke execute on function admin_set_bot(uuid, boolean) from public, anon;
 grant execute on function admin_set_bot(uuid, boolean) to authenticated;

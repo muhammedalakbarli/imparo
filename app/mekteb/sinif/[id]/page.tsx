@@ -1,10 +1,15 @@
 "use client";
 
 // Sinif dashboardu (müəllim) — kod paylaş, şagird reyestri + analitika, tapşırıq təyin et.
+// İdarəetmə (0054): sinfin adını dəyiş, kodu yenilə, sinfi sil, tapşırığı redaktə et/sil,
+// şagirdi çıxar, şagirdin fərdi mənzərəsi.
 
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Users, Flame, Star, CircleCheck, AlertTriangle, ClipboardList, Clock, Target } from "lucide-react";
+import {
+  ArrowLeft, Users, Flame, Star, CircleCheck, AlertTriangle, ClipboardList, Clock, Target,
+  Pencil, Check, X, Trash2, RefreshCw, Copy, ChevronRight,
+} from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { useContent } from "@/components/ContentProvider";
 import {
@@ -13,40 +18,60 @@ import {
   classAssignments,
   classSkillGaps,
   assignLesson,
+  assignmentProgress,
+  renameClass,
+  regenClassCode,
+  deleteClass,
+  removeStudent,
+  updateAssignment,
+  deleteAssignment,
+  classStudentDetail,
   type TeacherClass,
   type RosterRow,
   type ClassAssignment,
   type SkillGapRow,
+  type AssignmentProgress,
+  type StudentDetail,
 } from "@/lib/schools";
 import { getSkill } from "@/lib/skills";
 import { PageSkeleton } from "@/components/Skeleton";
+import { useRouter } from "next/navigation";
 
 export default function ClassPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const { user, ready } = useAuthUser();
   const { subjects } = useContent();
   const [cls, setCls] = useState<TeacherClass | null | undefined>(undefined);
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [tasks, setTasks] = useState<ClassAssignment[]>([]);
   const [gaps, setGaps] = useState<SkillGapRow[]>([]);
+  const [prog, setProg] = useState<AssignmentProgress[]>([]);
   const [lessonId, setLessonId] = useState("");
   const [due, setDue] = useState("");
   const [minScore, setMinScore] = useState(70);
   const [busy, setBusy] = useState(false);
+  // İdarəetmə vəziyyəti
+  const [renaming, setRenaming] = useState<string | null>(null); // null = redaktə yoxdur
+  const [detailUid, setDetailUid] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  function reload() {
+  const reload = useCallback(() => {
     classRoster(id).then(setRoster);
     classAssignments(id).then(setTasks);
     classSkillGaps(id).then(setGaps);
-  }
+    assignmentProgress(id).then(setProg);
+  }, [id]);
+
+  const loadClass = useCallback(() => {
+    teacherClasses().then((cs) => setCls(cs.find((c) => c.id === id) ?? null));
+  }, [id]);
+
   useEffect(() => {
     if (!user) return;
-    teacherClasses().then((cs) => {
-      setCls(cs.find((c) => c.id === id) ?? null);
-    });
+    loadClass();
     reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, id]);
+  }, [user, loadClass, reload]);
 
   // Sinfin fənninin dərsləri (tapşırıq üçün).
   const lessons = useMemo(() => {
@@ -65,6 +90,8 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
     return { n, avgXp, active, avgDone };
   }, [roster]);
 
+  const progOf = (aid: string) => prog.find((p) => p.assignment_id === aid);
+
   async function assign() {
     const lid = lessonId || lessons[0]?.id;
     if (!lid || busy) return;
@@ -73,7 +100,32 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
     await assignLesson(id, lid, lesson?.title ?? "Tapşırıq", due || null, minScore).catch(() => null);
     setDue("");
     setBusy(false);
-    classAssignments(id).then(setTasks);
+    reload();
+  }
+
+  async function saveName(name: string) {
+    if (!name.trim()) { setRenaming(null); return; }
+    await renameClass(id, name).catch(() => null);
+    setRenaming(null);
+    loadClass();
+  }
+
+  async function newCode() {
+    await regenClassCode(id).catch(() => null);
+    loadClass();
+  }
+
+  async function removeClass() {
+    await deleteClass(id).catch(() => null);
+    router.replace("/mekteb/muellim");
+  }
+
+  function copyCode() {
+    if (!cls) return;
+    navigator.clipboard?.writeText(cls.code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
   }
 
   if (!ready || cls === undefined) return <PageSkeleton />;
@@ -100,13 +152,48 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
 
         {/* Başlıq + kod */}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-gradient-to-r from-brand to-brand-dark p-5 text-white shadow-lg">
-          <div>
-            <h1 className="text-2xl font-extrabold">{cls.name}</h1>
+          <div className="min-w-0">
+            {renaming === null ? (
+              <h1 className="flex items-center gap-2 text-2xl font-extrabold">
+                <span className="truncate">{cls.name}</span>
+                <button onClick={() => setRenaming(cls.name)} aria-label="Adı dəyiş"
+                  className="rounded-lg p-1 text-white/70 transition-colors hover:bg-white/15 hover:text-white">
+                  <Pencil size={16} />
+                </button>
+              </h1>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <input autoFocus value={renaming} onChange={(e) => setRenaming(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveName(renaming);
+                    if (e.key === "Escape") setRenaming(null);
+                  }}
+                  className="w-52 rounded-xl bg-white/15 px-3 py-1.5 text-xl font-extrabold text-white outline-none placeholder:text-white/50" />
+                <button onClick={() => saveName(renaming)} aria-label="Yadda saxla"
+                  className="rounded-lg bg-white/20 p-1.5 hover:bg-white/30"><Check size={16} /></button>
+                <button onClick={() => setRenaming(null)} aria-label="Ləğv et"
+                  className="rounded-lg p-1.5 text-white/70 hover:bg-white/15"><X size={16} /></button>
+              </div>
+            )}
             <p className="text-sm text-white/85">{cls.grade}-ci sinif kurikulumu</p>
           </div>
           <div className="text-right">
             <div className="text-[11px] uppercase tracking-wider text-white/70">Sinif kodu</div>
             <div className="font-mono text-2xl font-black tracking-widest">{cls.code}</div>
+            <div className="mt-1 flex items-center justify-end gap-1">
+              <button onClick={copyCode}
+                className="flex items-center gap-1 rounded-lg bg-white/15 px-2 py-1 text-[11px] font-bold hover:bg-white/25">
+                <Copy size={11} /> {copied ? "Kopyalandı" : "Kopyala"}
+              </button>
+              <ConfirmButton
+                label={<><RefreshCw size={11} /> Kodu yenilə</>}
+                question="Köhnə kod ləğv olunsun?"
+                onConfirm={newCode}
+                className="flex items-center gap-1 rounded-lg bg-white/15 px-2 py-1 text-[11px] font-bold hover:bg-white/25"
+                confirmClassName="rounded-lg bg-white text-brand px-2 py-1 text-[11px] font-bold"
+                cancelClassName="rounded-lg bg-white/15 px-2 py-1 text-[11px] font-bold"
+              />
+            </div>
           </div>
         </div>
 
@@ -167,17 +254,14 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
           </button>
 
           {tasks.length > 0 && (
-            <div className="mt-4 space-y-2 border-t border-line pt-4">
+            <div className="mt-4 space-y-1 border-t border-line pt-4">
               {tasks.map((a) => (
-                <div key={a.id} className="flex items-center gap-2 text-sm">
-                  <ClipboardList size={15} className="shrink-0 text-brand" />
-                  <span className="flex-1 truncate font-bold text-fg">{a.title}</span>
-                  {a.due_date && (
-                    <span className="flex shrink-0 items-center gap-1 text-xs text-orange-500">
-                      <Clock size={12} /> {a.due_date}
-                    </span>
-                  )}
-                </div>
+                <AssignmentRow
+                  key={a.id}
+                  a={a}
+                  progress={progOf(a.id)}
+                  onChanged={reload}
+                />
               ))}
             </div>
           )}
@@ -234,23 +318,286 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
               const atRisk = r.streak_days === 0 || Number(r.completed) === 0;
               return (
                 <div key={r.user_id} className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-b-0">
-                  <span className="flex-1 truncate font-bold text-fg">
-                    {r.name}
+                  <button onClick={() => setDetailUid(r.user_id)}
+                    className="flex min-w-0 flex-1 items-center gap-1.5 text-left font-bold text-fg hover:text-brand">
+                    <span className="truncate">{r.name}</span>
                     {atRisk && (
-                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-500">
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-500">
                         <AlertTriangle size={10} /> diqqət
                       </span>
                     )}
-                  </span>
+                    <ChevronRight size={14} className="shrink-0 text-muted" />
+                  </button>
                   <span className="w-16 text-right text-sm font-bold text-amber-500">{r.total_xp} XP</span>
                   <span className="w-12 text-right text-sm text-orange-500">🔥{r.streak_days}</span>
                   <span className="w-14 text-right text-sm text-emerald-600">{Number(r.completed)} dərs</span>
+                  <ConfirmButton
+                    label={<Trash2 size={14} />}
+                    question="Çıxarılsın?"
+                    onConfirm={async () => { await removeStudent(id, r.user_id).catch(() => null); reload(); }}
+                    className="rounded-lg p-1.5 text-muted transition-colors hover:bg-red-500/10 hover:text-red-500"
+                  />
                 </div>
               );
             })}
           </div>
         )}
+
+        {/* Təhlükəli zona */}
+        <div className="mt-8 rounded-2xl border border-red-500/25 bg-red-500/[0.04] p-4">
+          <div className="text-sm font-extrabold text-red-500">Sinfi sil</div>
+          <p className="mt-1 text-sm text-muted">
+            Sinif, üzvlüklər və tapşırıqlar silinir. Şagirdlərin şəxsi irəliləyişi (XP, dərslər) toxunulmur.
+          </p>
+          <div className="mt-3">
+            <ConfirmButton
+              label={<><Trash2 size={14} /> Sinfi sil</>}
+              question="Sinif həmişəlik silinsin?"
+              onConfirm={removeClass}
+              className="flex items-center gap-1.5 rounded-xl border-2 border-red-500/40 px-4 py-2 text-sm font-extrabold text-red-500 hover:bg-red-500/10"
+            />
+          </div>
+        </div>
       </main>
+
+      {detailUid && (
+        <StudentModal classId={id} uid={detailUid} onClose={() => setDetailUid(null)} />
+      )}
+    </div>
+  );
+}
+
+/* ── İki addımlı təsdiq düyməsi ──
+   Admin tərəfindəki ConfirmProvider şagird/müəllim tərəfində mount olunmayıb,
+   window.confirm isə mobil brauzerdə kobud görünür — ona görə yerində təsdiq. */
+function ConfirmButton({
+  label, question, onConfirm, className, confirmClassName, cancelClassName,
+}: {
+  label: React.ReactNode;
+  question: string;
+  onConfirm: () => void | Promise<void>;
+  className?: string;
+  confirmClassName?: string;
+  cancelClassName?: string;
+}) {
+  const [asking, setAsking] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  if (!asking) {
+    return <button type="button" onClick={() => setAsking(true)} className={className}>{label}</button>;
+  }
+  return (
+    <span className="flex items-center gap-1.5 text-[11px] font-bold">
+      <span className="text-muted">{question}</span>
+      <button type="button" disabled={busy}
+        onClick={async () => { setBusy(true); await onConfirm(); setBusy(false); setAsking(false); }}
+        className={confirmClassName ?? "rounded-lg bg-red-500 px-2 py-1 text-white disabled:opacity-50"}>
+        Bəli
+      </button>
+      <button type="button" onClick={() => setAsking(false)}
+        className={cancelClassName ?? "rounded-lg border border-line px-2 py-1 text-fg"}>
+        Xeyr
+      </button>
+    </span>
+  );
+}
+
+/* ── Tapşırıq sətri (baxış / redaktə) ── */
+function AssignmentRow({
+  a, progress, onChanged,
+}: {
+  a: ClassAssignment;
+  progress?: AssignmentProgress;
+  onChanged: () => void;
+}) {
+  const [edit, setEdit] = useState(false);
+  const [title, setTitle] = useState(a.title);
+  const [due, setDue] = useState(a.due_date ?? "");
+  const [min, setMin] = useState(a.min_score);
+  const [busy, setBusy] = useState(false);
+
+  async function save() {
+    setBusy(true);
+    await updateAssignment(a.id, {
+      title,
+      due: due ? due : null, // boş → son tarixi təmizlə
+      minScore: min,
+    }).catch(() => null);
+    setBusy(false);
+    setEdit(false);
+    onChanged();
+  }
+
+  if (edit) {
+    return (
+      <div className="rounded-xl border border-line bg-ink p-3">
+        <input value={title} onChange={(e) => setTitle(e.target.value)}
+          className="w-full rounded-lg border border-line bg-panel px-3 py-2 text-sm font-bold text-fg outline-none focus:border-brand" />
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <input type="date" value={due} onChange={(e) => setDue(e.target.value)}
+            className="rounded-lg border border-line bg-panel px-2.5 py-1.5 text-sm font-bold text-fg outline-none focus:border-brand" />
+          <label className="flex items-center gap-1.5 rounded-lg border border-line bg-panel px-2.5 py-1.5 text-sm">
+            <span className="font-bold text-muted">Min</span>
+            <input type="number" min={0} max={100} value={min} onChange={(e) => setMin(Number(e.target.value))}
+              className="w-12 bg-transparent font-bold text-fg outline-none" />
+            <span className="text-muted">%</span>
+          </label>
+          <button onClick={save} disabled={busy}
+            className="rounded-lg bg-brand px-3 py-1.5 text-sm font-extrabold text-white disabled:opacity-50">
+            {busy ? "…" : "Saxla"}
+          </button>
+          <button onClick={() => setEdit(false)} className="rounded-lg border border-line px-3 py-1.5 text-sm font-bold text-fg">
+            Ləğv et
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const pct = progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
+
+  return (
+    <div className="flex items-center gap-2 rounded-xl px-1 py-2 text-sm hover:bg-panel-2">
+      <ClipboardList size={15} className="shrink-0 text-brand" />
+      <span className="flex-1 truncate font-bold text-fg">{a.title}</span>
+      {progress && (
+        <span className="flex shrink-0 items-center gap-1.5 text-xs font-bold text-emerald-600" title="Tamamlayan şagird">
+          <span className="h-1.5 w-10 overflow-hidden rounded-full bg-panel-2">
+            <span className="block h-full rounded-full bg-emerald-500" style={{ width: `${pct}%` }} />
+          </span>
+          {progress.done}/{progress.total}
+        </span>
+      )}
+      {a.due_date && (
+        <span className="flex shrink-0 items-center gap-1 text-xs text-orange-500">
+          <Clock size={12} /> {a.due_date}
+        </span>
+      )}
+      <button onClick={() => setEdit(true)} aria-label="Redaktə et"
+        className="rounded-lg p-1.5 text-muted transition-colors hover:bg-panel-2 hover:text-fg">
+        <Pencil size={13} />
+      </button>
+      <ConfirmButton
+        label={<Trash2 size={13} />}
+        question="Silinsin?"
+        onConfirm={async () => { await deleteAssignment(a.id).catch(() => null); onChanged(); }}
+        className="rounded-lg p-1.5 text-muted transition-colors hover:bg-red-500/10 hover:text-red-500"
+      />
+    </div>
+  );
+}
+
+/* ── Şagirdin fərdi mənzərəsi ── */
+function StudentModal({ classId, uid, onClose }: { classId: string; uid: string; onClose: () => void }) {
+  const [d, setD] = useState<StudentDetail | null | undefined>(undefined);
+
+  useEffect(() => { classStudentDetail(classId, uid).then(setD); }, [classId, uid]);
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onClose]);
+
+  const doneCount = d?.assignments.filter((a) => a.done).length ?? 0;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4" onClick={onClose}>
+      <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-panel p-5 sm:rounded-2xl"
+        onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="truncate text-lg font-extrabold text-fg">{d?.name ?? "…"}</h2>
+          <button onClick={onClose} aria-label="Bağla" className="rounded-lg p-1.5 text-muted hover:bg-panel-2">
+            <X size={20} />
+          </button>
+        </div>
+
+        {d === undefined ? (
+          <p className="mt-6 text-center text-muted">Yüklənir…</p>
+        ) : d === null ? (
+          <p className="mt-6 text-center text-muted">Məlumat tapılmadı.</p>
+        ) : (
+          <>
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <MiniStat label="XP" value={String(d.total_xp)} />
+              <MiniStat label="Streak" value={`🔥 ${d.streak_days}`} />
+              <MiniStat label="Dərs" value={String(d.completed)} />
+              <MiniStat label="Tapşırıq" value={`${doneCount}/${d.assignments.length}`} />
+            </div>
+
+            <div className="mt-4">
+              <div className="mb-1.5 text-xs font-extrabold uppercase tracking-wide text-muted">Tapşırıqlar</div>
+              {d.assignments.length === 0 ? (
+                <p className="text-sm text-muted">Bu sinifdə hələ tapşırıq yoxdur.</p>
+              ) : (
+                <div className="overflow-hidden rounded-xl border border-line">
+                  {d.assignments.map((a) => (
+                    <div key={a.id} className="flex items-center gap-2 border-b border-line px-3 py-2 text-sm last:border-b-0">
+                      {a.done
+                        ? <CircleCheck size={15} className="shrink-0 text-emerald-500" />
+                        : <AlertTriangle size={15} className="shrink-0 text-amber-500" />}
+                      <span className="flex-1 truncate font-bold text-fg">{a.title}</span>
+                      {a.late && <span className="shrink-0 text-xs font-bold text-orange-500">gecikib</span>}
+                      {a.due_date && <span className="shrink-0 text-xs text-muted">{a.due_date}</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {d.weak_skills.length > 0 && (
+              <div className="mt-4">
+                <div className="mb-1.5 text-xs font-extrabold uppercase tracking-wide text-muted">Zəif bacarıqlar</div>
+                <div className="flex flex-wrap gap-2">
+                  {d.weak_skills.map((s) => {
+                    const sk = getSkill(s.skill_id);
+                    return (
+                      <span key={s.skill_id} className="rounded-lg bg-rose-500/10 px-2.5 py-1 text-sm font-bold text-rose-600">
+                        {sk?.title ?? s.skill_id} <span className="tabular-nums">{s.mastery}%</span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {d.recent.length > 0 && (
+              <div className="mt-4">
+                <div className="mb-1.5 text-xs font-extrabold uppercase tracking-wide text-muted">Son fəaliyyət</div>
+                <div className="space-y-1">
+                  {d.recent.map((r) => (
+                    <div key={r.lesson_id + r.at} className="flex items-center gap-2 text-sm">
+                      <CircleCheck size={14} className="shrink-0 text-emerald-500" />
+                      <span className="flex-1 truncate text-fg">{r.title ?? r.lesson_id}</span>
+                      <span className="shrink-0 text-xs text-muted">
+                        {new Date(r.at).toLocaleDateString("az-AZ", { day: "numeric", month: "short" })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-5 flex justify-end">
+              <ConfirmButton
+                label={<><Trash2 size={14} /> Sinifdən çıxar</>}
+                question="Çıxarılsın?"
+                onConfirm={async () => { await removeStudent(classId, uid).catch(() => null); onClose(); }}
+                className="flex items-center gap-1.5 rounded-xl border-2 border-red-500/40 px-4 py-2 text-sm font-extrabold text-red-500 hover:bg-red-500/10"
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-panel-2 px-3 py-2 text-center">
+      <div className="text-[10px] uppercase tracking-wide text-muted">{label}</div>
+      <div className="truncate font-extrabold text-fg">{value}</div>
     </div>
   );
 }

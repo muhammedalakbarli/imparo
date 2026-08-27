@@ -108,3 +108,55 @@ export const studentClasses = () => rpc<StudentClass[]>("student_classes").catch
 export const myAssignments = () => rpc<MyAssignment[]>("my_assignments").catch(() => []);
 export const leaveClass = (classId: string) =>
   rpc<null>("leave_class", { p_class_id: classId }).catch(() => null);
+
+// ── Müəllim idarəetməsi (migration 0054) ──
+// 0023-də yalnız yaratmaq mümkün idi; bunlar redaktə/silmə boşluğunu bağlayır.
+export const renameClass = (classId: string, name: string) =>
+  rpc<null>("rename_class", { p_class_id: classId, p_name: name });
+export const regenClassCode = (classId: string) =>
+  rpc<string>("regen_class_code", { p_class_id: classId });
+export const deleteClass = (classId: string) =>
+  rpc<null>("delete_class", { p_class_id: classId });
+export const removeStudent = (classId: string, uid: string) =>
+  rpc<null>("remove_student", { p_class_id: classId, p_uid: uid });
+
+// due: `undefined` → toxunma, `null` → son tarixi təmizlə, tarix → yenilə.
+export function updateAssignment(
+  id: string,
+  patch: { title?: string; due?: string | null; minScore?: number },
+) {
+  return rpc<null>("update_assignment", {
+    p_id: id,
+    p_title: patch.title ?? null,
+    p_due: patch.due ?? null,
+    p_min: patch.minScore ?? null,
+    p_clear_due: patch.due === null,
+  });
+}
+export const deleteAssignment = (id: string) => rpc<null>("delete_assignment", { p_id: id });
+
+/** Hər tapşırıq üzrə neçə şagird tamamlayıb. */
+export interface AssignmentProgress { assignment_id: string; done: number; total: number }
+export const assignmentProgress = (classId: string) =>
+  rpc<AssignmentProgress[]>("assignment_progress", { p_class_id: classId }).catch(() => []);
+
+/** Bir şagirdin müəllim üçün tam mənzərəsi (migration 0054). */
+export interface StudentAssignment {
+  id: string; title: string; lesson_id: string;
+  due_date: string | null; done: boolean; done_at: string | null; late: boolean;
+}
+export interface StudentDetail {
+  user_id: string;
+  name: string;
+  joined_at: string;
+  total_xp: number;
+  streak_days: number;
+  completed: number;
+  active_seconds: number;
+  last_active_date: string | null;
+  assignments: StudentAssignment[];
+  weak_skills: { skill_id: string; mastery: number; attempts: number }[];
+  recent: { lesson_id: string; title: string | null; subject: string | null; at: string }[];
+}
+export const classStudentDetail = (classId: string, uid: string) =>
+  rpc<StudentDetail | null>("class_student_detail", { p_class_id: classId, p_uid: uid }).catch(() => null);
