@@ -257,7 +257,7 @@ export default function LandingPage() {
             <img
               src={mascotSrc("ayi")}
               alt={t("cta.bear")}
-              className="order-2 mx-auto h-[148px] w-auto origin-bottom sm:order-1 lg:h-[185px]"
+              className="order-2 mx-auto h-[150px] w-auto sm:order-1 sm:h-[230px] lg:h-[290px]"
               draggable={false}
             />
 
@@ -284,7 +284,7 @@ export default function LandingPage() {
             <img
               src={mascotSrc("ceyran")}
               alt={t("cta.deer")}
-              className="order-3 mx-auto h-[148px] w-auto origin-bottom lg:h-[185px]"
+              className="order-3 mx-auto h-[150px] w-auto sm:h-[230px] lg:h-[290px]"
               draggable={false}
             />
           </div>
