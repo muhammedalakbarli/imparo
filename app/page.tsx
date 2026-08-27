@@ -230,27 +230,32 @@ export default function LandingPage() {
           </motion.div>
         </Reveal>
 
-        {/* ── Son CTA ── */}
-        <Reveal className="my-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand to-brand-dark px-6 py-16 text-center">
-            <span className="twinkle pointer-events-none absolute left-10 top-8 text-white/60" aria-hidden>
-              <Sparkles size={22} fill="currentColor" strokeWidth={0} />
-            </span>
-            <span
-              className="twinkle pointer-events-none absolute right-12 top-16 text-white/50"
-              style={{ animationDelay: "0.9s" }}
-              aria-hidden
-            >
-              <Sparkles size={16} fill="currentColor" strokeWidth={0} />
-            </span>
+      </main>
+
+      {/* ── Son CTA — TAM EN ──
+          Qəsdən <main>-in (max-w-6xl) KƏNARINDADIR: narıncı zolaq cihazın bir
+          kənarından o birinə uzansın. Daxili məzmun isə eyni max-w-6xl ilə
+          məhdudlaşır ki, geniş ekranda mətn kənardan-kənara dartılmasın.
+          Küncləri yumru DEYİL: ekran kənarına dayanan yumru künc kəsik görünür. */}
+      <Reveal className="mt-8">
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand to-brand-dark px-5 py-16 text-center">
+          <span className="twinkle pointer-events-none absolute left-[8%] top-8 text-white/60" aria-hidden>
+            <Sparkles size={22} fill="currentColor" strokeWidth={0} />
+          </span>
+          <span
+            className="twinkle pointer-events-none absolute right-[10%] top-16 text-white/50"
+            style={{ animationDelay: "0.9s" }}
+            aria-hidden
+          >
+            <Sparkles size={16} fill="currentColor" strokeWidth={0} />
+          </span>
+          <div className="mx-auto max-w-6xl">
             <div className="flex justify-center">
               <Mascot size={100} mood="celebrate" />
             </div>
             <h2 className="mt-4 text-3xl font-extrabold text-white">{t("home.finalTitle")}</h2>
             <p className="mx-auto mt-3 max-w-md text-white/85">{t("home.finalBody")}</p>
-            {/* Yuxarıdakı hero düyməsi ilə eyni yerə: əvvəl sınayır, qeydiyyat sonra.
-                Əvvəl bura "/signup" idi — eyni səhifədə iki fərqli axın vardı və
-                aşağıdan gələn istifadəçi hesabı dəyəri görməmiş yaradırdı. */}
+            {/* Yuxarıdakı hero düyməsi ilə eyni yerə: əvvəl sınayır, qeydiyyat sonra. */}
             <Link
               href="/onboarding"
               className="mt-8 inline-block rounded-2xl bg-white px-8 py-4 text-lg font-extrabold uppercase tracking-wide text-brand btn-pop [--pop:#c9c2f5] hover:bg-white/90"
@@ -258,8 +263,8 @@ export default function LandingPage() {
               {t("home.ctaStart")}
             </Link>
           </div>
-        </Reveal>
-      </main>
+        </div>
+      </Reveal>
 
       {/* Alt — Duolingo üslubu böyük footer */}
       <SiteFooter />
