@@ -37,7 +37,32 @@ export function zefiSrc(emotion: ZefiEmotion): string {
 }
 
 /**
- * Zefidən BAŞQA personajların (ayı, ceyran, sincab...) ünvanı.
+ * Platformadakı personajlar (Zefidən başqa).
+ *
+ * Yeni personaj əlavə etmək:
+ *   python3 scripts/cutout.py "Maskot/maskot 3d/<fayl>.jpeg" <ad>
+ * sonra adı bura yaz — tip yoxlaması yazı səhvini tutur.
+ */
+export const CHARACTERS = [
+  "ayi",            // ayı — əl yelləyir
+  "ayi_armud",      // ayı — armud dərir
+  "ayi_bal",        // ayı — bal yeyir
+  "bayqus",         // bayquş — əl yelləyir
+  "ceyran",         // ceyran — əl yelləyir
+  "kirpi",          // kirpi
+  "kirpi_salam",    // kirpi — əl yelləyir
+  "kirpi_gobelek",  // kirpi — göbələk yığır
+  "sican",          // siçan — əl yelləyir
+  "sican_pendir",   // siçan — pendir yeyir
+  "sincab",         // sincab
+  "sincab_salam",   // sincab — əl yelləyir
+  "porsuq",         // porsuq — əl yelləyir
+] as const;
+
+export type CharacterName = (typeof CHARACTERS)[number];
+
+/**
+ * Personaj şəklinin ünvanı.
  *
  * `ZefiEmotion`-a əlavə edilmir: onlar Zefinin əhval-ruhiyyəsi deyil, ayrıca
  * personajlardır. Amma keş-bust versiyası eyni yerdən gəlməlidir — əks halda
@@ -46,7 +71,7 @@ export function zefiSrc(emotion: ZefiEmotion): string {
  * Fayllar `public/assets/images/zefi/` altındadır (qovluq adı tarixidir).
  * Yeni personaj: `python3 scripts/cutout.py <yaşıl-ekran> <ad>`
  */
-export function mascotSrc(name: string): string {
+export function mascotSrc(name: CharacterName): string {
   return `/assets/images/zefi/${name}.png?v=${V}`;
 }
 
