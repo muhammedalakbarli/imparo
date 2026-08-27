@@ -77,11 +77,20 @@ export function mascotSrc(name: CharacterName): string {
 
 export default function ZefiMascot({
   emotion = "happy",
+  character,
   size = 120,
   badge,
   disk = true,
 }: {
   emotion?: ZefiEmotion;
+  /**
+   * Zefi əvəzinə başqa personaj göstər (ayı, ceyran, kirpi...).
+   *
+   * Ayrı komponent yazmaq əvəzinə burada dəstəklənir, çünki lazım olan hər şey —
+   * arxa ağ disk (tünd rejimdə personaj fona qarışmasın deyə), ölçü, nişan —
+   * onsuz da bu komponentdədir. Verilsə `emotion` nəzərə alınmır.
+   */
+  character?: CharacterName;
   size?: number;
   badge?: string;
   /** Arxa ağ disk — TÜND rejimdə görünür (narıncı tülkü tünd fonda əriməsin).
@@ -108,8 +117,8 @@ export default function ZefiMascot({
       ) : null}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={SRC[emotion]}
-        alt="Zefi"
+        src={character ? mascotSrc(character) : SRC[emotion]}
+        alt={character ?? "Zefi"}
         width={size}
         height={size}
         className="zefi-mascot-img"

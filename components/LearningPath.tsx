@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Star, Check, Lock, Flag, Trophy, Sparkles, Gift } from "lucide-react";
-import ZefiMascot, { type ZefiEmotion } from "@/components/ZefiMascot";
+import ZefiMascot, { type ZefiEmotion, type CharacterName } from "@/components/ZefiMascot";
 import { useT } from "@/lib/i18n";
 import { playStep } from "@/lib/sound";
 import { vibrateWrong } from "@/lib/haptics";
@@ -251,22 +251,50 @@ function NodeLabel({ node }: { node: PathNode }) {
 const MASCOT_SIZE = 104;
 // Mascotun düyün mərkəzindən üfüqi aralığı — qonşu (kilidli) bölmə ilə aydın boşluq.
 const MASCOT_GAP = 152;
-// Yol boyu növbələşən pozalar (ağlayan/"worried" istisna — həmişə müsbət).
-const PERCH_EMOTIONS: ZefiEmotion[] = [
-  "happy",
-  "welcome",
-  "celebrating",
-  "learning",
-  "thinking",
+// Yol boyu növbələşən personajlar.
+//
+// Zefi siyahıda QALIR — o, əsas maskotdur və yoldan tamamilə yox olmamalıdır.
+// Yanına meşənin digər sakinləri qatılır ki, yol "boş cığır" yox, içində həyat
+// olan bir yer kimi oxunsun.
+//
+// "Məşğul" pozalara (bal yeyir, göbələk yığır, pendir yeyir) qəsdən yer verilib:
+// nəyisə edən personaj sadəcə əl yelləyəndən daha canlı görünür.
+// "worried" istisnadır — yol boyu əhval həmişə müsbət qalmalıdır.
+type Perch =
+  | { kind: "zefi"; emotion: ZefiEmotion }
+  | { kind: "char"; name: CharacterName };
+
+const PERCH_CAST: Perch[] = [
+  { kind: "zefi", emotion: "happy" },
+  { kind: "char", name: "ayi" },
+  { kind: "char", name: "sincab_salam" },
+  { kind: "zefi", emotion: "celebrating" },
+  { kind: "char", name: "kirpi_gobelek" },
+  { kind: "char", name: "ceyran" },
+  { kind: "zefi", emotion: "learning" },
+  { kind: "char", name: "sican_pendir" },
+  { kind: "char", name: "bayqus" },
+  { kind: "zefi", emotion: "thinking" },
+  { kind: "char", name: "ayi_bal" },
+  { kind: "char", name: "porsuq" },
+  { kind: "zefi", emotion: "welcome" },
+  { kind: "char", name: "kirpi_salam" },
+  { kind: "char", name: "sican" },
+  { kind: "char", name: "ayi_armud" },
+  { kind: "char", name: "sincab" },
 ];
 
-function MascotPerch({ emotion }: { emotion: ZefiEmotion }) {
+function MascotPerch({ perch }: { perch: Perch }) {
   return (
     <div className="pointer-events-none relative flex flex-col items-center">
       {/* Arxa ağ disk artıq ZefiMascot-un öz içindədir (tünd rejimdə avtomatik) — bax
           components/ZefiMascot.tsx + globals.css `.zefi-disk`. */}
       <span className="relative z-10">
-        <ZefiMascot emotion={emotion} size={MASCOT_SIZE} />
+        {perch.kind === "zefi" ? (
+          <ZefiMascot emotion={perch.emotion} size={MASCOT_SIZE} />
+        ) : (
+          <ZefiMascot character={perch.name} size={MASCOT_SIZE} />
+        )}
       </span>
       <span className="relative z-10 mt-1 h-3 w-20 rounded-[50%] bg-black/25 blur-[3px]" aria-hidden />
     </div>
@@ -323,8 +351,10 @@ export default function LearningPath({ nodes }: { nodes: PathNode[] }) {
     // Zefi-ni aralıqlarda, düyünün əks tərəfində platformada göstər.
     const showMascot = i > 0 && i % 5 === 2 && node.state !== "current";
     const mascotSide = off >= 0 ? -1 : 1; // düyün sağdadırsa Zefi solda
-    // Hər görünüşdə fərqli poza (növbələşir).
-    const mascotEmotion = PERCH_EMOTIONS[Math.floor(i / 5) % PERCH_EMOTIONS.length];
+    // Hər görünüşdə fərqli personaj. İndeksə bağlıdır, təsadüfi DEYİL: eyni
+    // düyündə həmişə eyni personaj durur — şagird "ayı orada yaşayır" kimi
+    // qavrayır və hər açılışda mənzərə dəyişmir.
+    const perch = PERCH_CAST[Math.floor(i / 5) % PERCH_CAST.length];
 
     rows.push(
       <motion.div
@@ -346,7 +376,7 @@ export default function LearningPath({ nodes }: { nodes: PathNode[] }) {
               className="absolute top-1/2 z-10 -translate-y-1/2"
               style={{ [mascotSide < 0 ? "right" : "left"]: `${MASCOT_GAP}px` }}
             >
-              <MascotPerch emotion={mascotEmotion} />
+              <MascotPerch perch={perch} />
             </div>
           )}
           <NodeButton node={node} />
