@@ -108,6 +108,9 @@ export interface TaskForm {
   sentence?: string; // word_order: düzgün cümlə
   translation?: string; // word_order: azərbaycanca ipucu (istəyə bağlı)
   audioText?: string; // listening: səsləndiriləcək İngilis mətni
+  // match_pairs: hər sətir "sol|sağ". Sətir sırası DÜZGÜN cavabdır — ekranda
+  // sağ sütun qarışdırılır, ona görə müəllif sadəcə düzgün cütləri yazır.
+  pairsText?: string;
   figure?: Task["figure"];
 }
 
@@ -128,6 +131,12 @@ export function buildTaskData(f: TaskForm): Record<string, unknown> {
     d.audioText = f.audioText ?? "";
     d.options = f.options ?? [];
     d.correctIndex = f.correctIndex ?? 0;
+  } else if (f.type === "match_pairs") {
+    d.pairs = (f.pairsText ?? "")
+      .split("\n")
+      .map((line) => line.split("|"))
+      .filter((p) => p.length === 2 && p[0].trim() && p[1].trim())
+      .map(([left, right]) => ({ left: left.trim(), right: right.trim() }));
   } else {
     d.answer = f.answer ?? 0;
     if (f.tolerance !== undefined) d.tolerance = f.tolerance;

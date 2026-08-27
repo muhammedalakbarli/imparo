@@ -93,6 +93,19 @@ function parseTask(row: TaskRow): { task: Task; bonus: boolean } {
       answer: (d.answer as string) ?? "",
       translation: d.translation as string | undefined,
     };
+  } else if (row.type === "match_pairs") {
+    task = {
+      id: row.id,
+      type: "match_pairs",
+      prompt: row.prompt,
+      xp: row.xp,
+      figure,
+      pairs: Array.isArray(d.pairs)
+        ? (d.pairs as { left: string; right: string }[]).filter(
+            (x) => x && typeof x.left === "string" && typeof x.right === "string",
+          )
+        : [],
+    };
   } else if (row.type === "listening") {
     task = {
       id: row.id,

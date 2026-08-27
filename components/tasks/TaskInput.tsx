@@ -3,6 +3,7 @@
 // Tapşırıq tipini alıb uyğun giriş sahəsini göstərir.
 // Çoxseçimli: böyük 3D "tile"-lar; reveal=true olduqda düz/səhv rəngi ilə canlanır.
 // Dil öyrənmə tipləri: listening (dinlə-seç), word_order (cümlə quran).
+// Cütləri tap (match_pairs): oxumadan həll edilə bilən tip — bax MatchPairs.tsx.
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -11,6 +12,7 @@ import type { Task } from "@/lib/types";
 import type { UserAnswer } from "@/lib/grading";
 import { playSelect } from "@/lib/sound";
 import { speakEnglish, preloadEnglish, spokenTextsOf } from "@/lib/tts";
+import MatchPairs from "./MatchPairs";
 
 interface Props {
   task: Task;
@@ -27,6 +29,19 @@ export default function TaskInput({ task, value, onChange, disabled, reveal }: P
   useEffect(() => {
     preloadEnglish(spokenTextsOf(task));
   }, [task]);
+
+  // ── Cütləri tap ────────────────────────────────────────────
+  if (task.type === "match_pairs") {
+    return (
+      <MatchPairs
+        key={task.id}
+        task={task}
+        onChange={onChange}
+        disabled={disabled}
+        reveal={!!reveal}
+      />
+    );
+  }
 
   // ── Çoxseçimli ─────────────────────────────────────────────
   if (task.type === "multiple_choice") {

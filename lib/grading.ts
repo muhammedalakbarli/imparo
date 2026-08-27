@@ -56,6 +56,18 @@ export function gradeTask(task: Task, answer: UserAnswer): GradeResult {
     case "listening":
       correct = Number(answer) === task.correctIndex;
       break;
+
+    // Cavab formatı: hər sol element üçün seçilmiş sağ elementin ƏSL indeksi,
+    // sol sıra ilə vergüllə ayrılmış — məs. "2,0,1".
+    // `pairs` sırası düzgün cavab olduğuna görə doğru cavab "0,1,2,..."-dir.
+    // Qismən doğru sayılmır: uşaq bütün cütləri tapmalıdır.
+    case "match_pairs": {
+      const picked = String(answer).split(",");
+      correct =
+        picked.length === task.pairs.length &&
+        picked.every((v, i) => Number(v) === i);
+      break;
+    }
   }
 
   return { correct, earnedXp: correct ? task.xp : 0 };

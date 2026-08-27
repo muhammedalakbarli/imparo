@@ -670,6 +670,9 @@ function correctAnswerText(task: Task): string {
   if (task.type === "numeric") return String(task.answer);
   if (task.type === "listening") return task.options[task.correctIndex];
   if (task.type === "word_order") return task.answer;
+  // Cütləri tap: düzgün cavab bir söz deyil, bütöv uyğunluqdur.
+  if (task.type === "match_pairs")
+    return task.pairs.map((p) => `${p.left} → ${p.right}`).join(", ");
   return task.accepted[0] ?? "";
 }
 

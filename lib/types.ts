@@ -2,6 +2,7 @@
 // Bu tiplər həm lokal seed məzmununda, həm də sonradan Supabase DB-də istifadə olunur.
 
 export type TaskType =
+  | "match_pairs"
   | "multiple_choice"
   | "fill_blank"
   | "numeric"
@@ -82,7 +83,22 @@ export interface ListeningTask extends TaskBase {
   correctIndex: number;
 }
 
+// Cütləri tap — sol sütundakı hər elementi sağdakı qarşılığı ilə birləşdir.
+//
+// NİYƏ ƏLAVƏ OLUNDU: mövcud beş tipin hamısı OXUMAĞI tələb edir. 1-2-ci sinif
+// şagirdi hələ yaxşı oxumur. Cütləşdirmə emoji/rəqəm/qısa sözlə işlədiyi üçün
+// oxumadan da həll edilə bilir — uşaq mənanı GÖRÜR, sonra toxunur.
+//
+// `pairs` sırası DÜZGÜN cavabdır: i-ci sol element i-ci sağ elementə uyğundur.
+// Ekranda sağ sütun qarışdırılır (bax MatchPairs komponenti), ona görə məzmun
+// müəllifi cütləri sadəcə düzgün sıra ilə yazır.
+export interface MatchPairsTask extends TaskBase {
+  type: "match_pairs";
+  pairs: { left: string; right: string }[];
+}
+
 export type Task =
+  | MatchPairsTask
   | MultipleChoiceTask
   | FillBlankTask
   | NumericTask

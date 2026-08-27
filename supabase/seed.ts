@@ -62,6 +62,8 @@ function taskData(task: Task, bonus: boolean): Record<string, unknown> {
     d.audioText = task.audioText;
     d.options = task.options;
     d.correctIndex = task.correctIndex;
+  } else if (task.type === "match_pairs") {
+    d.pairs = task.pairs;
   }
   return d;
 }
@@ -116,6 +118,11 @@ async function main() {
           kind: l.kind ?? "lesson",
           visual: l.visual ?? null,
           sections: l.sections ?? null,
+          // `video` QƏSDƏN YAZILMIR. Videolar admin panelindən əlavə olunur və
+          // yalnız DB-də yaşayır; TS məzmununda yoxdur. Bura `l.video ?? null`
+          // qoysaq, seed hər işə düşəndə bütün videoları SİLƏRDİ.
+          // Upsert yalnız göndərilən sütunları yeniləyir, ona görə buraxılan
+          // sütun DB-dəki dəyərini saxlayır (yoxlanıldı — aşağıdakı testə bax).
           sort_order: li,
         });
         const all = [

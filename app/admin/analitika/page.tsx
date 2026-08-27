@@ -28,6 +28,7 @@ const TYPE_NAMES: Record<TaskType, string> = {
   numeric: "Rəqəm",
   word_order: "Söz sırası",
   listening: "Dinləmə",
+  match_pairs: "Cütləri tap",
 };
 
 interface FbRow { task_id: string; category: string; resolved: boolean }

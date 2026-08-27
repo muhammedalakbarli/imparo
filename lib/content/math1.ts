@@ -42,6 +42,7 @@ export const math1: Subject = {
             { id: "ry1-sayma-l1-t13", type: "multiple_choice", prompt: "⭐⭐⭐⭐⭐ — neçə ulduz var?", options: ["5", "4", "6", "3"], correctIndex: 0, xp: 10, explanation: "Ulduzları bir-bir sayırıq: 1, 2, 3, 4, 5. Cəmi 5 ulduz var.", skills: ["number.count"] },
             { id: "ry1-sayma-l1-t14", type: "numeric", prompt: "Ən kiçik birrəqəmli ədəd (0-dan başqa) hansıdır?", answer: 1, xp: 10, explanation: "0-dan sonra gələn ilk ədəd 1-dir, ona görə 0 sayılmasa ən kiçiyi 1-dir.", skills: ["number.count"] },
             { id: "ry1-sayma-l1-t15", type: "numeric", prompt: "Ən böyük birrəqəmli ədəd hansıdır?", answer: 9, xp: 15, explanation: "Birrəqəmli ədədlər 0-dan 9-a qədərdir. 10 artıq iki rəqəmlə yazılır, ona görə ən böyüyü 9-dur.", skills: ["number.count"] },
+            { id: "ry1-sayma-l1-t16", type: "match_pairs", prompt: "Rəqəmi düzgün şəkillə birləşdir.", pairs: [{ left: "2", right: "🍎🍎" }, { left: "4", right: "🍎🍎🍎🍎" }, { left: "3", right: "🍎🍎🍎" }], xp: 15, explanation: "Hər sətirdə almaları bir-bir sayırıq: 2 alma → 2, 3 alma → 3, 4 alma → 4.", skills: ["number.count"] },
           ],
           bonusTasks: [
             { id: "ry1-sayma-l1-b1", type: "multiple_choice", prompt: "🐟🐟🐟🐟 — neçə balıq var?", options: ["4", "3", "5", "6"], correctIndex: 0, xp: 15, explanation: "Balıqları sayırıq: 1, 2, 3, 4. Cəmi 4 balıq var.", skills: ["number.count"] },

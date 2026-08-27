@@ -325,6 +325,9 @@ function taskToForm(t: Task, bonus: boolean, l: Lesson): Partial<TaskForm> {
     return { ...base, words: t.words, sentence: t.answer, translation: t.translation };
   if (t.type === "listening")
     return { ...base, audioText: t.audioText, options: t.options, correctIndex: t.correctIndex };
+  // Cütlər formada "sol|sağ" sətirləri kimi redaktə olunur — sadə textarea kifayətdir.
+  if (t.type === "match_pairs")
+    return { ...base, pairsText: t.pairs.map((x) => `${x.left}|${x.right}`).join("\n") };
   return { ...base, answer: t.answer, tolerance: t.tolerance };
 }
 
@@ -531,6 +534,18 @@ function EditForm({
           return "Ən azı 2 söz lazımdır";
         if (!((form.sentence as string) ?? "").trim()) return "Düzgün cümlə boş ola bilməz";
       }
+      if (type === "match_pairs") {
+        const rows = ((form.pairsText as string) ?? "")
+          .split("\n")
+          .map((l) => l.split("|"))
+          .filter((p) => p.length === 2 && p[0].trim() && p[1].trim());
+        if (rows.length < 2) return "Ən azı 2 cüt lazımdır ('sol|sağ' formatında)";
+        if (rows.length > 5) return "5 cütdən çox olmasın — kiçik ekranda sığmır";
+        // Təkrarlanan sağ tərəf tapşırığı həll edilməz edir: eyni cavab iki
+        // sola uyğun gəlsə uşaq düzgün cütü seçsə də səhv sayıla bilər.
+        const rights = rows.map((p) => p[1].trim());
+        if (new Set(rights).size !== rights.length) return "Sağ tərəflər təkrarlanmamalıdır";
+      }
       if (type === "listening") {
         if (!((form.audioText as string) ?? "").trim()) return "Səsləndiriləcək mətn lazımdır";
         const opts = ((form.options as string[]) ?? []).filter((o) => o.trim());
@@ -645,9 +660,19 @@ function TaskFields({
         <option value="numeric">Rəqəm</option>
         <option value="listening">Dinləmə (dinlə-seç)</option>
         <option value="word_order">Cümlə quran</option>
+        <option value="match_pairs">Cütləri tap</option>
       </select>
 
       <Field label="Sual (prompt)" value={form.prompt} onChange={(v) => set("prompt", v)} textarea />
+
+      {type === "match_pairs" && (
+        <Field
+          label="Cütlər — hər sətir 'sol|sağ'. Sətir sırası DÜZGÜN cavabdır (ekranda sağ sütun qarışdırılır)."
+          value={(form.pairsText as string) ?? ""}
+          onChange={(v) => set("pairsText", v)}
+          textarea
+        />
+      )}
 
       {type === "listening" && (
         <Field
