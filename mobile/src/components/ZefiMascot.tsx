@@ -7,11 +7,13 @@ export type ZefiEmotion =
   | "learning"
   | "celebrating"
   | "worried"
-  | "thinking";
+  | "thinking"
+  | "gift";
 
 // React Native require statik olmalıdır — hər poza ayrıca.
 const SRC: Record<ZefiEmotion, ReturnType<typeof require>> = {
   welcome: require("../../assets/zefi/zefi_welcome.png"),
+  gift: require("../../assets/zefi/zefi_gift.png"),
   happy: require("../../assets/zefi/zefi_happy.png"),
   learning: require("../../assets/zefi/zefi_learning.png"),
   celebrating: require("../../assets/zefi/zefi_celebrating.png"),

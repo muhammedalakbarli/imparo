@@ -26,6 +26,7 @@ import { useT } from "@/lib/i18n";
 import { useCountUp } from "@/lib/useCountUp";
 import Logo from "@/components/Logo";
 import Mascot from "@/components/Mascot";
+import ZefiMascot from "@/components/ZefiMascot";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -249,19 +250,35 @@ export default function LandingPage() {
           >
             <Sparkles size={16} fill="currentColor" strokeWidth={0} />
           </span>
-          <div className="mx-auto max-w-6xl">
-            <div className="flex justify-center">
-              <Mascot size={100} mood="celebrate" />
+          <div className="mx-auto grid max-w-6xl grid-cols-2 items-center gap-6 sm:grid-cols-[auto_1fr_auto] sm:gap-8">
+            {/* Sol — salamlayan Zefi. Kiçik ekranda sıra ilə mətndən SONRA gəlir
+                (order-2), yəni telefonda əvvəl mesaj oxunur, sonra maskotlar. */}
+            <div className="order-2 flex origin-bottom justify-center sm:order-1 lg:scale-125">
+              <ZefiMascot emotion="welcome" size={148} disk={false} />
             </div>
-            <h2 className="mt-4 text-3xl font-extrabold text-white">{t("home.finalTitle")}</h2>
-            <p className="mx-auto mt-3 max-w-md text-white/85">{t("home.finalBody")}</p>
-            {/* Yuxarıdakı hero düyməsi ilə eyni yerə: əvvəl sınayır, qeydiyyat sonra. */}
-            <Link
-              href="/onboarding"
-              className="mt-8 inline-block rounded-2xl bg-white px-8 py-4 text-lg font-extrabold uppercase tracking-wide text-brand btn-pop [--pop:#c9c2f5] hover:bg-white/90"
-            >
-              {t("home.ctaStart")}
-            </Link>
+
+            {/* Mərkəz — mesaj. Zefi kənara keçdiyi üçün burada yer boşaldı,
+                başlıq da ona görə xeyli böyüdü. */}
+            <div className="order-1 col-span-2 text-center sm:order-2 sm:col-span-1">
+              <h2 className="text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl">
+                {t("home.finalTitle")}
+              </h2>
+              <p className="mx-auto mt-4 max-w-lg text-base text-white/90 sm:text-lg">
+                {t("home.finalBody")}
+              </p>
+              {/* Yuxarıdakı hero düyməsi ilə eyni yerə: əvvəl sınayır, qeydiyyat sonra. */}
+              <Link
+                href="/onboarding"
+                className="mt-8 inline-block rounded-2xl bg-white px-8 py-4 text-lg font-extrabold uppercase tracking-wide text-brand btn-pop [--pop:#c9c2f5] hover:bg-white/90"
+              >
+                {t("home.ctaStart")}
+              </Link>
+            </div>
+
+            {/* Sağ — hədiyyəli Zefi */}
+            <div className="order-3 flex origin-bottom justify-center lg:scale-125">
+              <ZefiMascot emotion="gift" size={148} disk={false} />
+            </div>
           </div>
         </div>
       </Reveal>

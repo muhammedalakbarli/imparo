@@ -9,13 +9,15 @@ export type ZefiEmotion =
   | "learning"
   | "celebrating"
   | "worried"
-  | "thinking";
+  | "thinking"
+  | "gift";
 
 // ?v=4 — keş-bust: təmizlənmiş asetlər üçün brauzer/SW köhnə keşlənmiş (tozlu/kəsik) PNG-ni
 // atıb təzəsini çəksin. Asetlər dəyişəndə bu rəqəmi artır.
 const V = "4";
 export const SRC: Record<ZefiEmotion, string> = {
   welcome: `/assets/images/zefi/zefi_welcome.png?v=${V}`,
+  gift: `/assets/images/zefi/zefi_gift.png?v=${V}`,
   happy: `/assets/images/zefi/zefi_happy.png?v=${V}`,
   learning: `/assets/images/zefi/zefi_learning.png?v=${V}`,
   celebrating: `/assets/images/zefi/zefi_celebrating.png?v=${V}`,
