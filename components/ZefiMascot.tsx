@@ -36,6 +36,20 @@ export function zefiSrc(emotion: ZefiEmotion): string {
   return SRC[emotion];
 }
 
+/**
+ * Zefidən BAŞQA personajların (ayı, ceyran, sincab...) ünvanı.
+ *
+ * `ZefiEmotion`-a əlavə edilmir: onlar Zefinin əhval-ruhiyyəsi deyil, ayrıca
+ * personajlardır. Amma keş-bust versiyası eyni yerdən gəlməlidir — əks halda
+ * aset yenilənəndə brauzer köhnəni göstərməyə davam edir (bir dəfə belə oldu).
+ *
+ * Fayllar `public/assets/images/zefi/` altındadır (qovluq adı tarixidir).
+ * Yeni personaj: `python3 scripts/cutout.py <yaşıl-ekran> <ad>`
+ */
+export function mascotSrc(name: string): string {
+  return `/assets/images/zefi/${name}.png?v=${V}`;
+}
+
 export default function ZefiMascot({
   emotion = "happy",
   size = 120,

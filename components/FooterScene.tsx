@@ -15,7 +15,7 @@
 // maskot səviyyəsində olardı, mövcud peşəkar render isə hazırdır.
 
 import { useT } from "@/lib/i18n";
-import { zefiSrc } from "@/components/ZefiMascot";
+import { mascotSrc } from "@/components/ZefiMascot";
 
 export default function FooterScene() {
   const t = useT();
@@ -66,20 +66,27 @@ export default function FooterScene() {
         <Cloud className="absolute left-[24%] top-[10%] h-[13%]" />
         <Cloud className="absolute right-[28%] top-[19%] hidden h-[10%] sm:block" />
 
-        {/* Zefi — səhnənin qarşısında, təpənin üstündə. `zefi_welcome` əl qaldırıb
-            salamlayır: səhifənin sonu üçün doğru poza. */}
-        <div className="absolute bottom-[1%] left-1/2 h-[92%] w-auto -translate-x-1/2">
-          {/* next/image YOX: aset ünvanı keş-bust sorğu sətri daşıyır və
-              next/image lokal ünvanda onu `images.localPatterns` konfiqurasiyası
-              olmadan rədd edir. ZefiMascot da eyni səbəbdən adi <img> işlədir. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={zefiSrc("welcome")}
-            alt={t("scene.zefi")}
-            className="h-full w-auto drop-shadow-[0_10px_18px_rgba(0,0,0,0.18)]"
-            draggable={false}
-          />
-        </div>
+        {/* Personajlar — səhnənin qarşısında, təpənin üstündə.
+            Zefi burada QƏSDƏN yoxdur: o, yuxarıdakı narıncı CTA zolağında
+            dayanır və eyni səhifədə iki dəfə görünməsi təkrar yaradırdı.
+            Mövqelər ağacların arasına düşür (ağaclar 1-23% aralığındadır). */}
+        {/* next/image YOX: ünvan keş-bust sorğu sətri daşıyır, next/image isə
+            lokal ünvanda onu `images.localPatterns` konfiqurasiyası olmadan
+            rədd edir. ZefiMascot da eyni səbəbdən adi <img> işlədir. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={mascotSrc("ayi")}
+          alt={t("scene.bear")}
+          className="absolute bottom-[1%] left-[26%] h-[80%] w-auto drop-shadow-[0_10px_18px_rgba(0,0,0,0.18)] sm:left-[30%]"
+          draggable={false}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={mascotSrc("ceyran")}
+          alt={t("scene.deer")}
+          className="absolute bottom-[1%] right-[26%] h-[84%] w-auto drop-shadow-[0_10px_18px_rgba(0,0,0,0.18)] sm:right-[30%]"
+          draggable={false}
+        />
       </div>
     </div>
   );
