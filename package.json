@@ -1,0 +1,59 @@
+{
+  "name": "imparo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Azərbaycan məktəbliləri (1–8-ci siniflər) üçün oyunlaşdırılmış öyrənmə platforması.",
+  "author": "muhammedalakbarli",
+  "license": "UNLICENSED",
+  "homepage": "https://imparo.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/muhammedalakbarli/imparo.git"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "npm run guard && opennextjs-cloudflare build && npm run guard:pages && opennextjs-cloudflare deploy && npm run guard:smoke",
+    "prebuild": "tsx scripts/gen-content-seed.ts",
+    "guard": "tsx scripts/guard.ts",
+    "guard:smoke": "tsx scripts/guard.ts --smoke",
+    "indexnow": "tsx scripts/indexnow.ts",
+    "guard:pages": "tsx scripts/guard.ts --pages"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.110.0",
+    "cmdk": "^1.1.1",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^1.24.0",
+    "next": "^16.3.0",
+    "posthog-js": "^1.412.2",
+    "qrcode.react": "^4.2.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "sonner": "^2.0.8",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.2",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
+    "esbuild": "^0.27.7",
+    "eslint": "^9",
+    "eslint-config-next": "^16.3.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.12",
+    "typescript": "^5",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.122.0"
+  }
+}

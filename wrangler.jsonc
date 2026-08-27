@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "imparo",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-06-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // routes/custom_domain əlavə olunanda wrangler workers.dev linkini defolt
+  // söndürür — qəsdən açıq saxlanılır ki, köhnə imparo.m-alakbarli2007.workers.dev
+  // linki qırılmasın (paylaşılmış ola bilər).
+  "workers_dev": true,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Cloudflare Custom Domains: eyni hesabdakı zona üçün DNS+SSL avtomatik
+  // qurulur (əl ilə CNAME/TXT lazım deyil). "www" da bağlanıb — middleware.ts
+  // onu 301 ilə apex-ə yönləndirir (dublikat məzmun/SEO problemi olmasın).
+  "routes": [
+    { "pattern": "imparo.app", "custom_domain": true },
+    { "pattern": "www.imparo.app", "custom_domain": true }
+  ]
+}

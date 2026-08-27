@@ -1,0 +1,110 @@
+-- İngilis 2-ci dövr (Present Continuous): Qayda→Lüğət→Dinləmə→Oxu→Yazı.
+-- Bölmələr yenidən sıralanır (PS 0-4, PC 5-9, köhnə 10+); köhnə təkrar en-gr-l2 silinir.
+begin;
+
+-- Təkrar Present Continuous (köhnə en-gr-l2) sil.
+delete from tasks where lesson_id = 'en-gr-l2';
+delete from lessons where id = 'en-gr-l2';
+
+insert into units (id, subject_id, title, description, sort_order) values
+  ('en-c1-grammar', 'ingilis-dili', 'Qayda: Present Simple', 'İndiki sadə zaman — hər gün təkrarlanan işlər. Qaydanı oxu, sonra məşq et.', 0),
+  ('en-c1-vocab', 'ingilis-dili', 'Lüğət: Gündəlik fellər', '8 yeni fel — eyni sözləri müxtəlif cümlələrdə təkrar-təkrar işlət.', 1),
+  ('en-c1-listening', 'ingilis-dili', 'Dinləmə: Present Simple', 'Present Simple cümlələrini qulaqla tanı — dinlə və düzgün mənanı seç.', 2),
+  ('en-c1-reading', 'ingilis-dili', 'Oxu: Mənim günüm', 'Qısa mətni oxu və suallara cavab ver (Present Simple).', 3),
+  ('en-c1-writing', 'ingilis-dili', 'Yazı: Present Simple', 'Sözlərdən düzgün Present Simple cümləsi qur.', 4),
+  ('en-c2-grammar', 'ingilis-dili', 'Qayda: Present Continuous', 'İndi, danışıq anında baş verən işlər. Qaydanı oxu, sonra məşq et.', 5),
+  ('en-c2-vocab', 'ingilis-dili', 'Lüğət: İndi görülən işlər', '8 yeni fel — run, write, sleep, cook, sing, dance, swim, sit.', 6),
+  ('en-c2-listening', 'ingilis-dili', 'Dinləmə: Present Continuous', 'İndi baş verən işlərin cümlələrini dinlə və düzgün mənanı seç.', 7),
+  ('en-c2-reading', 'ingilis-dili', 'Oxu: In the park', 'Qısa mətni oxu və suallara cavab ver (Present Continuous).', 8),
+  ('en-c2-writing', 'ingilis-dili', 'Yazı: Present Continuous', 'Sözlərdən düzgün Present Continuous cümləsi qur.', 9),
+  ('en-grammar', 'ingilis-dili', 'Qrammatika — Zamanlar və cümlə', 'Present Simple, Present Continuous, Past Simple, sual/inkar cümlələr, əvəzliklər, artikllar, sifət dərəcələri və modal fellər.', 10),
+  ('en-nouns', 'ingilis-dili', 'İsimlər (Nouns)', 'İsim nədir, cəm forması, sayıla bilən və sayıla bilməyən isimlər.', 11),
+  ('en-vocab', 'ingilis-dili', 'Söz ehtiyatı (Vocabulary)', 'Gündəlik həyatla bağlı mövzular: ailə, məktəb, təbiət, qida, şəhər və hobbilər.', 12),
+  ('en-listen-speak', 'ingilis-dili', 'Dinləmə (Listening)', 'İngiliscəni qulaqla tanı: salamlaşma, sual-cavab və gündəlik ifadələr.', 13),
+  ('en-reading', 'ingilis-dili', 'Oxu (Reading)', 'Qısa mətnləri oxuyub başa düş və suallara cavab ver.', 14),
+  ('en-skills', 'ingilis-dili', 'Yazı (Writing)', 'Böyük hərf, durğu işarələri və düzgün cümlə quruluşu ilə yaz.', 15)
+on conflict (id) do update set title = excluded.title, description = excluded.description, sort_order = excluded.sort_order;
+
+insert into lessons (id, unit_id, title, intro, visual, sections, sort_order) values
+  ('pc-rule', 'en-c2-grammar', 'Present Continuous qaydası', 'Present Continuous indi, bu anda baş verən işi bildirir. Gəl qaydanı öyrənək!', null, '[{"heading":"Present Continuous nədir?","body":"İndi, danışıq anında baş verən işi bildirir: I am reading now. (Mən indi oxuyuram.) Çox vaxt ''now'', ''at the moment'' sözləri ilə işlənir."},{"heading":"am / is / are + fel + -ing","body":"I → am (I am playing). he/she/it → is (She is running). you/we/they → are (They are singing)."},{"heading":"-ing yazılışı","body":"Adətən sadəcə -ing: play → playing. Sonu ''e'' olanda ''e'' düşür: write → writing. Qısa sözlərdə son samit qoşalaşır: run → running, sit → sitting."}]'::jsonb, 0),
+  ('pc-vocab', 'en-c2-vocab', 'İş felləri (8 söz)', 'İndi görülən işləri bildirən 8 yeni fel öyrənək.', null, '[{"heading":"Yeni sözlər (8 fel)","body":"run — qaçmaq · write — yazmaq · sleep — yatmaq · cook — bişirmək · sing — mahnı oxumaq · dance — rəqs etmək · swim — üzmək · sit — oturmaq"},{"heading":"Məsləhət","body":"Bu felləri -ing forması ilə xatırla: running, writing, sleeping... çünki indi baş verən işi bildirirlər."}]'::jsonb, 0),
+  ('pc-listen', 'en-c2-listening', 'Dinlə və seç: indi baş verən iş', 'Cümləni dinlə və düzgün cavabı seç.', null, '[{"heading":"Necə işləyir?","body":"«Dinlə» düyməsinə bas, cümləni eşit və düzgün variantı seç. İstədiyin qədər təkrar dinlə."}]'::jsonb, 0),
+  ('pc-read', 'en-c2-reading', 'Reading: In the park', 'Qısa mətni oxu və suallara cavab ver.', null, '[{"heading":"Read the text (Mətni oxu)","body":"Look at the park. It is a sunny day. Many people are in the park. Two boys are playing football. A girl is running with her dog. An old man is sitting on a bench and reading a newspaper. Some children are singing and dancing. Everyone is having a good time."},{"heading":"İpucu","body":"Sualı oxu, cavabı mətndə tap. Lazım olsa mətnə yenidən bax."}]'::jsonb, 0),
+  ('pc-write', 'en-c2-writing', 'Cümlə qur: Present Continuous', 'Sözləri düzgün sıraya düz və Present Continuous cümləsi qur.', null, '[{"heading":"Necə işləyir?","body":"Sözlərə sıra ilə bas — cümlə yuxarıda düzələcək. Quruluş: kim → am/is/are → fel+ing."}]'::jsonb, 0)
+on conflict (id) do update set unit_id = excluded.unit_id, title = excluded.title, intro = excluded.intro, visual = excluded.visual, sections = excluded.sections, sort_order = excluded.sort_order;
+
+insert into tasks (id, lesson_id, type, prompt, data, xp, sort_order) values
+  ('pc-rule-t1', 'pc-rule', 'multiple_choice', '''I ___ reading now.''', '{"speakOptions":true,"options":["am","is","are","be"],"correctIndex":0}'::jsonb, 10, 0),
+  ('pc-rule-t2', 'pc-rule', 'multiple_choice', '''She ___ running.''', '{"speakOptions":true,"options":["am","is","are","be"],"correctIndex":1}'::jsonb, 10, 1),
+  ('pc-rule-t3', 'pc-rule', 'multiple_choice', '''They ___ singing.''', '{"speakOptions":true,"options":["am","is","are","be"],"correctIndex":2}'::jsonb, 10, 2),
+  ('pc-rule-t4', 'pc-rule', 'multiple_choice', '''We ___ cooking.''', '{"speakOptions":true,"options":["am","is","are","be"],"correctIndex":2}'::jsonb, 10, 3),
+  ('pc-rule-t5', 'pc-rule', 'fill_blank', '''play'' sözünə -ing əlavə et.', '{"accepted":["playing"]}'::jsonb, 10, 4),
+  ('pc-rule-t6', 'pc-rule', 'multiple_choice', 'Present Continuous nə vaxt işlədilir?', '{"options":["hər gün olan iş","indi baş verən iş","keçmiş iş","gələcək iş"],"correctIndex":1}'::jsonb, 10, 5),
+  ('pc-rule-t7', 'pc-rule', 'multiple_choice', '''He is ___ now.'' (write)', '{"speakOptions":true,"options":["write","writes","writing","wrote"],"correctIndex":2}'::jsonb, 10, 6),
+  ('pc-rule-t8', 'pc-rule', 'fill_blank', '''run'' sözünə -ing əlavə et (son samit qoşalaşır).', '{"accepted":["running"]}'::jsonb, 10, 7),
+  ('pc-rule-t9', 'pc-rule', 'multiple_choice', '''The baby ___ sleeping.''', '{"speakOptions":true,"options":["am","is","are","be"],"correctIndex":1}'::jsonb, 10, 8),
+  ('pc-rule-t10', 'pc-rule', 'multiple_choice', '''Look! It ___ raining.''', '{"speakOptions":true,"options":["am","is","are","be"],"correctIndex":1}'::jsonb, 10, 9),
+  ('pc-rule-t11', 'pc-rule', 'fill_blank', '''dance'' sözünə -ing əlavə et (''e'' düşür).', '{"accepted":["dancing"]}'::jsonb, 10, 10),
+  ('pc-rule-t12', 'pc-rule', 'multiple_choice', '''You ___ studying English.''', '{"speakOptions":true,"options":["am","is","are","be"],"correctIndex":2}'::jsonb, 15, 11),
+  ('pc-rule-b1', 'pc-rule', 'fill_blank', '''sit'' sözünə -ing əlavə et (son samit qoşalaşır).', '{"bonus":true,"accepted":["sitting"]}'::jsonb, 15, 12),
+  ('pc-rule-b2', 'pc-rule', 'multiple_choice', 'Hansı cümlə Present Continuous-dur?', '{"bonus":true,"speakOptions":true,"options":["I eat lunch.","I am eating lunch.","I ate lunch.","I will eat lunch."],"correctIndex":1}'::jsonb, 15, 13),
+  ('pc-rule-b3', 'pc-rule', 'fill_blank', '''swim'' sözünə -ing əlavə et.', '{"bonus":true,"accepted":["swimming"]}'::jsonb, 15, 14),
+  ('pc-rule-b4', 'pc-rule', 'multiple_choice', '''What ___ you doing?''', '{"bonus":true,"speakOptions":true,"options":["am","is","are","be"],"correctIndex":2}'::jsonb, 15, 15),
+  ('pc-vocab-t1', 'pc-vocab', 'multiple_choice', '''run'' sözünün mənası?', '{"options":["qaçmaq","yatmaq","üzmək","oxumaq"],"correctIndex":0}'::jsonb, 10, 0),
+  ('pc-vocab-t2', 'pc-vocab', 'multiple_choice', '''sleep'' sözünün mənası?', '{"options":["oturmaq","yatmaq","qaçmaq","bişirmək"],"correctIndex":1}'::jsonb, 10, 1),
+  ('pc-vocab-t3', 'pc-vocab', 'multiple_choice', '''cook'' sözünün mənası?', '{"options":["bişirmək","üzmək","yazmaq","rəqs etmək"],"correctIndex":0}'::jsonb, 10, 2),
+  ('pc-vocab-t4', 'pc-vocab', 'multiple_choice', '''swim'' sözünün mənası?', '{"options":["oxumaq","üzmək","qaçmaq","oturmaq"],"correctIndex":1}'::jsonb, 10, 3),
+  ('pc-vocab-t5', 'pc-vocab', 'multiple_choice', '''write'' sözünün mənası?', '{"options":["yazmaq","oxumaq","oturmaq","qaçmaq"],"correctIndex":0}'::jsonb, 10, 4),
+  ('pc-vocab-t6', 'pc-vocab', 'multiple_choice', '''dance'' sözünün mənası?', '{"options":["rəqs etmək","oxumaq","üzmək","yatmaq"],"correctIndex":0}'::jsonb, 10, 5),
+  ('pc-vocab-t7', 'pc-vocab', 'fill_blank', '''yatmaq'' ingiliscə necə yazılır?', '{"accepted":["sleep"]}'::jsonb, 10, 6),
+  ('pc-vocab-t8', 'pc-vocab', 'fill_blank', '''oturmaq'' ingiliscə necə yazılır?', '{"accepted":["sit"]}'::jsonb, 10, 7),
+  ('pc-vocab-t9', 'pc-vocab', 'multiple_choice', '''She is ___ in the pool.'' (üzmək)', '{"speakOptions":true,"options":["swimming","running","cooking","singing"],"correctIndex":0}'::jsonb, 10, 8),
+  ('pc-vocab-t10', 'pc-vocab', 'multiple_choice', '''He is ___ a letter.'' (yazmaq)', '{"speakOptions":true,"options":["writing","reading","cooking","dancing"],"correctIndex":0}'::jsonb, 10, 9),
+  ('pc-vocab-t11', 'pc-vocab', 'multiple_choice', '''They are ___ a song.'' (oxumaq)', '{"speakOptions":true,"options":["singing","sleeping","sitting","running"],"correctIndex":0}'::jsonb, 10, 10),
+  ('pc-vocab-t12', 'pc-vocab', 'fill_blank', '''The boys are ___ in the yard.'' (qaçmaq — -ing forması)', '{"accepted":["running"]}'::jsonb, 15, 11),
+  ('pc-vocab-b1', 'pc-vocab', 'multiple_choice', '''sing'' sözünün mənası?', '{"bonus":true,"options":["mahnı oxumaq","yatmaq","oturmaq","üzmək"],"correctIndex":0}'::jsonb, 15, 12),
+  ('pc-vocab-b2', 'pc-vocab', 'multiple_choice', '''sit'' sözünün mənası?', '{"bonus":true,"options":["oturmaq","qaçmaq","bişirmək","yazmaq"],"correctIndex":0}'::jsonb, 15, 13),
+  ('pc-vocab-b3', 'pc-vocab', 'multiple_choice', '''Mum is ___ dinner.'' (bişirmək)', '{"bonus":true,"speakOptions":true,"options":["cooking","swimming","writing","dancing"],"correctIndex":0}'::jsonb, 15, 14),
+  ('pc-vocab-b4', 'pc-vocab', 'fill_blank', '''rəqs etmək'' ingiliscə necə yazılır?', '{"bonus":true,"accepted":["dance"]}'::jsonb, 15, 15),
+  ('pc-listen-t1', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"I am reading a book.","options":["Mən kitab oxuyuram.","Mən yazıram.","Mən yatıram.","Mən qaçıram."],"correctIndex":0}'::jsonb, 10, 0),
+  ('pc-listen-t2', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"She is running.","options":["O yazır.","O qaçır.","O yatır.","O üzür."],"correctIndex":1}'::jsonb, 10, 1),
+  ('pc-listen-t3', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"They are singing.","options":["Onlar rəqs edir.","Onlar mahnı oxuyur.","Onlar yatır.","Onlar qaçır."],"correctIndex":1}'::jsonb, 10, 2),
+  ('pc-listen-t4', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"He is cooking dinner.","options":["O şam yeməyi bişirir.","O yemək yeyir.","O yazır.","O yatır."],"correctIndex":0}'::jsonb, 10, 3),
+  ('pc-listen-t5', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"We are swimming.","options":["Biz üzürük.","Biz qaçırıq.","Biz oxuyuruq.","Biz yatırıq."],"correctIndex":0}'::jsonb, 10, 4),
+  ('pc-listen-t6', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"The baby is sleeping.","options":["Körpə yatır.","Körpə ağlayır.","Körpə oynayır.","Körpə yeyir."],"correctIndex":0}'::jsonb, 10, 5),
+  ('pc-listen-t7', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"You are writing a letter.","options":["Sən məktub yazırsan.","Sən oxuyursan.","Sən qaçırsan.","Sən yatırsan."],"correctIndex":0}'::jsonb, 10, 6),
+  ('pc-listen-t8', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"She is dancing now.","options":["O indi rəqs edir.","O indi oxuyur.","O indi yatır.","O indi qaçır."],"correctIndex":0}'::jsonb, 10, 7),
+  ('pc-listen-t9', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"The children are playing.","options":["Uşaqlar oynayır.","Uşaqlar yatır.","Uşaqlar yeyir.","Uşaqlar oxuyur."],"correctIndex":0}'::jsonb, 10, 8),
+  ('pc-listen-t10', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"audioText":"I am sitting on the chair.","options":["Mən stulda oturmuşam.","Mən qaçıram.","Mən üzürəm.","Mən yazıram."],"correctIndex":0}'::jsonb, 15, 9),
+  ('pc-listen-b1', 'pc-listen', 'listening', 'Dinlə və sualın mənasını seç.', '{"bonus":true,"audioText":"What are you doing?","options":["Sən nə edirsən?","Sən hara gedirsən?","Sən kimsən?","Sən neçə yaşındasan?"],"correctIndex":0}'::jsonb, 15, 10),
+  ('pc-listen-b2', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"bonus":true,"audioText":"Look! It is raining.","options":["Bax! Yağış yağır.","Bax! Gün çıxıb.","Bax! Qar yağır.","Bax! Külək əsir."],"correctIndex":0}'::jsonb, 15, 11),
+  ('pc-listen-b3', 'pc-listen', 'listening', 'Dinlə və cümlənin mənasını seç.', '{"bonus":true,"audioText":"My father is reading a newspaper.","options":["Atam qəzet oxuyur.","Anam qəzet oxuyur.","Atam kitab oxuyur.","Atam yazır."],"correctIndex":0}'::jsonb, 15, 12),
+  ('pc-read-t1', 'pc-read', 'multiple_choice', 'What is the weather like?', '{"speakOptions":true,"options":["rainy","sunny","snowy","cloudy"],"correctIndex":1}'::jsonb, 10, 0),
+  ('pc-read-t2', 'pc-read', 'multiple_choice', 'Where are the people?', '{"speakOptions":true,"options":["at school","in the park","at home","at the shop"],"correctIndex":1}'::jsonb, 10, 1),
+  ('pc-read-t3', 'pc-read', 'multiple_choice', 'What are the two boys doing?', '{"speakOptions":true,"options":["swimming","playing football","sleeping","cooking"],"correctIndex":1}'::jsonb, 10, 2),
+  ('pc-read-t4', 'pc-read', 'multiple_choice', 'What is the girl doing?', '{"speakOptions":true,"options":["running with her dog","reading","dancing","cooking"],"correctIndex":0}'::jsonb, 10, 3),
+  ('pc-read-t5', 'pc-read', 'multiple_choice', 'What is the old man doing?', '{"speakOptions":true,"options":["singing","reading a newspaper","running","swimming"],"correctIndex":1}'::jsonb, 10, 4),
+  ('pc-read-t6', 'pc-read', 'multiple_choice', 'Where is the old man sitting?', '{"speakOptions":true,"options":["on a bench","on the grass","on a chair","on the floor"],"correctIndex":0}'::jsonb, 10, 5),
+  ('pc-read-t7', 'pc-read', 'fill_blank', '''Some children are singing and ___.'' (mətndən sözü yaz)', '{"accepted":["dancing"]}'::jsonb, 10, 6),
+  ('pc-read-t8', 'pc-read', 'multiple_choice', 'Are the people happy?', '{"speakOptions":true,"options":["Yes, they are.","No, they aren''t.","We don''t know.","They are sad."],"correctIndex":0}'::jsonb, 10, 7),
+  ('pc-read-t9', 'pc-read', 'multiple_choice', '''It is a sunny day.'' — hava necədir?', '{"options":["günəşli","yağışlı","qarlı","küləkli"],"correctIndex":0}'::jsonb, 10, 8),
+  ('pc-read-t10', 'pc-read', 'multiple_choice', 'What is everyone having?', '{"speakOptions":true,"options":["a good time","lunch","a book","a car"],"correctIndex":0}'::jsonb, 15, 9),
+  ('pc-read-b1', 'pc-read', 'multiple_choice', '''are playing'' hansı zamandır?', '{"bonus":true,"options":["Present Simple","Present Continuous","Past Simple","Future"],"correctIndex":1}'::jsonb, 15, 10),
+  ('pc-read-b2', 'pc-read', 'fill_blank', '''A girl is ___ with her dog.'' (qaçmaq — -ing, mətndən)', '{"bonus":true,"accepted":["running"]}'::jsonb, 15, 11),
+  ('pc-read-b3', 'pc-read', 'multiple_choice', '''Everyone is having a good time.'' nə deməkdir?', '{"bonus":true,"options":["hamı yaxşı vaxt keçirir","hamı yorğundur","hamı acdır","hamı yatır"],"correctIndex":0}'::jsonb, 15, 12),
+  ('pc-write-t1', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["I","am","reading"],"answer":"I am reading","translation":"Mən oxuyuram."}'::jsonb, 10, 0),
+  ('pc-write-t2', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["She","is","running"],"answer":"She is running","translation":"O qaçır."}'::jsonb, 10, 1),
+  ('pc-write-t3', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["They","are","singing"],"answer":"They are singing","translation":"Onlar mahnı oxuyur."}'::jsonb, 10, 2),
+  ('pc-write-t4', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["He","is","cooking","dinner"],"answer":"He is cooking dinner","translation":"O şam yeməyi bişirir."}'::jsonb, 10, 3),
+  ('pc-write-t5', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["We","are","swimming"],"answer":"We are swimming","translation":"Biz üzürük."}'::jsonb, 10, 4),
+  ('pc-write-t6', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["The","baby","is","sleeping"],"answer":"The baby is sleeping","translation":"Körpə yatır."}'::jsonb, 10, 5),
+  ('pc-write-t7', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["You","are","writing","a","letter"],"answer":"You are writing a letter","translation":"Sən məktub yazırsan."}'::jsonb, 10, 6),
+  ('pc-write-t8', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["She","is","dancing","now"],"answer":"She is dancing now","translation":"O indi rəqs edir."}'::jsonb, 10, 7),
+  ('pc-write-t9', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["I","am","sitting","here"],"answer":"I am sitting here","translation":"Mən burada oturmuşam."}'::jsonb, 10, 8),
+  ('pc-write-t10', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"words":["The","children","are","playing"],"answer":"The children are playing","translation":"Uşaqlar oynayır."}'::jsonb, 15, 9),
+  ('pc-write-b1', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"bonus":true,"words":["What","are","you","doing"],"answer":"What are you doing","translation":"Sən nə edirsən?"}'::jsonb, 15, 10),
+  ('pc-write-b2', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"bonus":true,"words":["It","is","raining","now"],"answer":"It is raining now","translation":"İndi yağış yağır."}'::jsonb, 15, 11),
+  ('pc-write-b3', 'pc-write', 'word_order', 'Sözləri düzgün sıraya düz.', '{"bonus":true,"words":["My","father","is","reading"],"answer":"My father is reading","translation":"Atam oxuyur."}'::jsonb, 15, 12)
+on conflict (id) do update set lesson_id = excluded.lesson_id, type = excluded.type, prompt = excluded.prompt, data = excluded.data, xp = excluded.xp, sort_order = excluded.sort_order;
+
+commit;

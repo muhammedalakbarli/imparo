@@ -1,0 +1,65 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local-only assistant/config files (repoda saxlanmır)
+CLAUDE.md
+AGENTS.md
+.claude/
+
+# Mobil app
+mobile/node_modules
+mobile/.env
+mobile/.expo
+
+# Maskot mənbə faylları (işlənmiş PNG-lər public/assets-dədir)
+/Maskot/
+
+# OpenNext (Cloudflare) build çıxışı
+.open-next/
+.wrangler/
+.dev.vars
+
+# Ekran şəkilləri / iş qeydləri
+*.jpeg
+/supabase*.png
+
+# Build zamanı yaranır (scripts/gen-content-seed.ts)
+/public/content-seed.json
