@@ -26,7 +26,7 @@ import { useT } from "@/lib/i18n";
 import { useCountUp } from "@/lib/useCountUp";
 import Logo from "@/components/Logo";
 import Mascot from "@/components/Mascot";
-import ZefiMascot from "@/components/ZefiMascot";
+import { mascotSrc } from "@/components/ZefiMascot";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import SiteFooter from "@/components/SiteFooter";
 
@@ -253,9 +253,13 @@ export default function LandingPage() {
           <div className="mx-auto grid max-w-6xl grid-cols-2 items-center gap-6 sm:grid-cols-[auto_1fr_auto] sm:gap-8">
             {/* Sol — salamlayan Zefi. Kiçik ekranda sıra ilə mətndən SONRA gəlir
                 (order-2), yəni telefonda əvvəl mesaj oxunur, sonra maskotlar. */}
-            <div className="order-2 flex origin-bottom justify-center sm:order-1 lg:scale-125">
-              <ZefiMascot emotion="welcome" size={148} disk={false} />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={mascotSrc("ayi")}
+              alt={t("cta.bear")}
+              className="order-2 mx-auto h-[148px] w-auto origin-bottom sm:order-1 lg:h-[185px]"
+              draggable={false}
+            />
 
             {/* Mərkəz — mesaj. Zefi kənara keçdiyi üçün burada yer boşaldı,
                 başlıq da ona görə xeyli böyüdü. */}
@@ -276,9 +280,13 @@ export default function LandingPage() {
             </div>
 
             {/* Sağ — hədiyyəli Zefi */}
-            <div className="order-3 flex origin-bottom justify-center lg:scale-125">
-              <ZefiMascot emotion="gift" size={148} disk={false} />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={mascotSrc("ceyran")}
+              alt={t("cta.deer")}
+              className="order-3 mx-auto h-[148px] w-auto origin-bottom lg:h-[185px]"
+              draggable={false}
+            />
           </div>
         </div>
       </Reveal>
