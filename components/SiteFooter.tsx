@@ -4,6 +4,7 @@
 // Funksional səhifələr (Məktəb/Mağaza) çıxış etmiş ziyarətçini login-ə atmasın deyə /signup-a gedir.
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import FooterScene from "@/components/FooterScene";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useT } from "@/lib/i18n";
 
@@ -48,7 +49,11 @@ export default function SiteFooter() {
   ];
 
   return (
-    <footer className="relative z-10 border-t border-line">
+    <footer className="relative z-10">
+      {/* Səhnə sərhəd XƏTTİNİN üstündədir: illüstrasiya futerə "oturur",
+          kəsilmiş kimi görünmür. */}
+      <FooterScene />
+      <div className="border-t border-line">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-5 py-12 sm:grid-cols-4">
         {cols.map((c) => (
           <div key={c.title}>
@@ -76,6 +81,7 @@ export default function SiteFooter() {
           </div>
           <LanguageSwitcher />
         </div>
+      </div>
       </div>
     </footer>
   );

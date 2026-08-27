@@ -1066,6 +1066,8 @@ const DICT: Dict = {
   "ft.investors": { az: "İnvestorlar", en: "Investors", ru: "Инвесторы" },
   "ft.terms": { az: "Şərtlər", en: "Terms", ru: "Условия" },
   "ft.privacy": { az: "Məxfilik", en: "Privacy", ru: "Конфиденциальность" },
+  "scene.alt": { az: "Təpələr və ağaclar arasında Zefi", en: "Zefi among hills and trees", ru: "Зефи среди холмов и деревьев" },
+  "scene.zefi": { az: "Zefi əl yelləyir", en: "Zefi waving", ru: "Зефи машет рукой" },
   "ft.rights": { az: "Bütün hüquqlar qorunur.", en: "All rights reserved.", ru: "Все права защищены." },
 
   // ── Hüquqi (ümumi) ──
