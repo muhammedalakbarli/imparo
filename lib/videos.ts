@@ -82,6 +82,23 @@ export interface UploadResult {
 }
 
 /**
+ * Kurikulum dərsi üçün faylı sabit yola yükləyir: `curriculum/<dərs id>.<uzantı>`.
+ * Ad dərs id-si olduğu üçün toplu yükləmədə fayl → dərs uyğunluğu avtomatikdir.
+ */
+export async function uploadCurriculumFile(file: File, lessonId: string): Promise<UploadResult> {
+  const sb = createClient();
+  const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+  const path = `curriculum/${lessonId}.${ext}`;
+  const { error } = await sb.storage.from(BUCKET).upload(path, file, {
+    contentType: file.type || undefined,
+    upsert: true,  // eyni dərsin videosu yenilənə bilsin
+  });
+  if (error) return { ok: false, error: error.message };
+  const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
+  return { ok: true, url: data.publicUrl };
+}
+
+/**
  * Videonu Storage-a yükləyir və ictimai URL qaytarır.
  * Yol: `<müəllim id>/<vaxt damğası>-<ad>.mp4` — RLS prefiks yoxlaması buna görədir.
  */

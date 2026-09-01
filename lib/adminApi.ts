@@ -601,3 +601,49 @@ export async function adminRemoveAdmin(uid: string): Promise<Res> {
   return { ok: !error, error: error?.message };
 }
 
+// ── Dərs videoları: toplu bağlama və istehsal növbəsi (migration 0061) ──
+// 806 dərsi bir-bir açıb ünvan yazmaq real deyil — bu funksiyalar admin
+// panelindəki toplu axını bəsləyir.
+export interface LessonVideoRow {
+  lesson_id: string;
+  title: string;
+  unit_title: string;
+  subject: string;
+  grade: number;
+  kind: string;
+  has_video: boolean;
+  src: string | null;
+  attempts: number;
+  sort_order: number;
+}
+export async function adminLessonVideoStatus(
+  subject?: string | null, onlyMissing = false,
+): Promise<LessonVideoRow[]> {
+  try {
+    const { data } = await createClient().rpc("admin_lesson_video_status", {
+      p_subject: subject ?? null, p_only_missing: onlyMissing,
+    });
+    return (data as LessonVideoRow[]) ?? [];
+  } catch { return []; }
+}
+
+export interface BulkVideoItem {
+  lesson_id: string;
+  src: string;
+  poster?: string;
+  captions?: string;
+  duration_sec?: number;
+}
+export interface BulkVideoResult { updated: number; missing: number; missing_ids: string[] }
+export async function adminBulkSetLessonVideo(
+  items: BulkVideoItem[],
+): Promise<Res & { result?: BulkVideoResult }> {
+  const { data, error } = await createClient().rpc("admin_bulk_set_lesson_video", { p_items: items });
+  const row = (data as BulkVideoResult[])?.[0];
+  return { ok: !error, error: error?.message, result: row };
+}
+export async function adminClearLessonVideo(lessonId: string): Promise<Res> {
+  const { error } = await createClient().rpc("admin_clear_lesson_video", { p_lesson_id: lessonId });
+  return { ok: !error, error: error?.message };
+}
+
