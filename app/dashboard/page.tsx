@@ -10,6 +10,7 @@ import { useContent } from "@/components/ContentProvider";
 import { loadProgress, loadActiveDays, lessonState, type ProgressState } from "@/lib/progress";
 import { getFriends } from "@/lib/friends";
 import { loadHearts, MAX_HEARTS } from "@/lib/hearts";
+import { loadLessonStars } from "@/lib/stars";
 import { loadPlus } from "@/lib/plus";
 import StreakPopover from "@/components/StreakPopover";
 import { useAuthUser } from "@/lib/useAuthUser";
@@ -44,6 +45,8 @@ export default function DashboardPage() {
   const [activeDays, setActiveDays] = useState<string[]>([]);
   const [friendStreaks, setFriendStreaks] = useState(0);
   const [hearts, setHearts] = useState(MAX_HEARTS);
+  // Dərs ulduzları (1–3) — path kartlarında göstərilir; dəqiqlikdən hesablanır.
+  const [stars, setStars] = useState<Map<string, number>>(new Map());
   const [plus, setPlus] = useState(false);
   const [quests, setQuests] = useState<QuestState | null>(null);
   const [chestOpen, setChestOpen] = useState(false);
@@ -64,6 +67,9 @@ export default function DashboardPage() {
   }, [user]);
   useEffect(() => {
     if (user) loadHearts().then(setHearts).catch(() => {});
+  }, [user]);
+  useEffect(() => {
+    if (user) loadLessonStars().then(setStars).catch(() => {});
   }, [user]);
   useEffect(() => {
     if (user) loadPlus().then(setPlus).catch(() => {});
@@ -101,6 +107,7 @@ export default function DashboardPage() {
         title: l.title,
         kind: l.kind ?? "lesson",
         state: lessonState(order, l.id, completed),
+        stars: stars.get(l.id),
         href: `/lessons/${l.id}`,
         unitTitle: li === 0 ? u.title : undefined,
         unitGoal: li === 0 ? u.description || undefined : undefined,
@@ -112,7 +119,7 @@ export default function DashboardPage() {
       ? Math.round((doneCount / lessons.length) * 100)
       : 0;
     return { nodes, currentLesson, scorePct };
-  }, [active, state]);
+  }, [active, state, stars]);
 
   // Məzmun DB-dən yüklənənə qədər gözlə — əks halda əvvəlcə koddakı (bəlkə köhnə)
   // struktur göstərilir, sonra DB-dəki ilə əvəzlənir → path "yanıb-sönür".
