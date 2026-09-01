@@ -5,11 +5,24 @@ import { createClient } from "./supabase/client";
 import type { Task, TaskType, RuleSection, LessonVideo } from "./types";
 
 // Cari istifadəçi admindirmi?
+//
+// Admin deyilsə, SESSİYADA BİR DƏFƏ dəvət yoxlanılır (bax 0060): komanda yoldaşı
+// e-poçt üzrə dəvət olunubsa, qeydiyyatdan keçən kimi avtomatik admin olur və
+// "əvvəl qeydiyyatdan keç, sonra səni əlavə edim" gedişi aradan qalxır.
+const INVITE_KEY = "imparo-admin-invite-checked";
+
 export async function checkIsAdmin(): Promise<boolean> {
   try {
     const supabase = createClient();
     const { data } = await supabase.rpc("is_admin");
-    return data === true;
+    if (data === true) return true;
+
+    if (typeof window !== "undefined" && !sessionStorage.getItem(INVITE_KEY)) {
+      sessionStorage.setItem(INVITE_KEY, "1");
+      const { data: claimed } = await supabase.rpc("claim_admin_invite");
+      if (claimed === true) return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -559,5 +572,32 @@ export interface AdminPaymentRow {
 export async function adminPayments(limit = 100): Promise<AdminPaymentRow[]> {
   try { const { data } = await createClient().rpc("admin_payments", { p_limit: limit }); return (data as AdminPaymentRow[]) ?? []; }
   catch { return []; }
+}
+
+// ── Admin dəvətləri (migration 0060) ──
+export interface AdminInvite {
+  email: string; role: string; note: string | null;
+  created_at: string; invited_by_email: string | null;
+}
+export async function adminListInvites(): Promise<AdminInvite[]> {
+  try { const { data } = await createClient().rpc("admin_list_invites"); return (data as AdminInvite[]) ?? []; }
+  catch { return []; }
+}
+/** Hesab varsa dərhal admin edir ("added"), yoxdursa dəvət yazır ("invited"). */
+export async function adminInviteAdmin(
+  email: string, role: "admin" | "super" = "admin", note?: string,
+): Promise<Res & { result?: string }> {
+  const { data, error } = await createClient().rpc("admin_invite_admin", {
+    p_email: email, p_role: role, p_note: note ?? null,
+  });
+  return { ok: !error, error: error?.message, result: (data as string) ?? undefined };
+}
+export async function adminRevokeInvite(email: string): Promise<Res> {
+  const { error } = await createClient().rpc("admin_revoke_invite", { p_email: email });
+  return { ok: !error, error: error?.message };
+}
+export async function adminRemoveAdmin(uid: string): Promise<Res> {
+  const { error } = await createClient().rpc("admin_remove_admin", { p_uid: uid });
+  return { ok: !error, error: error?.message };
 }
 
