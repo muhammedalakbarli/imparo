@@ -133,6 +133,20 @@ export const subjectMeta: SubjectMeta[] = [
     "lessons": 9
   },
   {
+    "slug": "suni-intellekt-5",
+    "name": "Süni İntellekt",
+    "grade": 5,
+    "units": 3,
+    "lessons": 12
+  },
+  {
+    "slug": "kibertehlukesizlik-5",
+    "name": "Kibertəhlükəsizlik",
+    "grade": 5,
+    "units": 3,
+    "lessons": 12
+  },
+  {
     "slug": "riyaziyyat-6",
     "name": "Riyaziyyat",
     "grade": 6,
