@@ -27,8 +27,8 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Bir sponsorluq yerinin qiyməti (qəpik) — illik Plus qiyməti ilə eynidir. */
-const SEAT_PRICE_CENTS = 2490;
+/** Bir sponsorluq yerinin qiyməti (qəpik) — LemonSqueezy-dəki illik Plus qiyməti: 23.99 ₼. */
+const SEAT_PRICE_CENTS = 2399;
 
 /** Plan → veriləcək gün sayı. */
 const PLAN_DAYS: Record<string, number> = { monthly: 30, yearly: 365 };

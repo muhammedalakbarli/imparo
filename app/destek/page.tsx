@@ -25,13 +25,13 @@ import { track } from "@/lib/analytics";
 // uydurma "ödəniş" düyməsi göstərilmir.
 const SPONSOR_CHECKOUT = process.env.NEXT_PUBLIC_LS_CHECKOUT_SPONSOR;
 
-/** Bir yer = bir illik Plus (24.90 ₼ = 2490 qəpik). Webhook-dakı dəyərlə eyni olmalıdır. */
-const SEAT_PRICE_CENTS = 2490;
+/** Bir yer = bir illik Plus (23.99 ₼ = 2399 qəpik). Webhook-dakı dəyərlə eyni olmalıdır. */
+const SEAT_PRICE_CENTS = 2399;
 
 const SEAT_OPTIONS = [
-  { seats: 1, label: "1 şagird", note: "24.90 ₼ · bir il pulsuz" },
-  { seats: 3, label: "3 şagird", note: "74.70 ₼ · bir sinif qrupu" },
-  { seats: 10, label: "10 şagird", note: "249 ₼ · bütöv bir sinif" },
+  { seats: 1, label: "1 şagird", note: "23.99 ₼ · bir il pulsuz" },
+  { seats: 3, label: "3 şagird", note: "71.97 ₼ · bir sinif qrupu" },
+  { seats: 10, label: "10 şagird", note: "239.90 ₼ · bütöv bir sinif" },
 ];
 
 export default function SupportPage() {
