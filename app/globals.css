@@ -602,34 +602,3 @@ html.dark .admin-theme {
   background: color-mix(in srgb, var(--color-panel) 82%, transparent);
   backdrop-filter: saturate(1.6) blur(10px);
 }
-
-/* ── Öyrənmə xəritəsinin səhnə rəngləri (bax components/PathScene.tsx) ───────
-   Fon SVG-dir və rəngləri buradan alır: açıq rejimdə günəşli çəmən, tünd
-   rejimdə gecə mənzərəsi. Kartlar səhnənin üstündə oxunaqlı qalmalıdır, ona
-   görə tonlar qəsdən yumşaqdır. */
-.path-scene {
-  --scene-sky-1: #dff1ff;
-  --scene-sky-2: #eaf7ea;
-  --scene-hill-far: #bfe3c4;
-  --scene-hill-near: #a8d9b4;
-  --scene-river-1: #7ec8f2;
-  --scene-river-2: #4ba3e3;
-  --scene-tree-1: #3f9e5d;
-  --scene-tree-2: #2f8a4d;
-  --scene-trunk: #8a5a2b;
-  --scene-cloud: #ffffff;
-  --scene-shadow: #14532d;
-}
-html.dark .path-scene {
-  --scene-sky-1: #14202e;
-  --scene-sky-2: #16261f;
-  --scene-hill-far: #1d3a2a;
-  --scene-hill-near: #17402c;
-  --scene-river-1: #1d5f86;
-  --scene-river-2: #12405e;
-  --scene-tree-1: #1f6b3d;
-  --scene-tree-2: #175a33;
-  --scene-trunk: #4a3520;
-  --scene-cloud: #24354a;
-  --scene-shadow: #000000;
-}

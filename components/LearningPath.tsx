@@ -1,108 +1,81 @@
 "use client";
 
-// "Imparo" öyrənmə xəritəsi — macəra xəritəsi üslubu (bax Maskot/maskot 3d/path.jpeg).
-//
-// DÜYÜN ARTIQ DAİRƏ DEYİL, KARTDIR. Səbəb: dairədə yalnız ikon yerləşirdi, dərsin
-// adı altda kiçik mətnlə qalırdı və şagird "növbəti nə öyrənəcəyəm" sualına
-// cavabı yalnız kliklədikdən sonra alırdı. Kartda nömrə, ad, ulduzlar və vəziyyət
-// eyni anda görünür.
-//
-// YERLƏŞMƏ: ilanvari (serpantin) — sətirlər növbə ilə soldan-sağa və sağdan-sola
-// gedir, aralarında kəsik-kəsik yol. Mobil ekranda sətir bir sütuna düşür və
-// tərs sıralama SÖNDÜRÜLÜR (əks halda oxunuş sırası pozulardı).
-//
-// Bölmə sonundakı sandıq və test düyünləri xüsusi görünür: sandıq — mükafat kartı,
-// test — "BOSS BATTLE" bannerı. Bu, bölmənin bitdiyini uzaqdan göstərir.
+// "Imparo" öyrənmə xəritəsi — Duolingo-üslubu tək sütunlu zigzag yol.
+// Qalın 3D düyünlər (altında dərinlik kölgəsi), düyünlər arası xətt YOX (Duolingo kimi),
+// cari düyün qızılı + "BAŞLA" balonu + halo, kiliddə düyün toxunanda titrəyir. Hər bölmə
+// başında rəngli banner. Zefi yolun yanında platformada. Reduced-motion/.no-anim tabedir.
 
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Star, Check, Lock, Flag, Trophy, Gift, Play, Swords } from "lucide-react";
+import { Star, Check, Lock, Flag, Trophy, Sparkles, Gift } from "lucide-react";
 import ZefiMascot, { type ZefiEmotion, type CharacterName } from "@/components/ZefiMascot";
-import PathScene from "@/components/PathScene";
 import { useT } from "@/lib/i18n";
 import { playStep } from "@/lib/sound";
 import { vibrateWrong } from "@/lib/haptics";
 
 export type NodeState = "done" | "current" | "locked";
+
 export type NodeKind = "lesson" | "chest" | "test";
 
 export interface PathNode {
   id: string;
-  kind?: NodeKind;
+  kind?: NodeKind; // "chest" = bölmə sandığı, "test" = bölmə sonu testi
   title: string;
   state: NodeState;
   href?: string;
-  unitTitle?: string; // dolu isə bu düyün yeni bölmənin başıdır
+  unitTitle?: string; // dolu isə bu düyün yeni bölmənin başıdır (banner tetikləyir)
+  // Bölmənin nə öyrətdiyi (məzmunda `unit.description`). Başlıq tək başına
+  // uşağa az şey deyir: "Ədədlər 0-10" bölmənin ADIdır, MƏQSƏDİ deyil.
   unitGoal?: string;
-  /** 1–3; tamamlanmış dərsdə dəqiqlikdən hesablanır (bax my_lesson_stars, 0062). */
-  stars?: number;
 }
 
-/** Sətirdəki kart sayı (desktop). Mobil/planşetdə sətir öz-özünə bir sütuna düşür. */
-const PER_ROW = 3;
+// Sabit en; zigzag amplitudası (Duolingo kimi orta).
+const LANE = 300;
+const AMPLITUDE = 78;
+const offsetAt = (i: number) => Math.round(Math.sin(i * 0.9) * AMPLITUDE);
 
-const STATE_STYLE: Record<NodeState, { badge: string; ring: string; card: string }> = {
-  done: {
-    badge: "bg-emerald-500 text-white",
-    ring: "border-emerald-500/30",
-    card: "bg-panel/95",
-  },
-  current: {
-    badge: "bg-amber-500 text-white",
-    ring: "border-amber-400 ring-4 ring-amber-400/25",
-    card: "bg-panel",
-  },
-  locked: {
-    badge: "bg-violet-500/85 text-white",
-    ring: "border-line",
-    card: "bg-panel/80",
-  },
-};
-
-/* ── Ulduzlar ────────────────────────────────────────────────────────────── */
-
-function Stars({ value, muted }: { value: number; muted?: boolean }) {
-  return (
-    <span className="flex items-center gap-0.5" aria-label={`${value} ulduz`}>
-      {[1, 2, 3].map((i) => (
-        <Star
-          key={i}
-          size={14}
-          strokeWidth={2.4}
-          className={
-            i <= value
-              ? "text-amber-400"
-              : muted
-                ? "text-line"
-                : "text-muted/35"
-          }
-          {...(i <= value ? { fill: "currentColor" } : {})}
-        />
-      ))}
-    </span>
-  );
-}
-
-/* ── Bölmə banneri ───────────────────────────────────────────────────────── */
-
+// Bölmələr üçün növbələşən rəng temaları.
+// Vahid palitra: indiqo (brend) və amber növbələşir — göy qurşağı yox.
 const UNIT_THEMES = ["from-brand to-brand-dark", "from-amber-500 to-orange-500"];
 
+// Düyünün 3D rəngləri (üz + alt dərinlik kölgəsi).
+const NODE_STYLE: Record<NodeState, { bg: string; depth: string; text: string }> = {
+  done: { bg: "#22c55e", depth: "#15803d", text: "#fff" },
+  current: { bg: "#f5b60a", depth: "#c98703", text: "#fff" },
+  locked: { bg: "var(--color-panel-2)", depth: "var(--color-line)", text: "var(--color-muted)" },
+};
+
+// Sandıq və bölmə-sonu-test düyünləri adi dərsdən vizual olaraq fərqlənir.
+const SPECIAL_STYLE: Record<"chest" | "test", { bg: string; depth: string }> = {
+  chest: { bg: "#a855f7", depth: "#7e22ce" }, // bənövşəyi — mükafat
+  test: { bg: "#0ea5e9", depth: "#0369a1" }, // mavi — yoxlama
+};
+
+// Bölmə banneri — rəngli gradient, ikon + başlıq; keçilmişsə kubok. Görünəndə səs.
 function UnitBanner({
-  title, goal, index, reached,
+  title,
+  goal,
+  index,
+  reached,
 }: {
-  title: string; goal?: string; index: number; reached: boolean;
+  title: string;
+  goal?: string;
+  index: number;
+  reached: boolean;
 }) {
   const theme = UNIT_THEMES[index % UNIT_THEMES.length];
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+      initial={{ opacity: 0, y: 10, scale: 0.96 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-30px" }}
       transition={{ type: "spring", stiffness: 240, damping: 22 }}
-      className="relative z-10 mb-5 mt-8 w-full first:mt-2"
+      className="relative z-10 my-4 w-full"
     >
-      <div className={`flex items-center gap-3 rounded-2xl bg-gradient-to-r ${theme} px-4 py-3 shadow-lg`}>
+      <div
+        className={`flex items-center gap-3 rounded-2xl bg-gradient-to-r ${theme} px-4 py-3 shadow-lg`}
+      >
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/25 text-white">
           <Flag size={18} strokeWidth={2.6} />
         </span>
@@ -110,9 +83,15 @@ function UnitBanner({
           <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">
             Bölmə {index + 1}
           </div>
-          <div className="truncate text-sm font-extrabold leading-tight text-white">{title}</div>
+          <div className="truncate text-sm font-extrabold leading-tight text-white">
+            {title}
+          </div>
           {goal && (
-            <div className="mt-0.5 text-xs font-semibold leading-snug text-white/85">{goal}</div>
+            // Qəsdən `truncate` YOXDUR: məqsəd cümləsi kəsilsə mənasını itirir,
+            // başlıqdan fərqli olaraq burada iki sətir qalması normaldır.
+            <div className="mt-0.5 text-xs font-semibold leading-snug text-white/85">
+              {goal}
+            </div>
           )}
         </div>
         {reached && <Trophy size={18} className="shrink-0 text-white/90" />}
@@ -121,162 +100,169 @@ function UnitBanner({
   );
 }
 
-/* ── Dərs kartı ──────────────────────────────────────────────────────────── */
-
-function LessonCard({ node, index }: { node: PathNode; index: number }) {
+function NodeButton({ node }: { node: PathNode }) {
   const t = useT();
   const [shake, setShake] = useState(false);
-  const isLocked = node.state === "locked";
-  const isCurrent = node.state === "current";
   const isDone = node.state === "done";
-  const s = STATE_STYLE[node.state];
+  const isCurrent = node.state === "current";
+  const isLocked = node.state === "locked";
+  const kind = node.kind ?? "lesson";
+  // Sandıq/test öz ikonunu saxlayır (kilidli olanda kilid göstərilir ki, əlçatmazlıq aydın olsun).
+  const Icon = isLocked
+    ? Lock
+    : kind === "chest"
+      ? Gift
+      : kind === "test"
+        ? Trophy
+        : isDone
+          ? Check
+          : Star;
+  const base = NODE_STYLE[node.state];
+  // Xüsusi düyünlər açıq olanda öz rəngindədir; kilidli/bitmiş halda ümumi sxem qalır.
+  const s =
+    kind !== "lesson" && isCurrent
+      ? { ...SPECIAL_STYLE[kind], text: "#fff" }
+      : base;
 
-  const body = (
+  const inner = (
     <motion.div
-      whileHover={!isLocked ? { y: -3 } : undefined}
-      whileTap={!isLocked ? { y: 1 } : undefined}
-      animate={shake ? { x: [0, -6, 6, -5, 5, 0] } : undefined}
-      transition={{ type: "spring", stiffness: 420, damping: 22 }}
-      className={`relative flex min-h-[74px] w-full items-center gap-3 rounded-2xl border-2 ${s.ring} ${s.card} px-3.5 py-3 shadow-[0_6px_16px_-8px_rgba(15,23,42,.35)] backdrop-blur-[2px] ${
-        isLocked ? "opacity-90" : ""
+      whileTap={!isLocked ? { y: 5, boxShadow: `0 1px 0 0 ${s.depth}` } : undefined}
+      whileHover={!isLocked ? { y: -2 } : undefined}
+      transition={{ type: "spring", stiffness: 500, damping: 20 }}
+      className={`relative z-10 flex h-[82px] w-[82px] items-center justify-center rounded-full ${
+        isCurrent ? "node-bob" : ""
       }`}
+      style={{ background: s.bg, color: s.text, boxShadow: `0 7px 0 0 ${s.depth}` }}
     >
-      {/* Nömrə nişanı */}
-      <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-[15px] font-extrabold shadow-sm ${s.badge}`}
-      >
-        {index}
-      </span>
+      {/* Parlaq üst işıq (glossy) */}
+      {!isLocked && (
+        <span
+          className="pointer-events-none absolute inset-x-4 top-2.5 h-4 rounded-full bg-white/35 blur-[2px]"
+          aria-hidden
+        />
+      )}
+      <Icon size={36} strokeWidth={3.2} {...(isCurrent || isDone ? { fill: "currentColor" } : {})} />
 
-      <span className="min-w-0 flex-1">
-        {/* Başlıq iki sətirə qədər açılır: kart eni 210px-dir və `truncate` ilə
-            "Nisbət və p…" kimi kəsilmiş adlar şagirdə heç nə demir. */}
-        <span className="block break-words hyphens-auto text-[13.5px] font-extrabold leading-[1.25] text-fg [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2] overflow-hidden">
-          {node.title}
-        </span>
-        <span className="mt-1 flex items-center gap-2">
-          <Stars value={isDone ? (node.stars ?? 1) : 0} muted={isLocked} />
-          {isCurrent && (
-            <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-amber-600">
-              {t("dash.start")}
-            </span>
-          )}
-        </span>
-      </span>
-
-      {/* Vəziyyət ikonu */}
-      <span
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-          isDone
-            ? "bg-emerald-500 text-white"
-            : isCurrent
-              ? "bg-amber-500 text-white"
-              : "bg-panel-2 text-muted"
-        }`}
-      >
-        {isDone ? <Check size={17} strokeWidth={3.4} /> : isCurrent ? <Play size={15} fill="currentColor" strokeWidth={0} /> : <Lock size={15} strokeWidth={2.8} />}
-      </span>
+      {/* Cari düyünün yanında oynayan qığılcımlar */}
+      {isCurrent && (
+        <>
+          <span className="twinkle pointer-events-none absolute -left-2 top-1 text-amber-200" aria-hidden>
+            <Sparkles size={13} fill="currentColor" strokeWidth={0} />
+          </span>
+          <span
+            className="twinkle pointer-events-none absolute -right-2 bottom-1 text-amber-100"
+            style={{ animationDelay: "0.8s" }}
+            aria-hidden
+          >
+            <Sparkles size={11} fill="currentColor" strokeWidth={0} />
+          </span>
+        </>
+      )}
     </motion.div>
   );
 
+  // Cari/tamamlanmış: keçid + səs. Kilidli: keçid yox, titrəmə + tooltip.
   if (node.href && !isLocked) {
     return (
-      <Link href={node.href} onClick={() => playStep()} className="block w-full">
-        {body}
-      </Link>
+      <NodeShell isCurrent={isCurrent}>
+        <Link href={node.href} onClick={() => playStep()}>
+          {inner}
+        </Link>
+        <NodeLabel node={node} />
+      </NodeShell>
     );
   }
 
   return (
-    <button
-      type="button"
-      className="block w-full cursor-default text-left"
-      aria-label={`${node.title} — ${t("path.locked")}`}
-      onClick={() => {
-        setShake(true);
-        vibrateWrong();
-        window.setTimeout(() => setShake(false), 480);
-      }}
-    >
-      {body}
-    </button>
+    <NodeShell isCurrent={isCurrent}>
+      <button
+        type="button"
+        onClick={() => {
+          setShake(true);
+          vibrateWrong();
+          window.setTimeout(() => setShake(false), 500);
+        }}
+        className="cursor-default"
+        aria-label={`${node.title} — kilidli`}
+      >
+        <motion.div animate={shake ? { x: [0, -6, 6, -5, 5, 0] } : undefined} transition={{ duration: 0.4 }}>
+          {inner}
+        </motion.div>
+      </button>
+      {shake && (
+        <motion.span
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute -top-8 z-10 flex items-center gap-1 rounded-lg border border-line bg-panel px-2 py-1 text-[11px] font-semibold text-muted shadow-sm"
+        >
+          <Lock size={11} /> {t("path.locked")}
+        </motion.span>
+      )}
+      <NodeLabel node={node} />
+    </NodeShell>
   );
 }
 
-/* ── Xüsusi düyünlər: sandıq və bölmə testi ──────────────────────────────── */
-
-function ChestCard({ node }: { node: PathNode }) {
-  const locked = node.state === "locked";
-  const inner = (
-    <motion.div
-      whileHover={!locked ? { y: -3 } : undefined}
-      className={`relative mx-auto flex w-full max-w-[420px] items-center gap-3 rounded-2xl border-2 px-4 py-3 shadow-[0_8px_20px_-10px_rgba(15,23,42,.4)] ${
-        locked ? "border-line bg-panel/80" : "border-violet-400 bg-panel"
-      }`}
-    >
-      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${locked ? "bg-panel-2 text-muted" : "bg-violet-500 text-white"}`}>
-        {locked ? <Lock size={18} strokeWidth={2.8} /> : <Gift size={20} strokeWidth={2.6} />}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[14px] font-extrabold text-fg">{node.title}</span>
-        <span className="block text-[12px] text-muted">Bölməni bitir, xüsusi mükafat qazan</span>
-      </span>
-    </motion.div>
-  );
-  return node.href && !locked ? <Link href={node.href} className="block">{inner}</Link> : inner;
-}
-
-function BossCard({ node }: { node: PathNode }) {
-  const locked = node.state === "locked";
-  const inner = (
-    <motion.div
-      whileHover={!locked ? { y: -3 } : undefined}
-      className={`relative mx-auto w-full max-w-[420px] overflow-hidden rounded-2xl border-2 shadow-[0_10px_24px_-12px_rgba(15,23,42,.5)] ${
-        locked ? "border-line bg-panel/80" : "border-rose-400 bg-panel"
-      }`}
-    >
-      <div className={`flex items-center gap-3 px-4 py-3 ${locked ? "" : "bg-gradient-to-r from-rose-500/10 to-transparent"}`}>
-        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${locked ? "bg-panel-2 text-muted" : "bg-rose-500 text-white"}`}>
-          {locked ? <Lock size={18} strokeWidth={2.8} /> : <Swords size={20} strokeWidth={2.6} />}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[10px] font-extrabold uppercase tracking-[0.14em] text-rose-500">
-            Bölmə sınağı
-          </span>
-          <span className="block truncate text-[14px] font-extrabold text-fg">{node.title}</span>
-        </span>
-      </div>
-    </motion.div>
-  );
-  return node.href && !locked ? <Link href={node.href} className="block">{inner}</Link> : inner;
-}
-
-/* ── Yol birləşdiriciləri ────────────────────────────────────────────────── */
-
-// Kartlar arası kəsik-kəsik yol. Yalnız desktopda görünür: mobil bir sütundur və
-// şaquli xətt kartları bir-birindən ayırmır, sıxlıq yaradır.
-function Dash() {
+function NodeShell({
+  children,
+  isCurrent,
+}: {
+  children: React.ReactNode;
+  isCurrent: boolean;
+}) {
+  const t = useT();
   return (
-    <span className="hidden h-0 flex-1 self-center border-t-[3px] border-dashed border-white/70 dark:border-white/25 sm:block" aria-hidden />
+    <div className="relative flex flex-col items-center">
+      {/* Cari düyünün arxasında qızılı işıq halosu */}
+      {isCurrent && (
+        <span
+          className="pointer-events-none absolute top-2 z-0 h-[82px] w-[82px] rounded-full bg-amber-400/40 blur-xl"
+          aria-hidden
+        />
+      )}
+      {/* Cari dərsin üstündə tullanan "BAŞLA" balonu */}
+      {isCurrent && (
+        <div className="path-bounce absolute -top-12 z-20 flex flex-col items-center">
+          <span className="rounded-xl bg-white px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-amber-600 shadow-md">
+            {t("dash.start")}
+          </span>
+          <span className="-mt-[3px] h-3 w-3 rotate-45 bg-white shadow-md" />
+        </div>
+      )}
+      {children}
+    </div>
   );
 }
 
-function RowTurn({ side }: { side: "left" | "right" }) {
+function NodeLabel({ node }: { node: PathNode }) {
   return (
     <span
-      className={`hidden h-8 w-16 border-b-[3px] border-dashed border-white/70 dark:border-white/25 sm:block ${
-        side === "right" ? "ml-auto rounded-br-3xl border-r-[3px]" : "mr-auto rounded-bl-3xl border-l-[3px]"
+      className={`mt-3 max-w-[130px] text-center text-xs leading-tight ${
+        node.state === "locked" ? "text-muted" : "font-semibold text-fg"
       }`}
-      aria-hidden
-    />
+    >
+      {node.title}
+    </span>
   );
 }
 
-/* ── Maskotlar (mövcud personaj dəsti saxlanılır) ────────────────────────── */
-
-const MASCOT_SIZE = 76;
-
-type Perch = { kind: "zefi"; emotion: ZefiEmotion } | { kind: "char"; name: CharacterName };
+// Zefi yolun yanında kiçik platformada (Duolingo owl kimi).
+// Ölçü dərs dairələrindən (82px) bir qədər böyük — görkəmli.
+const MASCOT_SIZE = 104;
+// Mascotun düyün mərkəzindən üfüqi aralığı — qonşu (kilidli) bölmə ilə aydın boşluq.
+const MASCOT_GAP = 152;
+// Yol boyu növbələşən personajlar.
+//
+// Zefi siyahıda QALIR — o, əsas maskotdur və yoldan tamamilə yox olmamalıdır.
+// Yanına meşənin digər sakinləri qatılır ki, yol "boş cığır" yox, içində həyat
+// olan bir yer kimi oxunsun.
+//
+// "Məşğul" pozalara (bal yeyir, göbələk yığır, pendir yeyir) qəsdən yer verilib:
+// nəyisə edən personaj sadəcə əl yelləyəndən daha canlı görünür.
+// "worried" istisnadır — yol boyu əhval həmişə müsbət qalmalıdır.
+type Perch =
+  | { kind: "zefi"; emotion: ZefiEmotion }
+  | { kind: "char"; name: CharacterName };
 
 const PERCH_CAST: Perch[] = [
   { kind: "zefi", emotion: "happy" },
@@ -300,7 +286,9 @@ const PERCH_CAST: Perch[] = [
 
 function MascotPerch({ perch }: { perch: Perch }) {
   return (
-    <div className="pointer-events-none hidden flex-col items-center sm:flex">
+    <div className="pointer-events-none relative flex flex-col items-center">
+      {/* Arxa ağ disk artıq ZefiMascot-un öz içindədir (tünd rejimdə avtomatik) — bax
+          components/ZefiMascot.tsx + globals.css `.zefi-disk`. */}
       <span className="relative z-10">
         {perch.kind === "zefi" ? (
           <ZefiMascot emotion={perch.emotion} size={MASCOT_SIZE} />
@@ -308,135 +296,102 @@ function MascotPerch({ perch }: { perch: Perch }) {
           <ZefiMascot character={perch.name} size={MASCOT_SIZE} />
         )}
       </span>
-      <span className="relative z-10 mt-0.5 h-2.5 w-14 rounded-[50%] bg-black/25 blur-[3px]" aria-hidden />
+      <span className="relative z-10 mt-1 h-3 w-20 rounded-[50%] bg-black/25 blur-[3px]" aria-hidden />
     </div>
   );
 }
 
-/* ── Başlanğıc nişanı ────────────────────────────────────────────────────── */
+// Fon boyu incə, hərəkət edən parıltılar (dekorativ, kliklənməz).
+const DECOR = [
+  { top: "8%", left: "6%", size: 14, delay: "0s" },
+  { top: "24%", left: "88%", size: 10, delay: "0.9s" },
+  { top: "46%", left: "10%", size: 12, delay: "1.6s" },
+  { top: "63%", left: "84%", size: 9, delay: "0.4s" },
+  { top: "80%", left: "12%", size: 13, delay: "1.2s" },
+  { top: "92%", left: "80%", size: 10, delay: "2s" },
+];
 
-function StartMarker() {
+function Decor() {
   return (
-    <div className="relative z-10 mb-1 flex items-center gap-2">
-      <span className="rounded-xl bg-amber-500 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white shadow-md">
-        Start
-      </span>
-      <span className="h-0 w-14 border-t-[3px] border-dashed border-white/70 dark:border-white/25" aria-hidden />
+    <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+      {DECOR.map((d, i) => (
+        <span
+          key={i}
+          className="twinkle absolute text-brand/20"
+          style={{ top: d.top, left: d.left, animationDelay: d.delay }}
+        >
+          <Sparkles size={d.size} fill="currentColor" strokeWidth={0} />
+        </span>
+      ))}
     </div>
   );
-}
-
-/* ── Xəritə ──────────────────────────────────────────────────────────────── */
-
-interface NumberedNode { node: PathNode; num: number }
-
-interface Segment {
-  unitTitle?: string;
-  unitGoal?: string;
-  lessons: NumberedNode[];
-  chest?: PathNode;
-  test?: PathNode;
-}
-
-// Düyünləri bölmələrə ayırır və dərs nömrələrini BURADA hesablayır (render zamanı
-// yox): render sırasında sayğac dəyişdirmək React-in yenidən render qaydalarına
-// ziddir və eyni komponent iki dəfə render olunanda nömrələr sürüşür.
-function toSegments(nodes: PathNode[]): Segment[] {
-  const out: Segment[] = [];
-  let cur: Segment | null = null;
-  let num = 0;
-  for (const n of nodes) {
-    if (n.unitTitle || !cur) {
-      cur = { unitTitle: n.unitTitle, unitGoal: n.unitGoal, lessons: [] };
-      out.push(cur);
-    }
-    const kind = n.kind ?? "lesson";
-    if (kind === "chest") cur.chest = n;
-    else if (kind === "test") cur.test = n;
-    else {
-      num += 1;
-      cur.lessons.push({ node: n, num });
-    }
-  }
-  return out;
-}
-
-function chunk<T>(arr: T[], size: number): T[][] {
-  const rows: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) rows.push(arr.slice(i, i + size));
-  return rows;
 }
 
 export default function LearningPath({ nodes }: { nodes: PathNode[] }) {
-  const segments = toSegments(nodes);
+  const rows: React.ReactNode[] = [];
+  let unitIndex = -1;
+
+  nodes.forEach((node, i) => {
+    const off = offsetAt(i);
+
+    // Yeni bölmə başı — banner əlavə et.
+    if (node.unitTitle) {
+      unitIndex += 1;
+      rows.push(
+        <UnitBanner
+          key={`b-${node.id}`}
+          title={node.unitTitle}
+          goal={node.unitGoal}
+          index={unitIndex}
+          reached={node.state !== "locked"}
+        />,
+      );
+    }
+
+    // Zefi-ni aralıqlarda, düyünün əks tərəfində platformada göstər.
+    const showMascot = i > 0 && i % 5 === 2 && node.state !== "current";
+    const mascotSide = off >= 0 ? -1 : 1; // düyün sağdadırsa Zefi solda
+    // Hər görünüşdə fərqli personaj. İndeksə bağlıdır, təsadüfi DEYİL: eyni
+    // düyündə həmişə eyni personaj durur — şagird "ayı orada yaşayır" kimi
+    // qavrayır və hər açılışda mənzərə dəyişmir.
+    const perch = PERCH_CAST[Math.floor(i / 5) % PERCH_CAST.length];
+
+    rows.push(
+      <motion.div
+        key={node.id}
+        initial={{ opacity: 0, y: 14 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ type: "spring", stiffness: 260, damping: 22 }}
+        className={`flex w-full flex-col items-center py-3 ${
+          node.state === "current" ? "pt-14" : ""
+        }`}
+      >
+        <div
+          className="relative flex items-center justify-center"
+          style={{ transform: `translateX(${off}px)` }}
+        >
+          {showMascot && (
+            <div
+              className="absolute top-1/2 z-10 -translate-y-1/2"
+              style={{ [mascotSide < 0 ? "right" : "left"]: `${MASCOT_GAP}px` }}
+            >
+              <MascotPerch perch={perch} />
+            </div>
+          )}
+          <NodeButton node={node} />
+        </div>
+      </motion.div>,
+    );
+  });
 
   return (
-    <div className="path-scene relative overflow-hidden rounded-[28px] border border-line/70 px-3 py-4 sm:px-5 sm:py-6">
-      <PathScene />
-
-      <div className="relative z-10">
-        {segments.map((seg, si) => {
-          const rows = chunk(seg.lessons, PER_ROW);
-          return (
-            <div key={seg.unitTitle ?? `seg-${si}`}>
-              {seg.unitTitle && (
-                <UnitBanner
-                  title={seg.unitTitle}
-                  goal={seg.unitGoal}
-                  index={si}
-                  reached={seg.lessons.some((l) => l.node.state !== "locked")}
-                />
-              )}
-
-              {si === 0 && <StartMarker />}
-
-              {rows.map((row, ri) => {
-                const reversed = ri % 2 === 1;
-                // Personaj indeksi bölmə və sətir nömrəsindən çıxarılır — sabitdir,
-                // yəni eyni yerdə həmişə eyni personaj durur.
-                const perch = PERCH_CAST[(si * 3 + ri) % PERCH_CAST.length];
-                return (
-                  <div key={`r-${si}-${ri}`}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 14 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-40px" }}
-                      transition={{ type: "spring", stiffness: 260, damping: 24 }}
-                      className={`flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-2 ${
-                        reversed ? "sm:flex-row-reverse" : ""
-                      }`}
-                    >
-                      {row.map(({ node: n, num }, ni) => (
-                        <div key={n.id} className="contents">
-                          {ni > 0 && <Dash />}
-                          <div className="w-full sm:w-[210px] sm:shrink-0">
-                            <LessonCard node={n} index={num} />
-                          </div>
-                        </div>
-                      ))}
-                      {/* Sətirdə boş yer qalırsa personaj oradadır — xəritə "boş cığır" görünməsin */}
-                      {row.length < PER_ROW && (
-                        <div className="hidden flex-1 justify-center sm:flex">
-                          <MascotPerch perch={perch} />
-                        </div>
-                      )}
-                    </motion.div>
-
-                    {ri < rows.length - 1 && <RowTurn side={reversed ? "left" : "right"} />}
-                  </div>
-                );
-              })}
-
-              {(seg.chest || seg.test) && (
-                <div className="mt-4 space-y-3">
-                  {seg.chest && <ChestCard node={seg.chest} />}
-                  {seg.test && <BossCard node={seg.test} />}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+    <div
+      className="relative mx-auto flex flex-col items-center py-2"
+      style={{ width: LANE, maxWidth: "100%" }}
+    >
+      <Decor />
+      {rows}
     </div>
   );
 }
