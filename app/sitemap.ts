@@ -26,6 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/signup", priority: 0.7, freq: "monthly" },
     { path: "/sertler", priority: 0.3, freq: "monthly" },
     { path: "/mexfilik", priority: 0.3, freq: "monthly" },
+    { path: "/geri-qaytarma", priority: 0.3, freq: "monthly" },
   ];
 
   return [

@@ -201,7 +201,9 @@ export default function PlusPage() {
           </button>
         )}
         <p className="mt-2 text-center text-xs text-muted">
-          Plus yalnız ödənişdən sonra aktivləşir.
+          Plus yalnız ödənişdən sonra aktivləşir. İlk ödənişdən sonrakı 14 gün ərzində şərtsiz geri
+          qaytarma —{" "}
+          <Link href="/geri-qaytarma" className="font-bold text-brand hover:underline">şərtlərə bax</Link>.
         </p>
 
         {/* Kart/m10 ilə ödəniş — kart ödənişi provayderi (LemonSqueezy) təsdiq

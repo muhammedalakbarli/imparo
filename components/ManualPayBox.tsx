@@ -150,7 +150,8 @@ export default function ManualPayBox({
       />
       <p className="mt-1.5 text-xs text-muted">
         Köçürməni etdikdən sonra bu formanı göndər. Plus dərhal açılmır — ödəniş yoxlanıldıqdan
-        sonra (adətən bir neçə saat) hesabına əlavə olunur.
+        sonra (adətən bir neçə saat) hesabına əlavə olunur.{" "}
+        <a href="/geri-qaytarma" className="font-bold text-brand hover:underline">Geri qaytarma şərtləri</a>
       </p>
 
       {err && <p className="mt-2 text-sm font-bold text-red-500">{err}</p>}

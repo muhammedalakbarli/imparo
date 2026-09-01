@@ -11,7 +11,7 @@
 // banner 7 gün göstərilir, tarix hər iki sənəddə özü yenilənir.
 
 /** Son hüquqi yeniləmə (ISO, Bakı vaxtı ilə gün). */
-export const LEGAL_UPDATED = "2026-08-24";
+export const LEGAL_UPDATED = "2026-09-01";
 
 /** Şərtlərdə vəd edilən bildiriş müddəti. */
 export const LEGAL_NOTICE_DAYS = 7;

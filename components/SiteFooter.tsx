@@ -44,6 +44,7 @@ export default function SiteFooter() {
       links: [
         { label: t("ft.terms"), href: "/sertler" },
         { label: t("ft.privacy"), href: "/mexfilik" },
+        { label: t("ft.refund"), href: "/geri-qaytarma" },
       ],
     },
   ];

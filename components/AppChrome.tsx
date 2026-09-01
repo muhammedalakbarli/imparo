@@ -21,6 +21,7 @@ const BARE_ROUTES = new Set([
   "/haqqimizda",
   "/sertler",
   "/mexfilik",
+  "/geri-qaytarma",
   "/blog",
   "/karyera",
   "/investorlar",

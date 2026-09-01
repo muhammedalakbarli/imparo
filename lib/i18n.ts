@@ -1066,6 +1066,7 @@ const DICT: Dict = {
   "ft.investors": { az: "İnvestorlar", en: "Investors", ru: "Инвесторы" },
   "ft.terms": { az: "Şərtlər", en: "Terms", ru: "Условия" },
   "ft.privacy": { az: "Məxfilik", en: "Privacy", ru: "Конфиденциальность" },
+  "ft.refund": { az: "Geri qaytarma", en: "Refunds", ru: "Возврат" },
   "scene.alt": { az: "Təpələr və ağaclar arasında Zefi", en: "Zefi among hills and trees", ru: "Зефи среди холмов и деревьев" },
   "cta.bear": { az: "Əl yelləyən ayı", en: "A waving bear", ru: "Медведь машет рукой" },
   "cta.deer": { az: "Əl yelləyən ceyran", en: "A waving gazelle", ru: "Газель машет рукой" },
@@ -1088,9 +1089,9 @@ const DICT: Dict = {
   "legal.notice.close": { az: "Bildirişi bağla", en: "Dismiss notice", ru: "Закрыть уведомление" },
   "legal.changed": { az: "Bu dəfə nə dəyişdi", en: "What changed this time", ru: "Что изменилось" },
   "legal.changedBody": {
-    az: "Fənn siyahısı düzəldildi (5 fənn), reklamla bağlı ziddiyyət aradan qaldırıldı (Imparo reklam göstərmir), alt-emalçılara Cloudflare və Resend əlavə olundu, könüllü valideyn hesabatı ayrıca izah edildi və mövcud olmayan App Store/Google Play alışı barədə bənd silindi.",
-    en: "Corrected the subject list (5 subjects), removed a contradiction about ads (Imparo shows no ads), added Cloudflare and Resend to sub-processors, documented the optional parent report, and removed a clause about App Store/Google Play purchases that do not exist.",
-    ru: "Исправлен список предметов (5), устранено противоречие про рекламу (Imparo не показывает рекламу), в список субобработчиков добавлены Cloudflare и Resend, описан необязательный родительский отчёт, удалён пункт о покупках через App Store/Google Play, которых нет.",
+    az: "Ayrıca Geri qaytarma siyasəti əlavə olundu: ilk ödənişdən sonrakı 14 gün ərzində şərtsiz geri qaytarma, yenilənmə ödənişi üçün 7 günlük pəncərə, ləğvetmə qaydası, sponsorluq və kart/m10 köçürmələri üzrə şərtlər. Şərtlərin 11-ci bəndi (\"ödənişlər geri qaytarılmır\") həmin sənədə uyğun yenidən yazıldı.",
+    en: "Added a separate Refund Policy: a no-questions refund within 14 days of the first payment, a 7-day window for renewal charges, cancellation rules, and terms for sponsorships and card/m10 transfers. Clause 11 of the Terms (\"payments are non-refundable\") was rewritten to match.",
+    ru: "Добавлена отдельная Политика возврата: полный возврат в течение 14 дней после первого платежа, 7-дневное окно для платежей за продление, правила отмены, условия для спонсорства и переводов картой/m10. Пункт 11 Условий («платежи не возвращаются») переписан соответственно.",
   },
   "legal.contactLine": { az: "Sualın var? Bizə yaz:", en: "Have a question? Write to us:", ru: "Есть вопрос? Напишите нам:" },
 
@@ -1350,8 +1351,8 @@ const DICT: Dict = {
   },
   "terms.s11.t": { az: "11. Geri qaytarma siyasəti", en: "11. Refund policy", ru: "11. Политика возврата" },
   "terms.s11.b": {
-    az: "Qanunla tələb olunmadıqca, ödənişlər geri qaytarılmır və virtual əşyalar üçün geri ödəmə edilmir. Abunəliyi ləğv etsən, cari ödəniş dövrünün sonuna qədər Xidmətə çıxışın qalır.",
-    en: "Unless required by law, payments are non-refundable and there are no refunds for virtual items. If you cancel, you keep access until the end of the current billing period.",
+    az: "Geri qaytarma qaydaları ayrıca sənəddə — Geri qaytarma siyasətində (imparo.app/geri-qaytarma) müəyyən olunub və bu Şərtlərin ayrılmaz hissəsidir. Qısaca: ilk ödənişdən sonrakı 14 gün ərzində məbləğ şərtsiz qaytarılır; abunəliyi ləğv etsən, cari ödəniş dövrünün sonuna qədər Xidmətə çıxışın qalır.",
+    en: "Refund rules are set out in a separate document — the Refund Policy (imparo.app/geri-qaytarma) — which forms part of these Terms. In short: a full refund within 14 days of the first payment, no questions asked; if you cancel, you keep access until the end of the current billing period.",
     ru: "Если иное не требуется законом, платежи не возвращаются, и возврата за виртуальные предметы нет. При отмене доступ сохраняется до конца текущего периода.",
   },
   "terms.s12.t": { az: "12. Üçüncü tərəf linkləri və reklam", en: "12. Third-party links and ads", ru: "12. Ссылки третьих лиц и реклама" },
@@ -1398,6 +1399,93 @@ const DICT: Dict = {
   },
 
   // ── Məxfilik ──
+  // ── Geri qaytarma siyasəti (/geri-qaytarma) ──
+  // Ödəniş provayderləri (epoint/Payriff/LemonSqueezy) müqavilə üçün ayrıca
+  // geri qaytarma səhifəsi tələb edir; şərtlərin 11-ci bəndi buraya yönləndirir.
+  "refund.title": { az: "Geri qaytarma siyasəti", en: "Refund Policy", ru: "Политика возврата" },
+  "refund.intro": {
+    az: "Imparo Plus abunəsi və digər ödənişlər üçün geri qaytarma qaydaları. Məqsədimiz sadədir: xidmətdən razı qalmamısansa, pulunu geri qaytarmaq üçün mübahisə etməli olmayacaqsan.",
+    en: "Refund rules for Imparo Plus subscriptions and other payments. Our goal is simple: if the service did not work for you, you should not have to argue to get your money back.",
+    ru: "Правила возврата для подписки Imparo Plus и других платежей. Наша цель проста: если сервис вам не подошёл, вам не придётся спорить, чтобы вернуть деньги.",
+  },
+
+  "refund.s1.t": { az: "1. Bu siyasət nəyi əhatə edir", en: "1. What this policy covers", ru: "1. Что охватывает политика" },
+  "refund.s1.b": {
+    az: "Siyasət üç ödəniş növünə aiddir:\n• Imparo Plus abunəsi (aylıq və illik);\n• kart köçürməsi və ya m10 ilə edilən əl ilə ödənişlər;\n• sponsorluq (başqa şagirdə hədiyyə edilən abunə).\nPulsuz istifadə üçün ödəniş alınmır, ona görə geri qaytarma da tələb olunmur.",
+    en: "This policy covers three payment types:\n• Imparo Plus subscriptions (monthly and yearly);\n• manual payments made by card transfer or m10;\n• sponsorships (a subscription gifted to another student).\nFree use involves no payment, so no refund applies.",
+    ru: "Политика охватывает три типа платежей:\n• подписка Imparo Plus (месячная и годовая);\n• ручные платежи картой или через m10;\n• спонсорство (подписка, подаренная другому ученику).\nБесплатное использование не оплачивается, поэтому возврат не требуется.",
+  },
+
+  "refund.s2.t": { az: "2. 14 gün ərzində şərtsiz geri qaytarma", en: "2. 14-day no-questions refund", ru: "2. Возврат в течение 14 дней" },
+  "refund.s2.b": {
+    az: "İlk ödənişindən sonrakı 14 gün ərzində müraciət etsən, məbləğ tam qaytarılır — səbəb izah etməyə ehtiyac yoxdur. Bu, xidmətdən istifadə edib-etməməyindən asılı deyil.",
+    en: "If you contact us within 14 days of your first payment, we refund the full amount — no explanation needed. This applies whether or not you used the service.",
+    ru: "Если вы обратитесь в течение 14 дней после первого платежа, сумма возвращается полностью — объяснять причину не нужно. Это не зависит от того, пользовались ли вы сервисом.",
+  },
+
+  "refund.s3.t": { az: "3. Abunənin avtomatik yenilənməsi", en: "3. Automatic renewals", ru: "3. Автопродление" },
+  "refund.s3.b": {
+    az: "Yenilənmə ödənişi barədə 7 gün ərzində yazsan və həmin yeni dövrdə xidmətdən istifadə etməmisənsə, ödəniş tam qaytarılır. Yenilənməni əvvəlcədən dayandırmaq üçün Ayarlar → Abunəlik bölməsindən ləğv et.",
+    en: "If you write to us within 7 days of a renewal charge and have not used the service in that new period, we refund it in full. To avoid a renewal, cancel in Settings → Subscription beforehand.",
+    ru: "Если вы напишете в течение 7 дней после списания за продление и не пользовались сервисом в новом периоде, платёж возвращается полностью. Чтобы избежать продления, отмените подписку заранее в «Настройки → Подписка».",
+  },
+
+  "refund.s4.t": { az: "4. Ləğvetmə", en: "4. Cancellation", ru: "4. Отмена" },
+  "refund.s4.b": {
+    az: "Abunəni istənilən vaxt ləğv edə bilərsən. Ləğvetmə növbəti ödənişi dayandırır, amma artıq ödənilmiş dövrü kəsmir: Plus imkanları həmin dövrün sonuna qədər açıq qalır. Ləğvetmə üçün ayrıca səbəb və ya icazə tələb olunmur.",
+    en: "You can cancel at any time. Cancelling stops the next charge but does not cut the period you already paid for: Plus features stay active until the end of that period. No reason or approval is required.",
+    ru: "Вы можете отменить подписку в любой момент. Отмена останавливает следующее списание, но не прерывает уже оплаченный период: функции Plus работают до его конца. Причина или одобрение не требуются.",
+  },
+
+  "refund.s5.t": { az: "5. Zümrüd və oyun elementləri", en: "5. Gems and in-app items", ru: "5. Кристаллы и игровые элементы" },
+  "refund.s5.b": {
+    az: "Zümrüd pulla satılmır — yalnız dərsləri tamamlamaqla qazanılır. Ona görə zümrüd və onunla alınan elementlər üçün ayrıca geri qaytarma yoxdur. Plus abunəsi geri qaytarılanda qazanılmış zümrüd hesabında qalır.",
+    en: "Gems are not sold for money — they are earned by completing lessons. Therefore there is no separate refund for gems or items bought with them. If a Plus payment is refunded, the gems you earned stay in your account.",
+    ru: "Кристаллы не продаются за деньги — их зарабатывают, проходя уроки. Поэтому отдельного возврата за кристаллы и купленные за них предметы нет. При возврате оплаты Plus заработанные кристаллы остаются на счёте.",
+  },
+
+  "refund.s6.t": { az: "6. Sponsorluq ödənişləri", en: "6. Sponsorship payments", ru: "6. Спонсорские платежи" },
+  "refund.s6.b": {
+    az: "Sponsorluq məbləği ehtiyacı olan şagirdlərə pulsuz abunə kimi verilir. Ödənişin yeri hələ heç bir şagirdə verilməyibsə, məbləğ tam qaytarılır. Yer artıq konkret şagirdə burs kimi verilibsə, həmin hissə geri qaytarılmır — çünki şagird abunədən istifadə etməyə başlayıb. Hansı hissənin istifadə olunduğunu sənə açıq şəkildə bildiririk.",
+    en: "Sponsorship money is given to students in need as free subscriptions. If your funded seat has not yet been assigned to any student, we refund it in full. If the seat has already been granted to a specific student, that part is not refundable — the student has started using the subscription. We tell you plainly which part was used.",
+    ru: "Спонсорские средства передаются нуждающимся ученикам в виде бесплатных подписок. Если оплаченное место ещё никому не выдано, сумма возвращается полностью. Если место уже передано конкретному ученику, эта часть не возвращается — ученик начал пользоваться подпиской. Мы честно сообщаем, какая часть была использована.",
+  },
+
+  "refund.s7.t": { az: "7. Necə müraciət etməli", en: "7. How to request a refund", ru: "7. Как запросить возврат" },
+  "refund.s7.b": {
+    az: "destek@imparo.app ünvanına yaz və bunları göstər:\n• ödəniş etdiyin e-poçt (hesabın e-poçtu);\n• ödənişin tarixi və məbləği;\n• kart köçürməsi/m10 idisə — qəbz nömrəsi.\nMüraciətinə 1 iş günü ərzində cavab veririk. Təsdiqləndikdən sonra məbləğ 3–10 iş günü ərzində ödədiyin üsulla geri qaytarılır (bankın emal müddəti bizdən asılı deyil).",
+    en: "Email destek@imparo.app and include:\n• the email you paid with (your account email);\n• the date and amount of the payment;\n• for card/m10 transfers — the receipt number.\nWe reply within 1 business day. Once approved, the money is returned via the same method within 3–10 business days (bank processing time is outside our control).",
+    ru: "Напишите на destek@imparo.app и укажите:\n• email, с которого оплачивали (email аккаунта);\n• дату и сумму платежа;\n• для перевода картой/m10 — номер квитанции.\nМы отвечаем в течение 1 рабочего дня. После одобрения деньги возвращаются тем же способом в течение 3–10 рабочих дней (сроки банка от нас не зависят).",
+  },
+
+  "refund.s8.t": { az: "8. Kart köçürməsi və m10 ilə ödənişlər", en: "8. Card transfer and m10 payments", ru: "8. Переводы картой и m10" },
+  "refund.s8.b": {
+    az: "Əl ilə edilən ödənişlər köçürmənin gəldiyi karta və ya nömrəyə qaytarılır — başqa şəxsin hesabına köçürmə edilmir. Bankın tutduğu köçürmə komissiyası geri qaytarılan məbləğdən çıxıla bilər; bu, bizim tutduğumuz haqq deyil.",
+    en: "Manual payments are returned to the card or number the transfer came from — we do not send refunds to a third party's account. Any transfer fee charged by the bank may be deducted from the refunded amount; this is not a fee we charge.",
+    ru: "Ручные платежи возвращаются на ту карту или номер, с которых поступил перевод — на счёт третьего лица возврат не отправляется. Комиссия банка за перевод может быть удержана из возвращаемой суммы; это не наша комиссия.",
+  },
+
+  "refund.s9.t": { az: "9. Xidmətdə nasazlıq olarsa", en: "9. If the service is unavailable", ru: "9. Если сервис недоступен" },
+  "refund.s9.b": {
+    az: "Texniki nasazlıq ucbatından Plus imkanlarından uzun müddət istifadə edə bilməmisənsə, abunə müddətini itirilmiş günlər qədər uzadırıq. İstəsən, uzatma əvəzinə həmin dövrün pulunu geri qaytara bilərik.",
+    en: "If a technical failure prevented you from using Plus features for an extended time, we extend your subscription by the lost days. If you prefer, we refund that period instead of extending it.",
+    ru: "Если из-за технического сбоя вы длительное время не могли пользоваться функциями Plus, мы продлеваем подписку на потерянные дни. По вашему желанию вместо продления возвращаем оплату за этот период.",
+  },
+
+  "refund.s10.t": { az: "10. Sui-istifadə və bank mübahisəsi (chargeback)", en: "10. Abuse and chargebacks", ru: "10. Злоупотребления и чарджбэк" },
+  "refund.s10.b": {
+    az: "Təkrarlanan və əsassız geri qaytarma tələblərində və ya istifadə şərtləri pozulduqda müraciəti rədd edə bilərik — səbəbini yazılı bildiririk. Bankına mübahisə (chargeback) açmazdan əvvəl bizə yaz: əksər hallar bir gün ərzində birbaşa həll olunur, chargeback isə hər iki tərəf üçün həftələr çəkir.",
+    en: "We may decline repeated or unfounded refund requests, or requests where the Terms were broken — and we state the reason in writing. Before opening a chargeback with your bank, please write to us: most cases are resolved directly within a day, while a chargeback takes weeks for both sides.",
+    ru: "Мы можем отклонить повторяющиеся или необоснованные запросы на возврат, а также запросы при нарушении Условий — с письменным указанием причины. Прежде чем открывать спор (чарджбэк) в банке, напишите нам: большинство случаев решается напрямую за один день, а чарджбэк занимает недели у обеих сторон.",
+  },
+
+  "refund.s11.t": { az: "11. İstehlakçı hüquqları", en: "11. Consumer rights", ru: "11. Права потребителя" },
+  "refund.s11.b": {
+    az: "Bu siyasət Azərbaycan Respublikasının istehlakçıların hüquqlarının müdafiəsi haqqında qanunvericiliyi ilə sənə verilən hüquqları məhdudlaşdırmır. Qanun daha geniş hüquq verirsə, qanun tətbiq olunur.",
+    en: "This policy does not limit the rights granted to you by the consumer protection laws of the Republic of Azerbaijan. Where the law grants broader rights, the law applies.",
+    ru: "Эта политика не ограничивает права, предоставленные вам законодательством Азербайджанской Республики о защите прав потребителей. Если закон даёт более широкие права, применяется закон.",
+  },
+
   "privacy.title": { az: "Məxfilik siyasəti", en: "Privacy Policy", ru: "Политика конфиденциальности" },
   "privacy.s0.t": { az: "Ümumi", en: "General", ru: "Общее" },
   "privacy.s0.b": {

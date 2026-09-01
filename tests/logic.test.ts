@@ -313,10 +313,16 @@ describe("legal notice", () => {
     expect(legalNoticeOpen(new Date(bakuStart - 60_000))).toBe(false);
   });
 
+  // Tarix LEGAL_UPDATED-dən hesablanır: sənəd hər dəyişəndə test sınmasın deyə
+  // gözlənilən dəyər sabit yazılmır, formatın özü yoxlanılır.
   it("tarixi ICU-dan asılı olmadan üç dildə yazır", () => {
-    expect(formatLegalDate("az")).toBe("24 avqust 2026");
-    expect(formatLegalDate("en")).toBe("August 24, 2026");
-    expect(formatLegalDate("ru")).toBe("24 августа 2026");
+    const [y, m, d] = LEGAL_UPDATED.split("-").map(Number);
+    const az = ["yanvar","fevral","mart","aprel","may","iyun","iyul","avqust","sentyabr","oktyabr","noyabr","dekabr"];
+    const en = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const ru = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+    expect(formatLegalDate("az")).toBe(`${d} ${az[m - 1]} ${y}`);
+    expect(formatLegalDate("en")).toBe(`${en[m - 1]} ${d}, ${y}`);
+    expect(formatLegalDate("ru")).toBe(`${d} ${ru[m - 1]} ${y}`);
     expect(formatLegalDate("az")).not.toMatch(/M\d/);
   });
 
