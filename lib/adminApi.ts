@@ -548,3 +548,16 @@ export async function myBanStatus(): Promise<BanStatus> {
     return row ?? { banned: false, until: null, reason: null };
   } catch { return { banned: false, until: null, reason: null }; }
 }
+
+// ── Ödəniş jurnalı (migration 0058) ──
+// Webhook-un emal etdiyi hər hadisə burada iz qoyur — "ödəniş gəldi, amma Plus
+// verilmədi" tipli sualların cavabı yalnız bu jurnalla verilə bilir.
+export interface AdminPaymentRow {
+  id: string; event: string; kind: string | null; email: string | null;
+  amount_cents: number; currency: string; detail: string | null; created_at: string;
+}
+export async function adminPayments(limit = 100): Promise<AdminPaymentRow[]> {
+  try { const { data } = await createClient().rpc("admin_payments", { p_limit: limit }); return (data as AdminPaymentRow[]) ?? []; }
+  catch { return []; }
+}
+

@@ -25,10 +25,13 @@ import { track } from "@/lib/analytics";
 // uydurma "ödəniş" düyməsi göstərilmir.
 const SPONSOR_CHECKOUT = process.env.NEXT_PUBLIC_LS_CHECKOUT_SPONSOR;
 
+/** Bir yer = bir illik Plus (24.90 ₼ = 2490 qəpik). Webhook-dakı dəyərlə eyni olmalıdır. */
+const SEAT_PRICE_CENTS = 2490;
+
 const SEAT_OPTIONS = [
-  { seats: 1, label: "1 şagird", note: "bir il pulsuz" },
-  { seats: 3, label: "3 şagird", note: "bir sinif qrupu" },
-  { seats: 10, label: "10 şagird", note: "bütöv bir sinif" },
+  { seats: 1, label: "1 şagird", note: "24.90 ₼ · bir il pulsuz" },
+  { seats: 3, label: "3 şagird", note: "74.70 ₼ · bir sinif qrupu" },
+  { seats: 10, label: "10 şagird", note: "249 ₼ · bütöv bir sinif" },
 ];
 
 export default function SupportPage() {
@@ -39,17 +42,45 @@ export default function SupportPage() {
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  // Sponsorluq ödənişindən qayıdış: webhook havuza yeri bir neçə saniyəyə yazır.
+  const [waiting, setWaiting] = useState(
+    () => typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("paid") === "1",
+  );
 
   useEffect(() => { sponsorStats().then(setStats); }, []);
+
+  // Ödəniş gələnə qədər statistikanı təzələ (maksimum ~45 saniyə).
+  useEffect(() => {
+    if (!waiting) return;
+    let stop = false;
+    let tries = 0;
+    const base = stats?.seats_funded ?? -1;
+    const tick = async () => {
+      if (stop) return;
+      tries++;
+      const s = await sponsorStats();
+      if (s && s.seats_funded !== base) { setStats(s); setWaiting(false); return; }
+      if (tries >= 15) { setWaiting(false); return; }
+      setTimeout(tick, 3000);
+    };
+    void tick();
+    return () => { stop = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => { if (user) myScholarship().then(setMine); }, [user]);
 
   function sponsor() {
     track("sponsor_checkout", { seats, configured: !!SPONSOR_CHECKOUT });
     if (!SPONSOR_CHECKOUT || !user) return;
     const sep = SPONSOR_CHECKOUT.includes("?") ? "&" : "?";
+    // `custom_price` qəpiklə göndərilir (LS "pay what you want" məhsulu üçün):
+    // seçilən yer sayı × bir illik Plus qiyməti. Webhook yer sayını yenidən
+    // ÖDƏNİLƏN məbləğdən hesablayır — yəni bu parametr dəyişdirilsə də uyğunsuzluq yaranmır.
     const params =
       `checkout[custom][user_id]=${encodeURIComponent(user.id)}` +
       `&checkout[custom][plan]=sponsor&checkout[custom][seats]=${seats}` +
+      `&checkout[custom_price]=${seats * SEAT_PRICE_CENTS}` +
       (user.email ? `&checkout[email]=${encodeURIComponent(user.email)}` : "");
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.href = `${SPONSOR_CHECKOUT}${sep}${params}`;
@@ -74,6 +105,13 @@ export default function SupportPage() {
   return (
     <div className="min-h-screen bg-ink">
       <main className="mx-auto max-w-2xl px-4 py-8">
+        {waiting && (
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-line bg-panel px-4 py-3">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+            <span className="text-sm font-bold text-fg">Ödənişin qəbul olundu — havuza yazılır…</span>
+          </div>
+        )}
+
         {/* Hero */}
         <div className="flex items-center gap-4 rounded-3xl bg-gradient-to-br from-emerald-500 to-brand p-6 text-white shadow-lg">
           <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-white/95 shadow-sm">

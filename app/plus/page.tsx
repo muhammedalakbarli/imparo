@@ -43,9 +43,37 @@ export default function PlusPage() {
   const [done, setDone] = useState(false);
   const [active, setActive] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Ödənişdən qayıdış: webhook bir neçə saniyə gec gələ bilər, ona görə gözləyirik.
+  // Səhifə açılanda URL-dən oxunur: effekt içində setState çağırmaq lazım gəlmir
+  // (React "cascading render" xəbərdarlığı) və ilk render dərhal düzgün olur.
+  const [waiting, setWaiting] = useState(
+    () => typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("paid") === "1",
+  );
 
   useEffect(() => {
     loadPlus().then(setActive).catch(() => {});
+  }, []);
+
+  // LemonSqueezy uğurlu ödənişdən sonra `?paid=1` ilə geri qaytarır. Plus statusu
+  // webhook-dan asılıdır (client heç nə yaza bilmir) — ona görə status aktiv olana
+  // qədər qısa müddət yoxlanılır. Beləcə istifadəçi "ödədim, amma dəyişmədi" halında qalmır.
+  useEffect(() => {
+    if (!waiting) return;
+    let stop = false;
+    let tries = 0;
+    const tick = async () => {
+      if (stop) return;
+      tries++;
+      const on = await loadPlus().catch(() => false);
+      if (on) { setActive(true); setWaiting(false); return; }
+      if (tries >= 15) { setWaiting(false); return; }  // ~45 saniyə
+      setTimeout(tick, 3000);
+    };
+    void tick();
+    return () => { stop = true; };
+    // `waiting` yalnız ilk dəyərdən asılıdır (aşağıda yalnız false-a keçir).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Checkout linki varsa → LemonSqueezy hosted checkout-a yönləndir (user_id + plan + email).
@@ -72,6 +100,15 @@ export default function PlusPage() {
   return (
     <div className="min-h-screen bg-ink">
       <main className="mx-auto max-w-2xl px-4 py-8">
+        {waiting && (
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-line bg-panel px-4 py-3">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+            <span className="text-sm font-bold text-fg">
+              Ödənişin qəbul olundu — Plus aktivləşdirilir…
+            </span>
+          </div>
+        )}
+
         {/* Hero */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-400 via-orange-500 to-brand p-8 text-center text-white shadow-lg">
           <span className="twinkle pointer-events-none absolute left-8 top-8 text-white/60" aria-hidden>

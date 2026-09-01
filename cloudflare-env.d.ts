@@ -11,6 +11,8 @@ declare global {
     VAPID_PRIVATE_KEY?: string;
     VAPID_SUBJECT?: string;
     LEMONSQUEEZY_WEBHOOK_SECRET?: string;
+    /** "1" olanda test rejimli LemonSqueezy ödənişləri də emal olunur (yalnız sınaq üçün). */
+    LS_ALLOW_TEST_MODE?: string;
     RESEND_API_KEY?: string;
     // wrangler.jsonc-dəki statik asset binding-i. `lib/api/content.ts` DB boş olanda
     // /content-seed.json-u bununla oxuyur (məzmunu Worker bundle-ına salmamaq üçün).
