@@ -34,6 +34,7 @@ import {
   type StudentDetail,
 } from "@/lib/schools";
 import { getSkill } from "@/lib/skills";
+import ClassVideos from "@/components/mekteb/ClassVideos";
 import { PageSkeleton } from "@/components/Skeleton";
 import { useRouter } from "next/navigation";
 
@@ -305,6 +306,9 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
             </div>
           </>
         )}
+
+        {/* Video dərslər — müəllim yükləyir, sinfin şagirdləri izləyir (0056) */}
+        <ClassVideos classId={id} canManage subjectSlug={cls.subject_slug} grade={cls.grade} />
 
         {/* Şagird reyestri */}
         <h2 className="mt-6 text-lg font-bold text-fg">Şagirdlər</h2>

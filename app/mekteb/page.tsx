@@ -15,6 +15,7 @@ import {
   type MyAssignment,
 } from "@/lib/schools";
 import { PageSkeleton } from "@/components/Skeleton";
+import ClassVideos from "@/components/mekteb/ClassVideos";
 import Mascot from "@/components/Mascot";
 
 export default function SchoolPage() {
@@ -130,6 +131,17 @@ export default function SchoolPage() {
             </div>
           </div>
         )}
+
+        {/* Sinfimin video dərsləri — müəllimin yüklədikləri (0056).
+            Hər sinif üçün ayrıca blok: şagird bir neçə sinifdə ola bilər. */}
+        {classes.map((c) => (
+          <div key={`v-${c.id}`}>
+            {classes.length > 1 && (
+              <div className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">{c.name}</div>
+            )}
+            <ClassVideos classId={c.id} />
+          </div>
+        ))}
 
         {/* Mənim tapşırıqlarım */}
         <div className="mt-6">

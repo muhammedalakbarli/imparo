@@ -4,13 +4,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Users, ChevronRight, ArrowLeft, ShieldCheck, Clock, GraduationCap } from "lucide-react";
+import { Plus, Users, ChevronRight, ArrowLeft, ShieldCheck, Clock, GraduationCap, Video, Eye } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { useContent } from "@/components/ContentProvider";
 import {
   teacherClasses, createClass, myTeacherStatus, requestTeacher,
   type TeacherClass, type TeacherStatus,
 } from "@/lib/schools";
+import { myVideos, type MyVideo } from "@/lib/videos";
 import { PageSkeleton } from "@/components/Skeleton";
 
 export default function TeacherPage() {
@@ -23,6 +24,7 @@ export default function TeacherPage() {
   const [subjectSlug, setSubjectSlug] = useState("");
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<TeacherStatus | null>(null);
+  const [videos, setVideos] = useState<MyVideo[]>([]);
   const [note, setNote] = useState("");
   const [requesting, setRequesting] = useState(false);
 
@@ -34,6 +36,8 @@ export default function TeacherPage() {
       .then(([st, cls]) => {
         setStatus(st);
         setClasses(st.is_teacher ? cls : []);
+        // Video siyahısı yalnız təsdiqlənmiş müəllim üçün mənalıdır (RPC də belə yoxlayır).
+        if (st.is_teacher) myVideos().then(setVideos);
       })
       .finally(() => setLoaded(true));
   }
@@ -205,6 +209,42 @@ export default function TeacherPage() {
               </Link>
             ))}
           </div>
+        )}
+        {/* Video dərslərim — sinif videoları + kitabxanaya göndərilənlərin statusu (0056).
+            Sinif videosu dərhal açıqdır; kitabxana videosu admin təsdiqi gözləyir. */}
+        {videos.length > 0 && (
+          <section className="mt-8">
+            <h2 className="flex items-center gap-2 text-lg font-bold text-fg">
+              <Video size={18} className="text-brand" /> Video dərslərim
+            </h2>
+            <div className="mt-3 space-y-2">
+              {videos.map((v) => (
+                <div key={v.id} className="flex items-center gap-3 rounded-2xl border border-line bg-panel px-4 py-3">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-bold text-fg">{v.title}</span>
+                    <span className="block text-xs text-muted">
+                      {v.class_name ?? "Ümumi kitabxana"} ·{" "}
+                      {new Date(v.created_at).toLocaleDateString("az-AZ", { day: "numeric", month: "short" })}
+                    </span>
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1 text-xs font-bold text-muted">
+                    <Eye size={12} /> {v.views}
+                  </span>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                      v.status === "approved"
+                        ? "bg-emerald-500/10 text-emerald-600"
+                        : v.status === "pending"
+                          ? "bg-amber-500/15 text-amber-600"
+                          : "bg-red-500/10 text-red-500"
+                    }`}
+                  >
+                    {v.status === "approved" ? "Açıqdır" : v.status === "pending" ? "Təsdiq gözləyir" : "Rədd edilib"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
       </main>
     </div>

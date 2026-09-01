@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard, BookOpen, Users, BarChart3, School,
   GraduationCap, Megaphone, MessageSquare, ExternalLink,
-  TrendingUp, Gauge, ShieldAlert, ShieldCheck, Search, Siren, Bot,
+  TrendingUp, Gauge, ShieldAlert, ShieldCheck, Search, Siren, Bot, Video,
   Menu, X, ChevronRight,
 } from "lucide-react";
 import { Toaster } from "sonner";
@@ -60,6 +60,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/admin/mekteb", label: "Siniflər", Icon: School },
       { href: "/admin/muellimler", label: "Müəllimlər", Icon: GraduationCap, badge: "teachers" },
+      { href: "/admin/videolar", label: "Videolar", Icon: Video },
     ],
   },
   {

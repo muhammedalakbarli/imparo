@@ -13,6 +13,7 @@
 import { useRef, useState } from "react";
 import { Play } from "lucide-react";
 import type { LessonVideo as LessonVideoData } from "@/lib/types";
+import { youtubeId } from "@/lib/videos";
 
 function label(sec?: number): string | null {
   if (!sec || sec <= 0) return null;
@@ -35,6 +36,37 @@ export default function LessonVideo({
   const done = useRef(false);
 
   const dur = label(video.durationSec);
+
+  // Müəllim videosu YouTube linki ola bilər (0056): nativ <video> onu oynada bilmir,
+  // ona görə embed iframe-ə keçirik. `youtube-nocookie` seçildi — izləmə çərəzləri
+  // qoyulmur, uşaq platforması üçün minimum tələbdir. `rel=0` əlaqəli videoları
+  // (başqa kanalları) azaldır. Baxış sonu hadisəsi iframe-də oxunmadığı üçün
+  // `onWatched` oynatma başlayanda bir dəfə çağırılır — irəliləyiş itməsin.
+  const ytId = youtubeId(video.src);
+  if (ytId) {
+    return (
+      <div className="mt-6 overflow-hidden rounded-2xl border-2 border-line bg-black">
+        <iframe
+          className="block aspect-video w-full"
+          src={`https://www.youtube-nocookie.com/embed/${ytId}?rel=0&modestbranding=1`}
+          title="Video dərs"
+          loading="lazy"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          onLoad={() => {
+            if (done.current) return;
+            done.current = true;
+            onWatched?.();
+          }}
+        />
+        {dur && (
+          <div className="bg-panel px-4 py-2 text-xs font-bold uppercase tracking-wide text-muted">
+            Video · {dur}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   // Video yüklənməsə dərs BLOKLANMAMALIDIR — şagird tapşırıqlara keçə bilər.
   if (failed) {
