@@ -5,6 +5,7 @@
 import type { NextRequest } from "next/server";
 import crypto from "crypto";
 import { grantPlusServer, revokePlusServer } from "@/lib/plusServer";
+import { recordSponsorshipServer } from "@/lib/sponsorServer";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export const runtime = "nodejs";
@@ -26,7 +27,8 @@ export async function POST(req: NextRequest) {
   if (!valid) return new Response("invalid signature", { status: 401 });
 
   let body: {
-    meta?: { event_name?: string; custom_data?: { user_id?: string; plan?: string } };
+    meta?: { event_name?: string; custom_data?: { user_id?: string; plan?: string; seats?: string | number } };
+    data?: { attributes?: { total?: number; currency?: string } };
   };
   try {
     body = JSON.parse(raw);
@@ -41,6 +43,26 @@ export async function POST(req: NextRequest) {
 
   // user_id yoxdursa (məs. test event) — 200 qaytar ki, LS retry etməsin.
   if (!userId) return new Response("no user_id", { status: 200 });
+
+  // ── Sponsorluq: alıcıya Plus VERİLMİR, havuza pulsuz yer əlavə olunur (0057).
+  // Ayrıca məhsuldur: `checkout[custom][plan]=sponsor&seats=N`.
+  if (custom.plan === "sponsor") {
+    if (event !== "order_created" && event !== "subscription_payment_success") {
+      return new Response("ignored", { status: 200 });
+    }
+    const seats = Math.max(1, Math.round(Number(custom.seats ?? 1) || 1));
+    try {
+      await recordSponsorshipServer(
+        userId, seats,
+        Math.round(Number(body.data?.attributes?.total ?? 0)),
+        body.data?.attributes?.currency ?? "AZN",
+      );
+    } catch (err) {
+      console.error("[lemonsqueezy webhook] sponsorship error", { event, userId, err });
+      return new Response("processing error", { status: 500 });
+    }
+    return new Response("ok", { status: 200 });
+  }
 
   try {
     if (

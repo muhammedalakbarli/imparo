@@ -4,7 +4,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, User, Dumbbell, LogOut, ChevronRight, Settings, HelpCircle, School, Crown, Map } from "lucide-react";
+import { BookOpen, User, Dumbbell, LogOut, ChevronRight, Settings, HelpCircle, School, Crown, Map, HeartHandshake } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { signOut } from "@/lib/auth";
 import { useContent } from "@/components/ContentProvider";
@@ -68,6 +68,7 @@ export default function MorePage() {
         <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-panel">
           <Row href="/mekteb" Icon={School} label={t("nav.schools")} />
           <Row href="/plus" Icon={Crown} label="Imparo Plus" />
+          <Row href="/destek" Icon={HeartHandshake} label="Dəstək ol / burs" />
         </div>
 
         {/* Tənzimləmə */}

@@ -8,7 +8,7 @@ import { use, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft, Users, Flame, Star, CircleCheck, AlertTriangle, ClipboardList, Clock, Target,
-  Pencil, Check, X, Trash2, RefreshCw, Copy, ChevronRight,
+  Pencil, Check, X, Trash2, RefreshCw, Copy, ChevronRight, HeartHandshake,
 } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { useContent } from "@/components/ContentProvider";
@@ -35,6 +35,7 @@ import {
 } from "@/lib/schools";
 import { getSkill } from "@/lib/skills";
 import ClassVideos from "@/components/mekteb/ClassVideos";
+import { endorseStudent } from "@/lib/sponsor";
 import { PageSkeleton } from "@/components/Skeleton";
 import { useRouter } from "next/navigation";
 
@@ -56,6 +57,8 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
   const [renaming, setRenaming] = useState<string | null>(null); // null = redaktə yoxdur
   const [detailUid, setDetailUid] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  // Zəmanət verilmiş şagirdlər (sessiya daxilində vizual təsdiq üçün).
+  const [endorsed, setEndorsed] = useState<Set<string>>(new Set());
 
   const reload = useCallback(() => {
     classRoster(id).then(setRoster);
@@ -335,6 +338,21 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
                   <span className="w-16 text-right text-sm font-bold text-amber-500">{r.total_xp} XP</span>
                   <span className="w-12 text-right text-sm text-orange-500">🔥{r.streak_days}</span>
                   <span className="w-14 text-right text-sm text-emerald-600">{Number(r.completed)} dərs</span>
+                  {/* Burs zəmanəti: ehtiyacı ən yaxşı müəllim bilir. Zəmanət Plus VERMİR —
+                      müraciəti yaradıb admin növbəsində öndə yerləşdirir (0057). */}
+                  <ConfirmButton
+                    label={<HeartHandshake size={14} />}
+                    question="Burs üçün zəmanət?"
+                    onConfirm={async () => {
+                      await endorseStudent(id, r.user_id).catch(() => null);
+                      setEndorsed((prev) => new Set(prev).add(r.user_id));
+                    }}
+                    className={`rounded-lg p-1.5 transition-colors ${
+                      endorsed.has(r.user_id)
+                        ? "text-emerald-600"
+                        : "text-muted hover:bg-emerald-500/10 hover:text-emerald-600"
+                    }`}
+                  />
                   <ConfirmButton
                     label={<Trash2 size={14} />}
                     question="Çıxarılsın?"

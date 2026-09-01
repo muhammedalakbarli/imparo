@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/haqqimizda", priority: 0.6, freq: "monthly" },
     { path: "/yardim", priority: 0.7, freq: "weekly" },
     { path: "/plus", priority: 0.8, freq: "weekly" },
+    { path: "/destek", priority: 0.6, freq: "monthly" },
     { path: "/blog", priority: 0.6, freq: "weekly" },
     { path: "/karyera", priority: 0.4, freq: "monthly" },
     { path: "/partnyorlar", priority: 0.6, freq: "monthly" },

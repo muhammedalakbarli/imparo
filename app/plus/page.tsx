@@ -4,7 +4,8 @@
 // Ödəniş inteqrasiyası hələ yoxdur; CTA marağı qeyd edir + "tezliklə".
 
 import { useEffect, useState } from "react";
-import { Heart, Gem, Sparkles, BarChart3, Crown } from "lucide-react";
+import { Heart, Gem, Sparkles, BarChart3, Crown, HeartHandshake } from "lucide-react";
+import Link from "next/link";
 import { track } from "@/lib/analytics";
 import { loadPlus } from "@/lib/plus";
 import { useOptionalUser } from "@/lib/useOptionalUser";
@@ -164,6 +165,23 @@ export default function PlusPage() {
         <p className="mt-2 text-center text-xs text-muted">
           Ödəniş sistemi tezliklə əlavə olunacaq. Plus yalnız ödənişdən sonra aktivləşir.
         </p>
+
+        {/* Sponsorluq: özünə yox, BAŞQA şagirdə Plus almaq (0057).
+            Ödəyə bilməyən şagird eyni səhifədən burs üçün müraciət edir. */}
+        <Link
+          href="/destek"
+          className="mt-6 flex items-center gap-4 rounded-2xl border border-line bg-panel p-5 transition hover:bg-panel-2"
+        >
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+            <HeartHandshake size={24} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-extrabold text-fg">Bir şagirdə hədiyyə et</span>
+            <span className="block text-sm text-muted">
+              Əlavə ödəyib imkanı olmayan şagirdə pulsuz Plus bağışla — və ya özün burs üçün müraciət et.
+            </span>
+          </span>
+        </Link>
       </main>
     </div>
   );
