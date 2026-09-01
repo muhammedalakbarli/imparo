@@ -10,6 +10,7 @@ import { track } from "@/lib/analytics";
 import { loadPlus } from "@/lib/plus";
 import { useOptionalUser } from "@/lib/useOptionalUser";
 import Mascot from "@/components/Mascot";
+import ManualPayBox from "@/components/ManualPayBox";
 
 // LemonSqueezy hosted checkout linkləri (.env-də təyin olunur; yoxdursa maraq qeyd edilir).
 const CHECKOUT: Record<string, string | undefined> = {
@@ -200,8 +201,18 @@ export default function PlusPage() {
           </button>
         )}
         <p className="mt-2 text-center text-xs text-muted">
-          Ödəniş sistemi tezliklə əlavə olunacaq. Plus yalnız ödənişdən sonra aktivləşir.
+          Plus yalnız ödənişdən sonra aktivləşir.
         </p>
+
+        {/* Kart/m10 ilə ödəniş — kart ödənişi provayderi (LemonSqueezy) təsdiq
+            gözlədiyi üçün əsas kanal budur. Rekvizit .env-də yoxdursa göstərilmir. */}
+        {user && !active && (
+          <ManualPayBox
+            kind="plus"
+            plan={plan}
+            amountCents={plan === "yearly" ? 2399 : 299}
+          />
+        )}
 
         {/* Sponsorluq: özünə yox, BAŞQA şagirdə Plus almaq (0057).
             Ödəyə bilməyən şagird eyni səhifədən burs üçün müraciət edir. */}

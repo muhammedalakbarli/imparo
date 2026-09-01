@@ -19,6 +19,7 @@ import {
   type SponsorStats, type MyScholarship,
 } from "@/lib/sponsor";
 import Mascot from "@/components/Mascot";
+import ManualPayBox from "@/components/ManualPayBox";
 import { track } from "@/lib/analytics";
 
 // Sponsorluq məhsulunun checkout linki (.env). Yoxdursa maraq qeyd olunur —
@@ -180,6 +181,17 @@ export default function SupportPage() {
             <p className="mt-2 text-center text-xs text-muted">
               Ödəniş kanalı hazırlanır — marağın qeyd olundu, hazır olanda xəbər veriləcək.
             </p>
+          )}
+
+          {/* Kart/m10 ilə birbaşa köçürmə (0059) */}
+          {user && (
+            <ManualPayBox
+              kind="sponsor"
+              plan="sponsor"
+              amountCents={seats * SEAT_PRICE_CENTS}
+              title="Kartla və ya m10 ilə dəstək ol"
+              onDone={() => sponsorStats().then(setStats)}
+            />
           )}
         </section>
 
