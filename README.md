@@ -14,6 +14,8 @@ göstəricilərinə görə fərdiləşdirir.
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?logo=tailwindcss)
 ![Cloudflare Workers](https://img.shields.io/badge/Deploy-Cloudflare_Workers-F38020?logo=cloudflareworkers)
 
+**[imparo.app →](https://imparo.app)**
+
 </div>
 
 ---
