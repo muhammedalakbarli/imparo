@@ -19,15 +19,37 @@ const VERSION = new URL(self.location.href).searchParams.get("v") || "dev";
 const CACHE = `imparo-${VERSION}`;
 const OFFLINE_URL = "/";
 
+// Köhnə ünvanlar (lib/site.ts LEGACY_HOSTS ilə eyni). Bu hostlarda quraşdırılmış
+// SW naviqasiyanı ŞƏBƏKƏYƏ ÇIXMADAN kanonik ünvana yönləndirir. Səbəb: bəzi
+// provayderlər *.workers.dev-i bloklayır (bağlantı "reset" olur) — köhnə linki,
+// əlfəcini və ya o ünvandan quraşdırılmış PWA-nı açan şagird server yönləndirməsinə
+// heç çatmır və "İnternet bağlantısı yoxdur" ekranında qalırdı.
+const CANONICAL_ORIGIN = "https://imparo.app";
+const LEGACY_HOSTS = ["www.imparo.app", "imparo.m-alakbarli2007.workers.dev"];
+const ON_LEGACY_HOST = LEGACY_HOSTS.includes(self.location.hostname);
+
 // Şəbəkə çatmayanda göstəriləcək minimal offline HTML.
+// Özü-özünü bərpa edir: bağlantı qayıdan kimi (`online` hadisəsi və ya hər 5 saniyədə
+// bir yoxlama) səhifəni yenidən yükləyir — əvvəl şagird "yenilə" düyməsini tapmalı
+// idi, tapmayanda bağlantı çoxdan qayıtsa da bu ekranda qalırdı.
 const OFFLINE_HTML = `<!doctype html><html lang="az"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Imparo — offline</title>
-<style>body{margin:0;height:100vh;display:flex;flex-direction:column;align-items:center;
-justify-content:center;font-family:system-ui,sans-serif;background:#f4f3fb;color:#2a2340;text-align:center;padding:24px}
-h1{font-size:20px;margin:16px 0 8px}p{color:#6b6880;max-width:280px}</style></head>
+<style>body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+justify-content:center;font-family:system-ui,sans-serif;background:#f4f3fb;color:#2a2340;text-align:center;padding:24px;box-sizing:border-box}
+h1{font-size:20px;margin:16px 0 8px}p{color:#6b6880;max-width:300px;margin:0 0 20px}
+button,a{font:inherit;font-weight:700;border-radius:14px;padding:12px 22px;cursor:pointer;text-decoration:none}
+button{border:0;background:#f97316;color:#fff}a{display:inline-block;margin-top:12px;color:#f97316}</style></head>
 <body><div style="font-size:56px">⭐</div><h1>İnternet bağlantısı yoxdur</h1>
-<p>Imparo-nu işlətmək üçün internetə qoşul. Bağlantı bərpa olunanda səhifəni yenilə.</p></body></html>`;
+<p>Bağlantı bərpa olunan kimi səhifə özü açılacaq.</p>
+<button type="button" onclick="location.reload()">Yenidən yoxla</button>
+<a href="${CANONICAL_ORIGIN}/dashboard">imparo.app-ı aç</a>
+<script>
+addEventListener("online", function () { location.reload(); });
+setInterval(function () {
+  fetch(location.href, { cache: "no-store" }).then(function (r) { if (r.ok) location.reload(); }).catch(function () {});
+}, 5000);
+</script></body></html>`;
 
 // Səhifə "Yenilə" deyəndə gözləyən SW-i dərhal aktiv et (yeni versiyaya keç).
 self.addEventListener("message", (event) => {
@@ -78,6 +100,9 @@ self.addEventListener("notificationclick", (event) => {
 self.addEventListener("install", (event) => {
   // skipWaiting-i BURADA çağırmırıq — yeni SW gözləyir ki, istifadəçi
   // "Yenilə" düyməsi ilə təsdiqləsin (səhifə ortasında məcburi yeniləmə olmasın).
+  // İstisna: köhnə host. Orada tətbiq səhifəsi heç açılmır (hamısı yönləndirilir),
+  // yəni "Yenilə" deyən olmayacaq — yeni SW dərhal aktivləşməlidir.
+  if (ON_LEGACY_HOST) self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE).then((cache) =>
       cache.put(
@@ -122,11 +147,20 @@ self.addEventListener("fetch", (event) => {
 
   // Səhifə naviqasiyası: əvvəlcə şəbəkə, offline olsa keş/ana səhifə.
   if (request.mode === "navigate") {
+    // Köhnə host → kanonik ünvan, şəbəkəsiz (bax ON_LEGACY_HOST).
+    if (ON_LEGACY_HOST) {
+      event.respondWith(Response.redirect(CANONICAL_ORIGIN + url.pathname + url.search, 301));
+      return;
+    }
     event.respondWith(
-      fetch(request).catch(async () => {
-        const cache = await caches.open(CACHE);
-        return (await cache.match(request)) || (await cache.match(OFFLINE_URL));
-      }),
+      // Bir dəfə təkrar cəhd: mobil şəbəkədə tək qırılmış bağlantı (Wi-Fi↔LTE keçidi,
+      // yuxudan oyanma) əvvəl dərhal "İnternet yoxdur" ekranı göstərirdi.
+      fetch(request)
+        .catch(() => new Promise((r) => setTimeout(r, 1500)).then(() => fetch(request)))
+        .catch(async () => {
+          const cache = await caches.open(CACHE);
+          return (await cache.match(request)) || (await cache.match(OFFLINE_URL));
+        }),
     );
     return;
   }

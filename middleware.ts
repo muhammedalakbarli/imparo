@@ -24,6 +24,12 @@ export function middleware(req: NextRequest) {
   //      həmin zonaya aid deyil, ona görə cron oradan çağırılır və yönləndirilməməlidir.
   if (req.nextUrl.pathname.startsWith("/api/")) return NextResponse.next();
 
+  // Service worker skripti də YÖNLƏNDİRİLMİR: brauzer SW skriptinin yönləndirilməsini
+  // qadağan edir ("script resource is behind a redirect"). Yönləndirilsəydi, köhnə
+  // hostda (workers.dev) əvvəllər quraşdırılmış SW HEÇ VAXT yenilənməzdi — halbuki
+  // məhz yeni SW həmin hostu brauzerin içində imparo.app-a yönləndirir (bax public/sw.js).
+  if (req.nextUrl.pathname === "/sw.js") return NextResponse.next();
+
   // Host başlığında port ola bilər (lokal/preview) — müqayisədən əvvəl atılır.
   const host = (req.headers.get("host") ?? "").split(":")[0].toLowerCase();
   if (LEGACY_HOSTS.includes(host)) {
