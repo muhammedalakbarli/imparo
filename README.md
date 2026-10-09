@@ -33,8 +33,8 @@ məşq isə ən zəif bacarığın **kökündən** seçilir.
 | | |
 |---|---|
 | Siniflər | 1–8 |
-| Fənlər | Riyaziyyat · Azərbaycan dili · İngilis dili (+ 5-ci sinifdə Rəqəmsal Təhlükəsizlik və Maliyyə Savadlılığı) |
-| Dərs · tapşırıq | 666 dərs · 10 043 tapşırıq |
+| Fənlər | Riyaziyyat · Azərbaycan dili · İngilis dili (+ 5-ci sinifdə Rəqəmsal Təhlükəsizlik, Maliyyə Savadlılığı, Süni İntellekt və Kibertəhlükəsizlik) — cəmi 28 fənn-sinif kursu |
+| Dərs · tapşırıq | 574 dərs (sandıq/test ilə 806 düyün) · 12 036 tapşırıq (2 601 bonus daxil) |
 | Bacarıq qrafı | 154 bacarıq · 9 853 tapşırıq etiketli |
 | Cavab izahı | 1–4-cü siniflər üzrə 2 989 tapşırıqda |
 

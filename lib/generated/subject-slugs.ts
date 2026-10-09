@@ -17,6 +17,8 @@ export const SUBJECT_SLUGS = [
   "ingilis-dili",
   "reqemsal-tehlukesizlik-5",
   "maliyye-savadliligi-5",
+  "suni-intellekt-5",
+  "kibertehlukesizlik-5",
   "riyaziyyat-6",
   "azerbaycan-dili-6",
   "ingilis-dili-6",
