@@ -45,6 +45,10 @@ export async function POST(req: Request) {
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_parent_email", { p_email: email });
   if (error) {
+    // Gündəlik tavan (0062) — kənar ünvanlara məktub spamının qarşısını alır.
+    if (error.message.includes("rate limited")) {
+      return fail("Bu gün çox cəhd edildi. Sabah yenidən yoxla.", 429);
+    }
     return fail(error.message.includes("invalid email") ? "E-poçt ünvanı düzgün deyil" : "Yadda saxlanmadı");
   }
 

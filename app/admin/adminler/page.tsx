@@ -94,7 +94,7 @@ export default function AdminAdminsPage() {
       />
 
       {/* Dəvət formu */}
-      <Card title="Admin əlavə et" desc="Hesabı varsa dərhal admin olur; yoxdursa e-poçt dəvəti yazılır və qeydiyyatdan keçəndə avtomatik tətbiq olunur.">
+      <Card title="Admin əlavə et" desc="Hesabı varsa dərhal admin olur; yoxdursa dəvət yazılır və həmin ünvanla GOOGLE ilə daxil olanda avtomatik tətbiq olunur (e-poçt/parol qeydiyyatı ünvanın sahibliyini sübut etmir).">
         <div className="flex flex-wrap items-center gap-2">
           <input
             value={email}
