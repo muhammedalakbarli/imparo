@@ -328,6 +328,12 @@ const DICT: Dict = {
   },
   "run.startBonus": { az: "Bonusa başla", en: "Start bonus", ru: "Начать бонус" },
   "run.backToPath": { az: "Yola qayıt", en: "Back to path", ru: "Вернуться к пути" },
+  "run.saveFailed": {
+    az: "İrəliləyiş saxlanmadı — internet bağlantısını yoxla.",
+    en: "Progress wasn't saved — check your internet connection.",
+    ru: "Прогресс не сохранён — проверь подключение к интернету.",
+  },
+  "run.retrySave": { az: "Yenidən cəhd et", en: "Try again", ru: "Повторить" },
   "run.home": { az: "Ana səhifə", en: "Home", ru: "Главная" },
   "run.noTasks": {
     az: "Bu dərs üçün hələ tapşırıq əlavə edilməyib.",

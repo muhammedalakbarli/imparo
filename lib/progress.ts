@@ -108,16 +108,34 @@ export async function loadActiveDays(userId: string): Promise<string[]> {
 // (eyni dərs ikinci dəfə "bitirilsə" mükafat verilmir) — client heç bir məbləğ göndərmir.
 // Bax migration 0037 (complete_lesson RPC). grantReward=false — yalnız onboarding diaqnostikası
 // üçün (bildiyi dərsi XP-siz "bilinən" kimi işarələmək).
+//
+// XƏTA ATIR. Əvvəl RPC xətası (keçici şəbəkə qırılması, mobil internet) sükutla
+// `{xp:0, gems:0}`-a çevrilirdi: şagird dərsi bitirir, bayram ekranını görür, amma
+// irəliləyiş yazılmır — yolda növbəti dərs açılmır və səbəbi heç yerdə görünmür.
+// İndi keçici xətalar üçün iki təkrar cəhd edilir, sonra xəta çağırana ötürülür.
+// RPC idempotentdir, ona görə təkrar cəhd mükafatı iki dəfə vermir.
 export async function completeLesson(
   lessonId: string,
   grantReward = true,
 ): Promise<{ xp: number; gems: number }> {
   const supabase = createClient();
-  const { data } = await supabase
-    .rpc("complete_lesson", { p_lesson_id: lessonId, p_grant_reward: grantReward })
-    .single();
-  const row = data as { xp: number; gems: number } | null;
-  return { xp: row?.xp ?? 0, gems: row?.gems ?? 0 };
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, attempt * 1200));
+    try {
+      const { data, error } = await supabase
+        .rpc("complete_lesson", { p_lesson_id: lessonId, p_grant_reward: grantReward })
+        .single();
+      if (error) throw error;
+      const row = data as { xp: number; gems: number } | null;
+      return { xp: row?.xp ?? 0, gems: row?.gems ?? 0 };
+    } catch (err) {
+      lastError = err;
+      // Ban kimi QƏTİ xətada təkrar cəhd mənasızdır.
+      if (String((err as { message?: string })?.message ?? "").includes("bloklanıb")) break;
+    }
+  }
+  throw lastError;
 }
 
 // Statistikaya əlavə XP yaz (məs. gündəlik quest mükafatı) — streak-ə toxunmadan.

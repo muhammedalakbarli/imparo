@@ -87,6 +87,8 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
   const [plus, setPlus] = useState(false);
   // Onboarding: statistikadan sonra mükafat zənciri (bal → seriya → sandıq → profil).
   const [rewards, setRewards] = useState(false);
+  // Dərs tamamlamasının serverə yazılması (bax saveCompletion).
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "failed">("idle");
   // Cəhd jurnalı (migration 0044): sual göründüyü an + eyni tapşırığa neçənci cəhd.
   const shownAtRef = useRef<number>(Date.now());
   const attemptNoRef = useRef<Record<string, number>>({});
@@ -253,6 +255,18 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
     return <div className="py-12 text-center text-muted">{t("run.noTasks")}</div>;
   }
 
+  // Tamamlamanı serverə yaz. Uğursuz olsa bayram ekranında xəbərdarlıq + "Yenidən
+  // cəhd et" görünür — əvvəl xəta udulurdu və irəliləyiş xəbərsiz itirdi.
+  function saveCompletion() {
+    setSaveState("saving");
+    completeLesson(lesson.id)
+      .then(() => {
+        setSaveState("saved");
+        void touchFriendStreaks();
+      })
+      .catch(() => setSaveState("failed"));
+  }
+
   function finishLesson(finalXp: number) {
     // XP+zümrüd artıq serverdə (complete_lesson RPC) həqiqi tapşırıq sayından hesablanır —
     // client heç bir məbləğ göndərmir, idempotentdir (bax lib/progress.ts, migration 0037).
@@ -260,9 +274,7 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
       // Qonaq: mükafat serverdə hesablanmır — onboarding üçün lokal qeyd kifayətdir.
       addGuestLesson(lesson.id, finalXp, 5);
     } else {
-      completeLesson(lesson.id)
-        .then(() => touchFriendStreaks())
-        .catch(() => {});
+      saveCompletion();
       bumpQuests({ xp: finalXp, lessons: 1 });
       addWeeklyXp(finalXp);
       addMonthlyXp(finalXp);
@@ -419,6 +431,8 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
         newLevel={startXp !== null ? levelFromXp(startXp + earnedXp).level : 0}
         guest={guest}
         onGuestContinue={() => setRewards(true)}
+        saveFailed={saveState === "failed"}
+        onRetrySave={saveCompletion}
       />
     );
   }
@@ -686,8 +700,12 @@ function DoneScreen({
   newLevel,
   guest = false,
   onGuestContinue,
+  saveFailed = false,
+  onRetrySave,
 }: {
   slug: string;
+  saveFailed?: boolean;
+  onRetrySave?: () => void;
   earnedXp: number;
   accuracy: number;
   bestCombo: number;
@@ -760,6 +778,22 @@ function DoneScreen({
         <Stat value={`${accuracy}%`} label={t("cel.accuracy")} tone="text-emerald-500" />
         <Stat value={`🔥 ${bestCombo}`} label={t("cel.combo")} tone="text-orange-500" />
       </motion.div>
+
+      {saveFailed && (
+        <div
+          role="alert"
+          className="mx-auto mt-6 flex max-w-sm flex-col items-center gap-2 rounded-2xl border-2 border-red-400/60 bg-red-500/10 px-4 py-3 text-sm font-semibold text-fg"
+        >
+          <span>{t("run.saveFailed")}</span>
+          <button
+            type="button"
+            onClick={onRetrySave}
+            className="rounded-xl bg-red-500 px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white btn-pop hover:bg-red-600"
+          >
+            {t("run.retrySave")}
+          </button>
+        </div>
+      )}
 
       {/* Onboarding: hesabsız oynanan ilk dərsdən sonra tərəqqini saxlamaq üçün
           profil təklif olunur (Duolingo modeli). Adi dərsdə isə yola qayıdırıq. */}

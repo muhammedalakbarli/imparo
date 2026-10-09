@@ -126,18 +126,18 @@ export const openApiSpec = {
       },
       post: {
         tags: ["Progress"],
-        summary: "Dərs tamamla (XP + streak yenilə)",
+        summary: "Dərs tamamla (mükafatı server hesablayır, idempotent)",
         requestBody: {
           required: true,
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/ProgressInput" },
-              example: { lessonId: "l1", xp: 40 },
+              example: { lessonId: "l1" },
             },
           },
         },
         responses: {
-          "200": { description: "Uğurlu", content: jsonExample({ lessonId: "l1", earnedXp: 40, totalXp: 380, streakDays: 4 }) },
+          "200": { description: "Uğurlu", content: jsonExample({ lessonId: "l1", earnedXp: 40, earnedGems: 5, alreadyCompleted: false, totalXp: 380, streakDays: 4 }) },
           "401": { description: "Giriş edilməyib", content: errorContent },
         },
       },
@@ -179,7 +179,6 @@ export const openApiSpec = {
         required: ["lessonId"],
         properties: {
           lessonId: { type: "string" },
-          xp: { type: "integer", minimum: 0 },
         },
       },
       Error: {
