@@ -21,13 +21,13 @@ import {
 import Mascot from "@/components/Mascot";
 import ManualPayBox from "@/components/ManualPayBox";
 import { track } from "@/lib/analytics";
+// Bir yer = bir illik Plus. Webhook ilə EYNİ sabit (əvvəl iki yerdə ayrıca yazılmışdı).
+import { SEAT_PRICE_CENTS } from "@/lib/lemonsqueezy";
 
 // Sponsorluq məhsulunun checkout linki (.env). Yoxdursa maraq qeyd olunur —
 // uydurma "ödəniş" düyməsi göstərilmir.
 const SPONSOR_CHECKOUT = process.env.NEXT_PUBLIC_LS_CHECKOUT_SPONSOR;
 
-/** Bir yer = bir illik Plus (23.99 ₼ = 2399 qəpik). Webhook-dakı dəyərlə eyni olmalıdır. */
-const SEAT_PRICE_CENTS = 2399;
 
 const SEAT_OPTIONS = [
   { seats: 1, label: "1 şagird", note: "23.99 ₼ · bir il pulsuz" },

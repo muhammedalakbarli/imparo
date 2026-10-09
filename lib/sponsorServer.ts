@@ -14,11 +14,14 @@ export async function recordSponsorshipServer(
   note?: string,
 ): Promise<void> {
   const admin = await adminClient();
-  await admin.rpc("record_sponsorship", {
+  // Xəta YOXLANMALIDIR: əvvəl nəticə atılırdı və RPC uğursuz olanda webhook "ok"
+  // qaytarırdı — ödənilmiş sponsorluq havuza düşmədən səssizcə itirdi.
+  const { error } = await admin.rpc("record_sponsorship", {
     p_uid: userId,
     p_seats: Math.max(1, Math.round(seats)),
     p_amount_cents: Math.max(0, Math.round(amountCents)),
     p_currency: currency,
     p_note: note ?? null,
   });
+  if (error) throw error;
 }

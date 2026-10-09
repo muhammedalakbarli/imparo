@@ -49,3 +49,14 @@ export async function claimPaymentEvent(
   if (error) throw error;
   return data === true;
 }
+
+/**
+ * `claimPaymentEvent`-in qeydini geri alır. Emal yarıda uğursuz olanda çağırılır:
+ * qeyd qalsaydı, LemonSqueezy-nin təkrar göndərişi "dublikat" sayılıb atılardı və
+ * ödəniş edilmiş Plus/sponsorluq HEÇ VAXT verilməzdi.
+ */
+export async function releasePaymentEvent(id: string): Promise<void> {
+  const admin = await adminClient();
+  const { error } = await admin.from("payment_events").delete().eq("id", id);
+  if (error) throw error;
+}
