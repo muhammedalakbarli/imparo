@@ -7,9 +7,11 @@ name: Həftəlik valideyn hesabatı
 # öz worker giriş nöqtəsini generasiya edir və scheduled() handler dəstəyi yoxdur
 # (bax cron-reminders.yml).
 #
-# Bazar günü 16:00 UTC = 20:00 Bakı. Həftə Bakı vaxtı ilə bazar 00:00-da bitir,
-# yəni hesabat tam bağlanmış həftəni əhatə edir. Axşam saatı valideynin məktubu
-# həqiqətən açdığı vaxtdır — iş günü səhəri yox.
+# Bazar günü 13:23 UTC = 17:23 Bakı. GitHub planlı işləri 3–7 saat gecikdirir
+# (16:00 UTC planı 19:20 UTC-də, yəni Bakı vaxtı ilə 23:20-də işləyirdi) — erkən
+# plan + tam olmayan dəqiqə məktubu axşam saatlarına salır. Axşam saatı valideynin
+# məktubu həqiqətən açdığı vaxtdır — iş günü səhəri yox. Hesabat pəncərəsi
+# (son 7 tam gün) endpoint-də Bakı yarıgecəsinə görə hesablanır.
 #
 # ⚠️ URL QƏSDƏN workers.dev-dir, imparo.app DEYİL: imparo.app zonasında Bot Fight
 # Mode datamərkəz IP-lərini (GitHub Actions runner-ləri) "managed challenge" ilə
@@ -18,7 +20,7 @@ name: Həftəlik valideyn hesabatı
 # Endpoint onsuz da CRON_SECRET ilə qorunur (fail-closed).
 on:
   schedule:
-    - cron: "0 16 * * 0"
+    - cron: "23 13 * * 0"
   workflow_dispatch: {} # əl ilə test üçün
 
 jobs:

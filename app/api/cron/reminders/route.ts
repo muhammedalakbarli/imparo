@@ -1,6 +1,14 @@
-// GET /api/cron/reminders — GitHub Actions hər axşam çağırır (bax .github/workflows/cron-reminders.yml).
+// GET /api/cron/reminders — GitHub Actions hər gün çağırır (bax .github/workflows/cron-reminders.yml).
 // Bu gün aktiv olmayan, streak-i olan istifadəçilərə "streak-in yanır" push göndərir.
 // service_role ilə işləyir (RLS-i keçir). CRON_SECRET ilə qorunur.
+//
+// ⚠️ GÖNDƏRMƏ `fetch` İLƏDİR, `webpush.sendNotification` İLƏ YOX.
+// `sendNotification` daxildə Node-un `https.request`-ini çağırır, Cloudflare Worker-də
+// isə o yoxdur ("[unenv] https.request is not implemented yet!"). Xəta catch-də
+// udulurdu və cavab `{"sent":0,"total":1}` olurdu — yəni push bildirişləri
+// Cloudflare-ə köçəndən bəri HEÇ VAXT çatmırdı, amma cron hər gün "success" görünürdü.
+// `generateRequestDetails` isə yalnız şifrələmə + VAPID imzası edir (Worker-də işləyir,
+// payload Node-da deşifrə edilərək yoxlanılıb) — sorğunu özümüz göndəririk.
 
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
@@ -9,9 +17,25 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Pulsuz planda bir Worker çağırışı ən çox 50 xarici sorğu edə bilər. 2 Supabase
+// sorğusu + push-lar + köhnəlmiş abunələrin silinməsi bu həddə sığmalıdır.
+// Qalanlar üçün cavabda `next` qaytarılır, workflow onu `?offset=` ilə yenidən çağırır.
+const BATCH = 40;
+
+// Gecə uşağa bildiriş göndərilmir. GitHub Actions cron-u saatlarla gecikə bilir
+// (ölçüldü: 3–7 saat) — əvvəl bildiriş Bakı vaxtı ilə 01:47-də də gedirdi.
+const QUIET_FROM_HOUR = 22; // 22:00-dan
+const QUIET_TO_HOUR = 8; // 08:00-a qədər
+
 // Bakı saat qurşağına görə bugünkü tarix "YYYY-MM-DD" (last_active_date ilə eyni format).
 function bakuToday(): string {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Baku" });
+}
+
+function bakuHour(): number {
+  return Number(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Baku", hour: "numeric", hour12: false }),
+  ) % 24;
 }
 
 interface Sub {
@@ -40,6 +64,12 @@ export async function GET(req: Request) {
     return new Response("unauthorized", { status: secret ? 401 : 500 });
   }
 
+  const params = new URL(req.url).searchParams;
+  const hour = bakuHour();
+  if ((hour >= QUIET_FROM_HOUR || hour < QUIET_TO_HOUR) && params.get("force") !== "1") {
+    return Response.json({ ok: true, sent: 0, next: null, note: `quiet_hours (Bakı ${hour}:00)` });
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
   const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -49,17 +79,19 @@ export async function GET(req: Request) {
     return Response.json({ ok: false, error: "missing_env" }, { status: 500 });
   }
 
-  webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
   const supabase = createClient(url, serviceKey, {
     auth: { persistSession: false },
   });
 
-  // Bütün abunələr + onların statistikası.
-  const { data: subs } = await supabase
+  const offset = Math.max(0, Number(params.get("offset")) || 0);
+  // Sabit sıra: partiyalar arasında eyni abunə iki dəfə düşməsin.
+  const { data: subs, count } = await supabase
     .from("push_subscriptions")
-    .select("user_id, endpoint, p256dh, auth");
+    .select("user_id, endpoint, p256dh, auth", { count: "exact" })
+    .order("endpoint")
+    .range(offset, offset + BATCH - 1);
   if (!subs || subs.length === 0) {
-    return Response.json({ ok: true, sent: 0, note: "no_subscriptions" });
+    return Response.json({ ok: true, sent: 0, next: null, note: "no_subscriptions" });
   }
 
   const userIds = [...new Set((subs as Sub[]).map((s) => s.user_id))];
@@ -73,6 +105,8 @@ export async function GET(req: Request) {
   let sent = 0;
   let removed = 0;
   let skipped = 0;
+  let failed = 0;
+  const errors: string[] = [];
 
   for (const s of subs as Sub[]) {
     const st = statById.get(s.user_id);
@@ -99,20 +133,51 @@ export async function GET(req: Request) {
           };
 
     try {
-      await webpush.sendNotification(
+      const d = webpush.generateRequestDetails(
         { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
         JSON.stringify(payload),
+        {
+          vapidDetails: { subject: vapidSubject, publicKey: vapidPublic, privateKey: vapidPrivate },
+          TTL: 12 * 60 * 60, // cihaz offline-dırsa 12 saat ərzində çatdırılsın
+        },
       );
-      sent++;
-    } catch (err: unknown) {
-      // Köhnəlmiş/ləğv olunmuş abunə (404/410) — cədvəldən sil.
-      const code = (err as { statusCode?: number })?.statusCode;
-      if (code === 404 || code === 410) {
+      const headers: Record<string, string> = {};
+      for (const [k, v] of Object.entries(d.headers)) headers[k] = String(v);
+      const res = await fetch(d.endpoint, {
+        method: d.method,
+        headers,
+        body: d.body as unknown as BodyInit,
+      });
+
+      if (res.ok) {
+        sent++;
+      } else if (res.status === 404 || res.status === 410) {
+        // Köhnəlmiş/ləğv olunmuş abunə — cədvəldən sil.
         await supabase.from("push_subscriptions").delete().eq("endpoint", s.endpoint);
         removed++;
+      } else {
+        failed++;
+        if (errors.length < 5) {
+          errors.push(`${res.status}: ${(await res.text().catch(() => "")).slice(0, 120)}`);
+        }
       }
+    } catch (err) {
+      // Əvvəl bu budaq səssiz idi və bütün uğursuzluqları gizlədirdi — indi sayılır.
+      failed++;
+      if (errors.length < 5) errors.push(String(err).slice(0, 160));
     }
   }
 
-  return Response.json({ ok: true, sent, removed, skipped, total: subs.length });
+  const nextOffset = offset + subs.length;
+  const next = count != null && nextOffset < count ? nextOffset : null;
+  return Response.json({
+    ok: true,
+    sent,
+    removed,
+    skipped,
+    failed,
+    errors,
+    total: count ?? subs.length,
+    next,
+  });
 }

@@ -10,8 +10,11 @@ name: Streak xatırlatma bildirişləri
 # scheduled() handler dəstəyi yoxdur — buna əl qatmaq hər `cf:build`-də sınan,
 # kövrək həll olardı. GitHub Actions isə tamam ayrı, sadə və repoda görünən yoldur.
 #
-# Saat 15:00 UTC = 19:00 Bakı vaxtı (UTC+4) — gecə yarısından ~5 saat əvvəl,
-# şagirdə seriyasını qorumaq üçün hələ vaxt qalır.
+# VAXT: GitHub planlı işləri saatlarla GECİKDİRİR (ölçüldü: 15:00 UTC planı
+# 18:16–21:47 UTC-də işləyirdi, yəni Bakı vaxtı ilə gecə 01:47-yə qədər). Ona
+# görə plan erkən qoyulub (11:17 UTC = 15:17 Bakı) və tam saatda deyil — :00
+# GitHub-da ən sıx, ən çox gecikən dəqiqədir. Endpoint özü də 22:00–08:00 Bakı
+# arası göndərmir (uşağa gecə bildirişi getməsin).
 #
 # ⚠️ URL QƏSDƏN workers.dev-dir, imparo.app DEYİL: imparo.app zonasında Bot Fight
 # Mode datamərkəz IP-lərini (GitHub Actions runner-ləri) "managed challenge" ilə
@@ -20,21 +23,38 @@ name: Streak xatırlatma bildirişləri
 # Endpoint onsuz da CRON_SECRET ilə qorunur (fail-closed).
 on:
   schedule:
-    - cron: "0 15 * * *"
+    - cron: "17 11 * * *"
   workflow_dispatch: {} # əl ilə test üçün (Actions səkməsindən "Run workflow")
 
 jobs:
   send-reminders:
     runs-on: ubuntu-latest
     steps:
-      - name: /api/cron/reminders çağır
+      # Endpoint bir çağırışda ən çox 40 abunə emal edir (Worker subrequest limiti).
+      # Cavabdakı `next` boş olana qədər növbəti partiya `?offset=` ilə çağırılır.
+      - name: /api/cron/reminders çağır (partiyalarla)
         run: |
-          code=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "https://imparo.m-alakbarli2007.workers.dev/api/cron/reminders")
-          echo "HTTP $code"
-          cat /tmp/resp.txt
-          if [ "$code" != "200" ]; then
-            echo "::error::Gözlənilməyən status: $code"
-            exit 1
-          fi
+          offset=0
+          for i in $(seq 1 25); do
+            code=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              "https://imparo.m-alakbarli2007.workers.dev/api/cron/reminders?offset=${offset}")
+            echo "── dövr $i · HTTP $code"
+            cat /tmp/resp.txt; echo
+            if [ "$code" != "200" ]; then
+              echo "::error::Gözlənilməyən status: $code"
+              exit 1
+            fi
+            failed=$(sed -n 's/.*"failed":\([0-9]*\).*/\1/p' /tmp/resp.txt)
+            if [ "${failed:-0}" -gt 0 ]; then
+              echo "::warning::${failed} bildiriş göndərilmədi — cavabdakı errors sahəsinə bax."
+            fi
+            next=$(sed -n 's/.*"next":\([0-9]*\).*/\1/p' /tmp/resp.txt)
+            if [ -z "$next" ]; then
+              echo "Bitdi."
+              exit 0
+            fi
+            offset=$next
+            sleep 2
+          done
+          echo "::warning::25 dövrdən sonra hələ abunə qalıb — BATCH-ə bax."
