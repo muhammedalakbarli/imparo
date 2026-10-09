@@ -14,11 +14,20 @@ const POSTHOG_HOST = "https://*.posthog.com";
 // Dəyərlər Next.js-in öz inline bootstrap script/style-larına görə 'unsafe-inline' saxlayır
 // (nonce-əsaslı CSP daha sərt olardı, amma bu layihədə middleware-əsaslı nonce infrastrukturu
 // yoxdur — səhifənin qırılma riski ilə "faydasız sərtlik" arasında balans seçilib).
+//
+// media-src / frame-src / img-src-dəki Supabase: video dərslər (0052/0056/0061).
+// Əvvəl bunlar yox idi və `default-src 'self'`-ə düşürdü — yəni Supabase Storage-a
+// yüklənmiş video, onun posteri və altyazısı, həmçinin YouTube embed-i brauzer
+// tərəfindən BLOKLANIRDI (şagird yalnız "Video açılmadı" görürdü).
+// media-src `https:` — müəllim birbaşa .mp4 linki də əlavə edə bilir (istənilən
+// domendən). Media skript icra etmir, ona görə bu genişlik təhlükəsizdir.
 const CSP = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${POSTHOG_HOST}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  `img-src 'self' data: blob: ${SUPABASE_HOST}`,
+  "media-src 'self' blob: https:",
+  "frame-src https://www.youtube-nocookie.com",
   "font-src 'self' data:",
   `connect-src 'self' ${SUPABASE_HOST} wss://*.supabase.co ${POSTHOG_HOST}`,
   "frame-ancestors 'none'",
@@ -39,9 +48,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Bütün səhifələrə əsas müdafiə başlıqları.
-        source: "/(.*)",
+        // Bütün səhifələrə əsas müdafiə başlıqları. /api-docs istisnadır: Swagger UI
+        // unpkg.com-dan yüklənir və öz CSP-sini route-un özü qoyur (bax app/api-docs).
+        // İki CSP başlığı olsaydı brauzer HƏR İKİSİNİ tətbiq edərdi və səhifə boş qalardı.
+        source: "/((?!api-docs).*)",
         headers: SECURITY_HEADERS,
+      },
+      {
+        source: "/api-docs",
+        headers: SECURITY_HEADERS.filter((h) => h.key !== "Content-Security-Policy"),
       },
       {
         // Service worker həmişə təzə yüklənsin, düzgün tip alsın.

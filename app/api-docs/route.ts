@@ -26,8 +26,22 @@ const html = `<!DOCTYPE html>
 </body>
 </html>`;
 
+// Qlobal CSP (next.config.ts) bu səhifəyə tətbiq olunmur — unpkg.com-a icazə lazımdır.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' https://unpkg.com",
+  "style-src 'self' 'unsafe-inline' https://unpkg.com",
+  "img-src 'self' data: https://unpkg.com",
+  "connect-src 'self'",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+].join("; ");
+
 export function GET() {
   return new Response(html, {
-    headers: { "content-type": "text/html; charset=utf-8" },
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "content-security-policy": CSP,
+    },
   });
 }

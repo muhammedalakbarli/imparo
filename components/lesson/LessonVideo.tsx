@@ -80,13 +80,21 @@ export default function LessonVideo({
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border-2 border-line bg-black">
       <div className="relative">
+        {/* `src` birbaşa <video>-dadır, <source> uşağında YOX: <source> istifadə
+            olunanda yükləmə xətası <source>-un özündə baş verir və <video>-nun
+            onError-u heç vaxt işə düşmür — "Video açılmadı" ehtiyat ekranı ölü idi.
+            `crossOrigin` yalnız altyazı olanda: Storage-dakı .vtt başqa mənbədən
+            gəlir və CORS rejimi olmadan brauzer <track>-ı yükləmir. Altyazısız
+            videoda qoyulmur — CORS başlığı verməyən xarici .mp4 linki sınmasın. */}
         <video
           ref={ref}
           className="block aspect-video w-full"
           controls={started}
           preload="none"
           playsInline
+          src={video.src}
           poster={video.poster}
+          crossOrigin={video.captions ? "anonymous" : undefined}
           onError={() => setFailed(true)}
           onEnded={() => {
             if (done.current) return;
@@ -94,7 +102,6 @@ export default function LessonVideo({
             onWatched?.();
           }}
         >
-          <source src={video.src} />
           {video.captions && (
             <track kind="captions" src={video.captions} srcLang="az" label="Azərbaycanca" default />
           )}
