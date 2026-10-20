@@ -20,6 +20,7 @@ import { useContent } from "@/components/ContentProvider";
 import { FEEDBACK_LABELS, type FeedbackCategory } from "@/lib/feedback";
 import type { Subject, Task, TaskType } from "@/lib/types";
 import { PageSkeleton } from "@/components/Skeleton";
+import { gradeLabel } from "@/lib/grade";
 
 const TIER_NAMES = ["Bürünc", "Gümüş", "Qızıl", "Platin", "Almaz"];
 const TYPE_NAMES: Record<TaskType, string> = {
@@ -270,7 +271,7 @@ export default function AdminAnalyticsPage() {
           </div>
           <Table
             head={["Sinif", "Fənn", "Dərs", "Tapşırıq"]}
-            rows={content.byGrade.map(([g, v]) => [`${g}-ci sinif`, v.subjects, v.lessons, v.tasks])}
+            rows={content.byGrade.map(([g, v]) => [gradeLabel(Number(g)), v.subjects, v.lessons, v.tasks])}
           />
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <Table title="Fənn üzrə tapşırıq" head={["Fənn", "Say"]} rows={content.bySubject.map(([n, c]) => [n, c])} />

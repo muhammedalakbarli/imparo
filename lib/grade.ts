@@ -17,10 +17,15 @@ export const GRADES_WITH_CONTENT = [1, 2, 3, 4, 5, 6, 7, 8];
 const GRADE_ORDINAL: Record<number, string> = {
   1: "1-ci", 2: "2-ci", 3: "3-cü", 4: "4-cü",
   5: "5-ci", 6: "6-cı", 7: "7-ci", 8: "8-ci",
+  9: "9-cu", 10: "10-cu", 11: "11-ci",
 };
 
+export function gradeOrdinal(g: number): string {
+  return GRADE_ORDINAL[g] ?? `${g}-ci`;
+}
+
 export function gradeLabel(g: number): string {
-  return `${GRADE_ORDINAL[g] ?? `${g}-ci`} sinif`;
+  return `${gradeOrdinal(g)} sinif`;
 }
 
 // İstifadəçinin sinfinə uyğun fənlər. BÜTÜN şagird-üzlü səhifələr (dashboard,

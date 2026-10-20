@@ -13,6 +13,7 @@ import {
 } from "@/lib/schools";
 import { myVideos, type MyVideo } from "@/lib/videos";
 import { PageSkeleton } from "@/components/Skeleton";
+import { gradeLabel } from "@/lib/grade";
 
 export default function TeacherPage() {
   const { user, ready } = useAuthUser();
@@ -168,7 +169,7 @@ export default function TeacherPage() {
               >
                 {options.map((s) => (
                   <option key={s.slug} value={s.slug}>
-                    {s.name} · {s.grade}-ci sinif
+                    {s.name} · {gradeLabel(s.grade)}
                   </option>
                 ))}
               </select>

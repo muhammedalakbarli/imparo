@@ -37,6 +37,7 @@ import { getSkill } from "@/lib/skills";
 import ClassVideos from "@/components/mekteb/ClassVideos";
 import { endorseStudent } from "@/lib/sponsor";
 import { PageSkeleton } from "@/components/Skeleton";
+import { gradeLabel } from "@/lib/grade";
 import { useRouter } from "next/navigation";
 
 export default function ClassPage({ params }: { params: Promise<{ id: string }> }) {
@@ -179,7 +180,7 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
                   className="rounded-lg p-1.5 text-white/70 hover:bg-white/15"><X size={16} /></button>
               </div>
             )}
-            <p className="text-sm text-white/85">{cls.grade}-ci sinif kurikulumu</p>
+            <p className="text-sm text-white/85">{gradeLabel(cls.grade)} kurikulumu</p>
           </div>
           <div className="text-right">
             <div className="text-[11px] uppercase tracking-wider text-white/70">Sinif kodu</div>

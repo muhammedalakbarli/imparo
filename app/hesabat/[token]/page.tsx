@@ -10,6 +10,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { adminClient } from "@/lib/supabase/admin";
+import { gradeLabel } from "@/lib/grade";
 import {
   accuracy,
   formatDuration,
@@ -98,7 +99,7 @@ export default async function ReportPage({
         <h1 className="text-3xl font-extrabold text-fg sm:text-4xl">{name}</h1>
         <p className="mt-1 text-sm text-muted">
           {formatRange(r.from, r.to)}
-          {r.grade ? ` · ${r.grade}-ci sinif` : ""}
+          {r.grade ? ` · ${gradeLabel(Number(r.grade))}` : ""}
         </p>
 
         <div className="mt-5 flex gap-2">

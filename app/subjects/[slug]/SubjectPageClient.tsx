@@ -18,6 +18,7 @@ import { useT } from "@/lib/i18n";
 import LearningPath, { type PathNode } from "@/components/LearningPath";
 import { PageSkeleton } from "@/components/Skeleton";
 import { getGuest } from "@/lib/guest";
+import { gradeLabel } from "@/lib/grade";
 
 export default function SubjectPageClient({ slug }: { slug: string }) {
   // Onboarding-dən "Sonra" seçən şagird hesabsız yolda gəzə bilir: tərəqqi qonaq
@@ -76,7 +77,7 @@ export default function SubjectPageClient({ slug }: { slug: string }) {
           </span>
           <div>
             <h1 className="text-2xl font-bold text-fg">{t(`subject.${subject.slug}`)}</h1>
-            <p className="text-sm text-muted">{subject.grade}-ci sinif</p>
+            <p className="text-sm text-muted">{gradeLabel(subject.grade)}</p>
           </div>
         </div>
 

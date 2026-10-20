@@ -9,6 +9,7 @@ import { useAuthUser } from "@/lib/useAuthUser";
 import { checkIsAdmin, adminLessonStats, type AdminLessonStat } from "@/lib/adminApi";
 import { PageHeader } from "@/components/admin/ui";
 import { DataTable, type Column } from "@/components/admin/DataTable";
+import { gradeLabel } from "@/lib/grade";
 
 export default function AdminContentPerfPage() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function AdminContentPerfPage() {
             <select value={grade} onChange={(e) => setGrade(e.target.value === "all" ? "all" : Number(e.target.value))}
               className="rounded-md border border-line bg-panel px-3 py-2 text-sm font-semibold text-fg">
               <option value="all">Bütün siniflər</option>
-              {grades.map((g) => <option key={g} value={g}>{g}-ci sinif</option>)}
+              {grades.map((g) => <option key={g} value={g}>{gradeLabel(Number(g))}</option>)}
             </select>
           } />
       </div>

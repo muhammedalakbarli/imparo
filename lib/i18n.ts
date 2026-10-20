@@ -75,6 +75,8 @@ const DICT: Dict = {
   "subject.ingilis-dili-8": { az: "İngilis dili", en: "English", ru: "Английский" },
   "subject.reqemsal-tehlukesizlik-5": { az: "Rəqəmsal Təhlükəsizlik", en: "Digital Safety", ru: "Цифровая безопасность" },
   "subject.maliyye-savadliligi-5": { az: "Maliyyə Savadlılığı", en: "Financial Literacy", ru: "Финансовая грамотность" },
+  "subject.suni-intellekt-5": { az: "Süni İntellekt", en: "Artificial Intelligence", ru: "Искусственный интеллект" },
+  "subject.kibertehlukesizlik-5": { az: "Kibertəhlükəsizlik", en: "Cybersecurity", ru: "Кибербезопасность" },
 
   // Bölmə (unit) adları — Praktika "Bölmə üzrə" siyahısı
   "unit.ry-natural": {
@@ -361,7 +363,7 @@ const DICT: Dict = {
   "hearts.continue": { az: "Davam et", en: "Keep going", ru: "Продолжить" },
   "dash.gradeSoonTitle": { az: "Tezliklə!", en: "Coming soon!", ru: "Скоро!" },
   "dash.gradeSoon": {
-    az: "{n}-ci sinif proqramı hazırlanır. Ayarlardan sinfini dəyişə bilərsən.",
+    az: "{ord} sinif proqramı hazırlanır. Ayarlardan sinfini dəyişə bilərsən.",
     en: "The grade {n} program is being prepared. You can change your grade in settings.",
     ru: "Программа {n} класса готовится. Класс можно изменить в настройках.",
   },
@@ -573,7 +575,7 @@ const DICT: Dict = {
     en: "Content is shown based on your grade",
     ru: "Контент показывается по твоему классу",
   },
-  "settings.gradeOption": { az: "{n}-ci sinif", en: "Grade {n}", ru: "{n} класс" },
+  "settings.gradeOption": { az: "{ord} sinif", en: "Grade {n}", ru: "{n} класс" },
   "settings.appearance": { az: "Görünüş", en: "Appearance", ru: "Внешний вид" },
   "settings.dark": { az: "Tünd rejim", en: "Dark mode", ru: "Тёмная тема" },
   "settings.darkHint": {

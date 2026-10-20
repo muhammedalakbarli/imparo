@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getSubjectMeta } from "@/lib/subjectMeta";
+import { gradeLabel } from "@/lib/grade";
 
 // Fənn səhifələri saytın ən dəyərli açıq məzmunudur ("5-ci sinif riyaziyyat"
 // kimi axtarışlar buraya düşür), ona görə başlıq/təsvir hər fənn üçün ayrıca
@@ -16,9 +17,9 @@ export async function generateMetadata({
   const s = getSubjectMeta(slug);
   if (!s) return { title: "Fənn tapılmadı" };
 
-  const title = `${s.grade}-ci sinif ${s.name}`;
+  const title = `${gradeLabel(s.grade)} ${s.name}`;
   const description =
-    `${s.grade}-ci sinif ${s.name} proqramı: ${s.units} bölmə, ${s.lessons} interaktiv dərs. ` +
+    `${gradeLabel(s.grade)} ${s.name} proqramı: ${s.units} bölmə, ${s.lessons} interaktiv dərs. ` +
     `Pulsuz məşq et, tərəqqini izlə.`;
 
   return {

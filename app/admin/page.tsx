@@ -27,6 +27,7 @@ import {
 } from "@/lib/adminApi";
 import type { Subject, Unit, Lesson, Task, TaskType, RuleSection } from "@/lib/types";
 import { PageSkeleton } from "@/components/Skeleton";
+import { gradeLabel } from "@/lib/grade";
 
 type Editing =
   | { kind: "subject"; mode: "new" | "edit"; data: Partial<Subject> }
@@ -184,7 +185,7 @@ export default function AdminPage() {
               <Row
                 key={s.slug}
                 title={`${s.icon} ${s.name}`}
-                sub={`${s.units.length} bölmə · ${s.grade}-ci sinif`}
+                sub={`${s.units.length} bölmə · ${gradeLabel(s.grade)}`}
                 onOpen={() => setSel({ s: s.slug })}
                 onEdit={() => setEditing({ kind: "subject", mode: "edit", data: s })}
                 onDelete={() => del("subject", s.slug, "Bütün bölmə/dərs/tapşırıqları da silinəcək.")}

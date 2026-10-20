@@ -13,7 +13,7 @@ import { loadHearts, MAX_HEARTS } from "@/lib/hearts";
 import { loadPlus } from "@/lib/plus";
 import StreakPopover from "@/components/StreakPopover";
 import { useAuthUser } from "@/lib/useAuthUser";
-import { userGrade, subjectsForGrade } from "@/lib/grade";
+import { userGrade, subjectsForGrade, gradeOrdinal } from "@/lib/grade";
 import { track } from "@/lib/analytics";
 import { useT } from "@/lib/i18n";
 import {
@@ -126,7 +126,7 @@ export default function DashboardPage() {
           <Mascot size={90} mood="happy" />
           <h1 className="mt-5 text-2xl font-bold text-fg">{t("dash.gradeSoonTitle")}</h1>
           <p className="mt-2 text-muted">
-            {t("dash.gradeSoon").replace("{n}", String(grade))}
+            {t("dash.gradeSoon").replace("{n}", String(grade)).replace("{ord}", gradeOrdinal(grade))}
           </p>
           <Link
             href="/ayarlar"

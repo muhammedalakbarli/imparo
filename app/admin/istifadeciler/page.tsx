@@ -21,6 +21,7 @@ import { BanDialog, PlusDialog, fmtUntil, daysLeft } from "@/components/admin/mo
 import { PageSkeleton } from "@/components/Skeleton";
 import { toast } from "sonner";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
+import { gradeLabel } from "@/lib/grade";
 
 function fmtDate(s: string | null): string {
   if (!s) return "—";
@@ -198,7 +199,7 @@ export default function AdminUsersPage() {
             className="rounded-md border border-line bg-panel px-3 py-1.5 text-sm font-semibold text-fg"
           >
             <option value="all">Bütün siniflər</option>
-            {grades.map((g) => <option key={g} value={g}>{g}-ci sinif</option>)}
+            {grades.map((g) => <option key={g} value={g}>{gradeLabel(Number(g))}</option>)}
           </select>
           <select
             value={fPlus}

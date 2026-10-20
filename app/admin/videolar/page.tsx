@@ -16,6 +16,7 @@ import { adminVideoQueue, adminDecideVideo, type AdminVideoRow } from "@/lib/vid
 import { PageShell, PageHeader, StatCard, Button, Badge, EmptyState, Card } from "@/components/admin/ui";
 import { DataTable, type Column } from "@/components/admin/DataTable";
 import { useConfirm } from "@/components/admin/ConfirmDialog";
+import { gradeLabel } from "@/lib/grade";
 
 export default function AdminVideosPage() {
   const router = useRouter();
@@ -78,7 +79,7 @@ export default function AdminVideosPage() {
       value: (r) => `${r.grade ?? ""} ${r.subject_slug ?? ""}`.trim(),
       render: (r) => (
         <span className="text-muted">
-          {r.grade ? `${r.grade}-ci sinif` : "—"}{r.subject_slug ? ` · ${r.subject_slug}` : ""}
+          {r.grade ? gradeLabel(Number(r.grade)) : "—"}{r.subject_slug ? ` · ${r.subject_slug}` : ""}
         </span>
       ),
     },

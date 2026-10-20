@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Download, Trash2 } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { createClient } from "@/lib/supabase/client";
-import { userGrade, GRADES_WITH_CONTENT } from "@/lib/grade";
+import { userGrade, GRADES_WITH_CONTENT, gradeOrdinal } from "@/lib/grade";
 import { loadPrefs, savePrefs, type Prefs, type DarkMode, type Lang } from "@/lib/prefs";
 import {
   pushSupported,
@@ -192,7 +192,7 @@ export default function SettingsPage() {
             >
               {GRADES_WITH_CONTENT.map((g) => (
                 <option key={g} value={g}>
-                  {t("settings.gradeOption").replace("{n}", String(g))}
+                  {t("settings.gradeOption").replace("{n}", String(g)).replace("{ord}", gradeOrdinal(g))}
                 </option>
               ))}
             </select>
