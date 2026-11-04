@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, Check } from "lucide-react";
 import { signInWithEmail, getCurrentUser } from "@/lib/auth";
+import { postLoginPath } from "@/lib/teacher";
 import { useT } from "@/lib/i18n";
 import Logo from "@/components/Logo";
 import GoogleButton from "@/components/GoogleButton";
@@ -26,7 +27,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     getCurrentUser().then((u) => {
-      if (u) router.replace("/dashboard");
+      if (u) router.replace(postLoginPath(u.user_metadata));
     });
     // Google OAuth callback xətası olubsa göstər (bax auth/callback route).
     if (new URLSearchParams(window.location.search).get("error") === "oauth") {
@@ -46,7 +47,8 @@ export default function LoginPage() {
       setError(res.error || t("auth.err.invalid"));
       return;
     }
-    router.push("/dashboard");
+    const u = await getCurrentUser();
+    router.push(postLoginPath(u?.user_metadata));
   }
 
   return (

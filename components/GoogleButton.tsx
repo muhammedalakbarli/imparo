@@ -5,13 +5,21 @@
 import { useState } from "react";
 import { signInWithGoogle } from "@/lib/auth";
 
-export default function GoogleButton({ label = "Google ilə davam et" }: { label?: string }) {
+export default function GoogleButton({
+  label = "Google ilə davam et",
+  onBeforeRedirect,
+}: {
+  label?: string;
+  /** Brauzer Google-a getməzdən əvvəl (məs. müəllim niyyətini yadda saxlamaq üçün). */
+  onBeforeRedirect?: () => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function handleClick() {
     setLoading(true);
     setError("");
+    onBeforeRedirect?.();
     const res = await signInWithGoogle();
     // Uğurlu halda brauzer Google-a yönləndirilir (bu koda qayıtmır).
     if (!res.ok) {

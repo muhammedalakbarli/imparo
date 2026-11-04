@@ -9,6 +9,7 @@ import ActivityTracker from "@/components/ActivityTracker";
 import BanGate from "@/components/BanGate";
 import LegalUpdateBanner from "@/components/LegalUpdateBanner";
 import RecoveryRedirect from "@/components/RecoveryRedirect";
+import TeacherIntentRedirect from "@/components/TeacherIntentRedirect";
 import { SITE_URL } from "@/lib/site";
 
 // Gövdə şrifti — yumşaq, oxunaqlı.
@@ -183,6 +184,7 @@ export default function RootLayout({
         <AnalyticsProvider />
         <ActivityTracker />
         <RecoveryRedirect />
+        <TeacherIntentRedirect />
         <ServiceWorkerRegister />
       </body>
     </html>

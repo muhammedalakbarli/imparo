@@ -4,13 +4,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Users, ChevronRight, ArrowLeft, ShieldCheck, Clock, GraduationCap, Video, Eye } from "lucide-react";
+import { Plus, Users, ChevronRight, ArrowLeft, Clock, GraduationCap, Video, Eye } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { useContent } from "@/components/ContentProvider";
 import {
-  teacherClasses, createClass, myTeacherStatus, requestTeacher,
+  teacherClasses, createClass, myTeacherStatus,
   type TeacherClass, type TeacherStatus,
 } from "@/lib/schools";
+import TeacherRequestForm from "@/components/teacher/TeacherRequestForm";
+import { markTeacherAccount } from "@/lib/teacher";
 import { myVideos, type MyVideo } from "@/lib/videos";
 import { PageSkeleton } from "@/components/Skeleton";
 import { gradeLabel } from "@/lib/grade";
@@ -26,8 +28,6 @@ export default function TeacherPage() {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<TeacherStatus | null>(null);
   const [videos, setVideos] = useState<MyVideo[]>([]);
-  const [note, setNote] = useState("");
-  const [requesting, setRequesting] = useState(false);
 
   // Fənlər (sinif üzrə sıralı) — sinif yaradarkən seçim.
   const options = [...subjects].sort((a, b) => a.grade - b.grade);
@@ -37,6 +37,12 @@ export default function TeacherPage() {
       .then(([st, cls]) => {
         setStatus(st);
         setClasses(st.is_teacher ? cls : []);
+        // İlk sinif: yeni müəllim (dəvət/təsdiq məktubundan ?yeni=1 ilə gəlir) və ya
+        // hələ sinfi olmayan müəllim üçün forma dərhal açıq olsun — boş siyahı +
+        // "Yeni sinif" düyməsi axtarmaq əlavə addımdır.
+        if (st.is_teacher && (cls.length === 0 || window.location.search.includes("yeni=1"))) {
+          setCreating(true);
+        }
         // Video siyahısı yalnız təsdiqlənmiş müəllim üçün mənalıdır (RPC də belə yoxlayır).
         if (st.is_teacher) myVideos().then(setVideos);
       })
@@ -45,14 +51,6 @@ export default function TeacherPage() {
   useEffect(() => {
     if (user) refresh();
   }, [user]);
-
-  async function sendRequest() {
-    if (requesting) return;
-    setRequesting(true);
-    await requestTeacher(note.trim()).catch(() => null);
-    await myTeacherStatus().then(setStatus);
-    setRequesting(false);
-  }
 
   async function submit() {
     const subj = options.find((s) => s.slug === subjectSlug) ?? options[0];
@@ -86,38 +84,31 @@ export default function TeacherPage() {
             {rs === "pending" ? (
               <>
                 <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-500/15 px-4 py-1.5 text-sm font-bold text-amber-600">
-                  <Clock size={16} /> Müraciətin baxılır
+                  <Clock size={16} /> Müraciətiniz baxılır
                 </div>
                 <p className="mt-3 text-muted">
-                  Müəllimlik müraciətin admin tərəfindən yoxlanılır. Təsdiqlənəndə sinif yarada biləcəksən.
+                  Təsdiqlənən kimi e-poçtla xəbər verəcəyik — sonra sinif yarada biləcəksiniz.
                 </p>
               </>
             ) : (
               <>
                 <p className="mt-2 text-muted">
-                  Sinif yaratmaq və tapşırıq vermək üçün müəllimlik təsdiqi lazımdır. Hər kəs avtomatik
-                  müəllim ola bilməz — müraciət et, admin təsdiqləsin.
+                  Sinif yaratmaq üçün müəllim hesabı lazımdır. Uşaqların təhlükəsizliyi üçün hesabları əl
+                  ilə təsdiqləyirik — məktəb və fənni yazın, təsdiqlənən kimi e-poçtla xəbər verəcəyik.
                 </p>
                 {rs === "rejected" && (
                   <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-red-500/10 px-4 py-1.5 text-sm font-bold text-red-500">
-                    Əvvəlki müraciətin rədd edildi — yenidən müraciət edə bilərsən
+                    Əvvəlki müraciət təsdiqlənməyib — yenidən göndərə bilərsiniz
                   </div>
                 )}
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Qısa məlumat (məktəb, fənn, niyə müəllim olmaq istəyirsən) — istəyə bağlı"
-                  rows={3}
-                  className="mt-4 w-full rounded-2xl border-2 border-line bg-ink px-4 py-2.5 text-fg outline-none focus:border-brand"
-                />
-                <button
-                  type="button"
-                  onClick={sendRequest}
-                  disabled={requesting}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand py-3 font-extrabold uppercase tracking-wide text-white btn-pop hover:bg-brand-dark disabled:opacity-50"
-                >
-                  <ShieldCheck size={18} /> {requesting ? "Göndərilir…" : "Müəllimlik üçün müraciət et"}
-                </button>
+                <div className="mt-5">
+                  <TeacherRequestForm
+                    onDone={async () => {
+                      await markTeacherAccount();
+                      await myTeacherStatus().then(setStatus);
+                    }}
+                  />
+                </div>
               </>
             )}
           </div>

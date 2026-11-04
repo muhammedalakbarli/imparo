@@ -389,6 +389,10 @@ export interface AdminTeacherRequest {
   name: string;
   status: string;
   note: string | null;
+  school: string | null;
+  subject: string | null;
+  /** "google" → ünvan provayder tərəfindən təsdiqlənib; "email" → sübut olunmayıb */
+  provider: string;
   created_at: string;
 }
 export interface AdminTeacher {
@@ -397,6 +401,45 @@ export interface AdminTeacher {
   name: string;
   approved_at: string;
   classes: number;
+  via: "request" | "invite" | "admin";
+}
+
+// ── Müəllim dəvət linkləri (0063) ──
+export interface AdminTeacherInvite {
+  token: string;
+  email: string | null;
+  note: string | null;
+  max_uses: number;
+  uses: number;
+  expires_at: string;
+  revoked_at: string | null;
+  created_at: string;
+  used_by: string | null;
+}
+export async function adminListTeacherInvites(): Promise<AdminTeacherInvite[]> {
+  try {
+    const { data } = await createClient().rpc("admin_list_teacher_invites");
+    return (data as AdminTeacherInvite[]) ?? [];
+  } catch { return []; }
+}
+export async function adminCreateTeacherInvite(opts: {
+  email?: string;
+  note?: string;
+  maxUses?: number;
+  days?: number;
+}): Promise<{ ok: boolean; token?: string; error?: string }> {
+  const { data, error } = await createClient().rpc("admin_create_teacher_invite", {
+    p_email: opts.email?.trim() || null,
+    p_note: opts.note?.trim() || null,
+    p_max_uses: opts.maxUses ?? 1,
+    p_days: opts.days ?? 14,
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, token: data as string };
+}
+export async function adminRevokeTeacherInvite(token: string): Promise<Res> {
+  const { error } = await createClient().rpc("admin_revoke_teacher_invite", { p_token: token });
+  return { ok: !error, error: error?.message };
 }
 export async function adminListTeacherRequests(): Promise<AdminTeacherRequest[]> {
   try {

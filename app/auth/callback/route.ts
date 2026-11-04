@@ -21,9 +21,13 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      // Müəllim hesabı (bax lib/teacher.ts) adi girişdə şagird panelinə yox,
+      // müəllim panelinə düşür. Yalnız naviqasiyadır — icazəni server yoxlayır.
+      const dest =
+        next === "/dashboard" && data.user?.user_metadata?.role === "teacher" ? "/mekteb/muellim" : next;
+      return NextResponse.redirect(`${origin}${dest}`);
     }
   }
 

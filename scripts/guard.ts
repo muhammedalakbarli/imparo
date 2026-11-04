@@ -118,6 +118,7 @@ const BUDGETS: RouteBudget[] = [
   { route: "auth/signup", skip: "POST — hesab yaradır" },
   { route: "progress", skip: "GET/POST — giriş etmiş sessiya tələb edir" },
   { route: "parent/email", skip: "POST — giriş etmiş sessiya tələb edir" },
+  { route: "teacher/notify", skip: "POST — giriş etmiş sessiya tələb edir, e-poçt göndərir" },
   { route: "parent/verify", skip: "GET — birdəfəlik token tələb edir" },
   { route: "parent/unsubscribe", skip: "GET — birdəfəlik token tələb edir" },
   { route: "tts", skip: "GET — audio qaytarır, xarici servis çağırır" },

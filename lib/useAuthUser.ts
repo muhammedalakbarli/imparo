@@ -6,6 +6,7 @@ import { displayName } from "./auth";
 import { ensureProfile } from "./progress";
 import { createClient } from "./supabase/client";
 import { identifyUser, resetAnalytics, track } from "./analytics";
+import { getTeacherIntent, teacherFlowPath } from "./teacher";
 import type { User } from "@supabase/supabase-js";
 
 /**
@@ -13,6 +14,13 @@ import type { User } from "@supabase/supabase-js";
  * qaytarır. Onboarding-də ilk dərs hesabsız oynanır (Duolingo modeli), ona görə həmin
  * səhifə qapını özü idarə etməlidir. Bütün digər çağırışlar əvvəlki kimi qorunur.
  */
+// Onboarding keçməmiş hesab hara getsin: müəllim axınına başlayıbsa (niyyət var) —
+// müəllim qeydiyyatına, əks halda şagird onboardinginə. Bax lib/teacher.ts.
+function onboardingPath(): string {
+  const intent = getTeacherIntent();
+  return intent ? teacherFlowPath(intent) : "/onboarding";
+}
+
 export function useAuthUser(opts?: { optional?: boolean }): { user: User | null; ready: boolean } {
   const optional = opts?.optional ?? false;
   const router = useRouter();
@@ -31,7 +39,7 @@ export function useAuthUser(opts?: { optional?: boolean }): { user: User | null;
         return;
       }
       if (!optional && !u.user_metadata?.onboarded) {
-        router.replace("/onboarding");
+        router.replace(onboardingPath());
         setReady(true);
         return;
       }
@@ -55,7 +63,7 @@ export function useAuthUser(opts?: { optional?: boolean }): { user: User | null;
         identifyUser(u.id, { grade: u.user_metadata?.grade });
         if (event === "SIGNED_IN") track("session_start");
         if (!optional && !u.user_metadata?.onboarded) {
-          router.replace("/onboarding");
+          router.replace(onboardingPath());
           setReady(true);
           return;
         }

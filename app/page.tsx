@@ -19,6 +19,7 @@ import {
   Smartphone,
   Apple,
   Play,
+  GraduationCap,
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { useContent } from "@/components/ContentProvider";
@@ -229,6 +230,25 @@ export default function LandingPage() {
             <StepCard n={2} tint="from-brand to-brand-dark" title={t("home.how.s2.t")} desc={t("home.how.s2.d")} />
             <StepCard n={3} tint="from-brand to-brand-dark" title={t("home.how.s3.t")} desc={t("home.how.s3.d")} />
           </motion.div>
+        </Reveal>
+
+        {/* ── Müəllimlər üçün — müəllimin sayta yeganə aydın giriş nöqtəsi ── */}
+        <Reveal className="pb-14 sm:pb-20">
+          <div className="flex flex-col items-center gap-5 rounded-3xl border border-line bg-panel p-8 text-center sm:flex-row sm:p-10 sm:text-left">
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+              <GraduationCap size={32} />
+            </span>
+            <div className="flex-1">
+              <h2 className="text-2xl font-extrabold text-fg sm:text-3xl">{t("home.teach.title")}</h2>
+              <p className="mt-2 text-muted">{t("home.teach.body")}</p>
+            </div>
+            <Link
+              href="/muellimler"
+              className="shrink-0 rounded-2xl bg-brand px-6 py-3.5 font-extrabold uppercase tracking-wide text-white btn-pop hover:bg-brand-dark"
+            >
+              {t("home.teach.cta")}
+            </Link>
+          </div>
         </Reveal>
 
       </main>

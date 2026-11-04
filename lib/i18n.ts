@@ -1265,6 +1265,78 @@ const DICT: Dict = {
   "partners.statLessons": { az: "hazır dərs", en: "ready lessons", ru: "готовых уроков" },
   "partners.cta": { az: "Partnyorluq üçün yaz", en: "Write about a partnership", ru: "Написать о партнёрстве" },
 
+  // Müəllimlər üçün (/muellimler) + ana səhifə bölməsi
+  "teachers.title": { az: "Müəllimlər üçün", en: "For teachers", ru: "Для учителей" },
+  "teachers.intro": {
+    az: "Imparo sinifiniz üçün pulsuz köməkçidir: tapşırığı siz verirsiniz, yoxlamanı və təkrarı platforma edir, siz isə hansı şagirdin harada ilişdiyini görürsünüz.",
+    en: "Imparo is a free assistant for your class: you set the work, the platform checks it and schedules review, and you see exactly where each student gets stuck.",
+    ru: "Imparo — бесплатный помощник для вашего класса: задания даёте вы, проверку и повторение берёт на себя платформа, а вы видите, где именно застревает каждый ученик.",
+  },
+  "teachers.getTitle": { az: "Nə əldə edirsiniz", en: "What you get", ru: "Что вы получаете" },
+  "teachers.get1": {
+    az: "Bir dəqiqədə sinif yaradın — şagirdlər 6 simvollu kodla qoşulur.",
+    en: "Create a class in a minute — students join with a 6-character code.",
+    ru: "Создайте класс за минуту — ученики присоединяются по 6-значному коду.",
+  },
+  "teachers.get2": {
+    az: "Kurikuluma uyğun hazır dərslərdən tapşırıq verin — son tarix və minimum balla.",
+    en: "Assign ready-made, curriculum-aligned lessons — with a due date and a minimum score.",
+    ru: "Назначайте готовые уроки по программе — со сроком и минимальным баллом.",
+  },
+  "teachers.get3": {
+    az: "Kim etdi, kim gecikdi — hər şagird üzrə tapşırıq-tapşırıq görün.",
+    en: "See who finished and who is late — assignment by assignment, for every student.",
+    ru: "Кто сделал, кто опоздал — по каждому ученику и каждому заданию.",
+  },
+  "teachers.get4": {
+    az: "Sinfin zəif bacarıqları: ortalama yox, «neçə şagird bu bacarıqda ilişib».",
+    en: "Your class’s weak skills: not an average, but “how many students are stuck on this skill”.",
+    ru: "Слабые навыки класса: не среднее, а «сколько учеников застряли на этом навыке».",
+  },
+  "teachers.get5": {
+    az: "Öz video izahınızı sinfə yükləyin və ya YouTube linki əlavə edin.",
+    en: "Upload your own video explanations to the class or add a YouTube link.",
+    ru: "Загружайте свои видеообъяснения в класс или добавляйте ссылку на YouTube.",
+  },
+  "teachers.howTitle": { az: "Necə başlayır", en: "How to start", ru: "Как начать" },
+  "teachers.how1.t": { az: "Hesab yaradın", en: "Create an account", ru: "Создайте аккаунт" },
+  "teachers.how1.b": {
+    az: "Google ilə bir kliklə. Şagird sualları, sinif seçimi, valideyn nəzarəti — heç biri yoxdur.",
+    en: "One click with Google. No student questions, no grade picker, no parental consent steps.",
+    ru: "Один клик через Google. Никаких вопросов для учеников, выбора класса или согласия родителей.",
+  },
+  "teachers.how2.t": { az: "Qısa müraciət", en: "A short request", ru: "Короткая заявка" },
+  "teachers.how2.b": {
+    az: "Məktəb və fənn — iki sahə. Hesabı əl ilə təsdiqləyirik ki, uşaqların sinfinə yalnız real müəllim girə bilsin; təsdiqlənən kimi e-poçtla xəbər veririk.",
+    en: "School and subject — two fields. We approve accounts by hand so only real teachers can reach children’s classes, and email you the moment you’re approved.",
+    ru: "Школа и предмет — два поля. Мы проверяем аккаунты вручную, чтобы в детские классы попадали только настоящие учителя, и сообщаем по почте сразу после одобрения.",
+  },
+  "teachers.how3.t": { az: "Sinif yaradın", en: "Create your class", ru: "Создайте класс" },
+  "teachers.how3.b": {
+    az: "Kodu şagirdlərlə paylaşın və ilk tapşırığı verin.",
+    en: "Share the code with your students and set the first assignment.",
+    ru: "Поделитесь кодом с учениками и дайте первое задание.",
+  },
+  "teachers.invite": {
+    az: "Dəvət linkiniz var? Sadəcə linki açın — təsdiq gözləmədən dərhal başlayırsınız.",
+    en: "Got an invite link? Just open it — you start right away, no approval wait.",
+    ru: "Есть ссылка-приглашение? Просто откройте её — начнёте сразу, без ожидания одобрения.",
+  },
+  "teachers.free": {
+    az: "Müəllim hesabı pulsuzdur.",
+    en: "Teacher accounts are free.",
+    ru: "Аккаунт учителя бесплатный.",
+  },
+  "teachers.cta": { az: "Müəllim kimi başla", en: "Start as a teacher", ru: "Начать как учитель" },
+  "teachers.ask": { az: "Sualınız var? Yazın", en: "Questions? Write to us", ru: "Есть вопросы? Напишите" },
+  "home.teach.title": { az: "Müəllimsiniz?", en: "Are you a teacher?", ru: "Вы учитель?" },
+  "home.teach.body": {
+    az: "Sinif yaradın, kurikuluma uyğun dərslərdən tapşırıq verin və şagirdlərin hansı bacarıqda ilişdiyini bir ekranda görün. Pulsuzdur.",
+    en: "Create a class, assign curriculum-aligned lessons and see on one screen which skills your students are stuck on. It’s free.",
+    ru: "Создайте класс, назначайте уроки по программе и смотрите на одном экране, на каких навыках застряли ученики. Бесплатно.",
+  },
+  "home.teach.cta": { az: "Müəllimlər üçün", en: "For teachers", ru: "Для учителей" },
+
   "efficacy.title": { az: "Səmərəlilik", en: "Efficacy", ru: "Эффективность" },
   "efficacy.intro": {
     az: "Imparo təsadüfi qurulmayıb — hər elementi öyrənmənin işləməsi üçün düşünülüb. Yanaşmamızın əsasında dayanan üç prinsip:",

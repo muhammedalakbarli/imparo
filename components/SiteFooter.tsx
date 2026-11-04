@@ -26,7 +26,7 @@ export default function SiteFooter() {
       links: [
         { label: "Imparo", href: "/" },
         { label: "Imparo Plus", href: "/plus" },
-        { label: t("ft.school"), href: "/signup" },
+        { label: t("ft.school"), href: "/muellimler" },
         { label: t("ft.shop"), href: "/signup" },
       ],
     },

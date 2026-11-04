@@ -19,6 +19,8 @@ export async function signUpWithEmail(
   password: string,
   guardianConsent: boolean,
   parentEmail?: string,
+  /** Əlavə user_metadata (məs. müəllim qeydiyyatında `role: "teacher"`). */
+  extra?: Record<string, unknown>,
 ): Promise<AuthResult> {
   const supabase = createClient();
 
@@ -49,6 +51,7 @@ export async function signUpWithEmail(
         name,
         guardianConsent,
         ...(parentEmail?.trim() ? { parentEmail: parentEmail.trim() } : {}),
+        ...(extra ?? {}),
       },
     },
   });

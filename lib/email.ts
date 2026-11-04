@@ -17,6 +17,8 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 export const MAIL_FROM = "Imparo <hesabat@mail.imparo.app>";
 export const MAIL_REPLY_TO = "destek@imparo.app";
+/** Admin bildirişləri (yeni müəllim müraciəti və s.). Email Routing ilə admin Gmail-inə gedir. */
+export const ADMIN_NOTIFY_TO = "info@imparo.app";
 
 export interface Mail {
   to: string;

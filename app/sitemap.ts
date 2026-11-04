@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/partnyorlar", priority: 0.6, freq: "monthly" },
     { path: "/investorlar", priority: 0.4, freq: "monthly" },
     { path: "/mekteb", priority: 0.6, freq: "monthly" },
+    { path: "/muellimler", priority: 0.7, freq: "monthly" },
     { path: "/login", priority: 0.5, freq: "monthly" },
     { path: "/signup", priority: 0.7, freq: "monthly" },
     { path: "/sertler", priority: 0.3, freq: "monthly" },

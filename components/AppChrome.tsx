@@ -27,6 +27,8 @@ const BARE_ROUTES = new Set([
   "/investorlar",
   "/partnyorlar",
   "/semerelilik",
+  "/muellimler",
+  "/muellim-ol",
 ]);
 
 const BARE_PREFIXES = ["/lessons/", "/u/", "/dost/", "/hesabat/", "/admin"];

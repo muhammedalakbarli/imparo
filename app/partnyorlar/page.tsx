@@ -124,7 +124,7 @@ export default function PartnersPage() {
           <Mail size={18} /> {t("partners.cta")}
         </a>
         <Link
-          href="/mekteb"
+          href="/muellimler"
           className="inline-flex items-center gap-2 rounded-2xl border-2 border-line px-6 py-3 font-extrabold uppercase tracking-wide text-fg transition-colors hover:border-brand hover:text-brand"
         >
           {t("ft.school")}
