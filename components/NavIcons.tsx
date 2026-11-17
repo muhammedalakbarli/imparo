@@ -1,5 +1,7 @@
 // Naviqasiya üçün xüsusi qrafik ikonlar — uşaqlar üçün rəngli "sticker/app-tile"
 // üslubu (gradient fon + ağ simvol + yumşaq üst işıq). Emoji deyil, əsl SVG illüstrasiya.
+// Hər bölmənin ÖZ rəngi var (hamısı narıncı olanda monoton görünürdü): Öyrən narıncı,
+// Praktika mavi, Liqa qızılı, Hədəflər bənövşəyi, Mağaza zümrüd, Profil firuzəyi.
 // Hər ikon öz-rəngli olduğu üçün ölçüdən başqa prop almır.
 
 type IconProps = { size?: number };
@@ -55,7 +57,7 @@ export function IconLearn({ size }: IconProps) {
 // Praktika — qantel
 export function IconPractice({ size }: IconProps) {
   return (
-    <Tile id="ni-practice" from="#FF9F43" to="#F47B3A" size={size}>
+    <Tile id="ni-practice" from="#5AB8FF" to="#2F7FE0" size={size}>
       <g fill="#fff">
         <rect x="15" y="22" width="18" height="4.5" rx="2.25" />
         <rect x="10.5" y="17" width="5.5" height="14" rx="2.5" />
@@ -70,7 +72,7 @@ export function IconPractice({ size }: IconProps) {
 // Liqa — kubok
 export function IconLeague({ size }: IconProps) {
   return (
-    <Tile id="ni-league" from="#FF9F43" to="#F47B3A" size={size}>
+    <Tile id="ni-league" from="#FFD45C" to="#F0A500" size={size}>
       <g fill="#fff">
         <path d="M18 14h12v6a6 6 0 0 1-12 0z" />
         <path
@@ -97,7 +99,7 @@ export function IconLeague({ size }: IconProps) {
 // Profil — insan
 export function IconProfile({ size }: IconProps) {
   return (
-    <Tile id="ni-profile" from="#FF9F43" to="#F47B3A" size={size}>
+    <Tile id="ni-profile" from="#2DD4BF" to="#0D9488" size={size}>
       <g fill="#fff">
         <circle cx="24" cy="19.5" r="5.5" />
         <path d="M14 33.5a10 10 0 0 1 20 0 1.5 1.5 0 0 1-1.5 1.5h-17a1.5 1.5 0 0 1-1.5-1.5z" />
@@ -109,7 +111,7 @@ export function IconProfile({ size }: IconProps) {
 // Görevlər — nişangah (target)
 export function IconQuests({ size }: IconProps) {
   return (
-    <Tile id="ni-quests" from="#FF9F43" to="#F47B3A" size={size}>
+    <Tile id="ni-quests" from="#B794F6" to="#7C4DFF" size={size}>
       <g fill="none" stroke="#fff" strokeWidth="3.4">
         <circle cx="24" cy="24" r="9.5" />
         <circle cx="24" cy="24" r="4.8" />
@@ -122,7 +124,7 @@ export function IconQuests({ size }: IconProps) {
 // Mağaza — alış-veriş çantası
 export function IconShop({ size }: IconProps) {
   return (
-    <Tile id="ni-shop" from="#FF9F43" to="#F47B3A" size={size}>
+    <Tile id="ni-shop" from="#34D399" to="#059669" size={size}>
       <path
         d="M18.5 19 v-1.2 a5.5 5.5 0 0 1 11 0 V19"
         fill="none"
@@ -141,7 +143,7 @@ export function IconShop({ size }: IconProps) {
 // Daha çoxu — rəngli xanalar
 export function IconMore({ size }: IconProps) {
   return (
-    <Tile id="ni-more" from="#FF9F43" to="#F47B3A" size={size}>
+    <Tile id="ni-more" from="#A8B4C4" to="#6B7A90" size={size}>
       <g fill="#fff">
         <rect x="14.5" y="14.5" width="8" height="8" rx="2.4" />
         <rect x="25.5" y="14.5" width="8" height="8" rx="2.4" />

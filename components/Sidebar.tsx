@@ -47,56 +47,56 @@ const NAV = [
     key: "nav.learn",
     Icon: IconLearn,
     match: ["/dashboard", "/subjects", "/lessons"],
-    activeBg: "bg-brand/12",
-    activeText: "text-brand",
+    activeBg: "bg-orange-500/12",
+    activeText: "text-orange-600",
   },
   {
     href: "/praktika",
     key: "nav.practice",
     Icon: IconPractice,
     match: ["/praktika"],
-    activeBg: "bg-brand/12",
-    activeText: "text-brand",
+    activeBg: "bg-sky-500/12",
+    activeText: "text-sky-600",
   },
   {
     href: "/liqa",
     key: "nav.league",
     Icon: IconLeague,
     match: ["/liqa"],
-    activeBg: "bg-brand/12",
-    activeText: "text-brand",
+    activeBg: "bg-amber-400/18",
+    activeText: "text-amber-600",
   },
   {
     href: "/gorevler",
     key: "nav.quests",
     Icon: IconQuests,
     match: ["/gorevler"],
-    activeBg: "bg-brand/12",
-    activeText: "text-brand",
+    activeBg: "bg-violet-500/12",
+    activeText: "text-violet-600",
   },
   {
     href: "/magaza",
     key: "nav.shop",
     Icon: IconShop,
     match: ["/magaza"],
-    activeBg: "bg-brand/12",
-    activeText: "text-brand",
+    activeBg: "bg-emerald-500/12",
+    activeText: "text-emerald-600",
   },
   {
     href: "/profil",
     key: "nav.profile",
     Icon: IconProfile,
     match: ["/profil"],
-    activeBg: "bg-brand/12",
-    activeText: "text-brand",
+    activeBg: "bg-teal-500/12",
+    activeText: "text-teal-600",
   },
   {
     href: "/daha",
     key: "nav.more",
     Icon: IconMore,
     match: ["/daha"],
-    activeBg: "bg-brand/12",
-    activeText: "text-brand",
+    activeBg: "bg-slate-500/10",
+    activeText: "text-slate-600",
   },
 ];
 
@@ -154,11 +154,15 @@ export default function Sidebar() {
           {NAV.map(({ href, key, Icon, match, activeBg, activeText }) => {
             const label = t(key);
             const on = isActive(match);
-            const cls = `flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-extrabold transition ${
+            const cls = `group/nav flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-extrabold transition ${
               on ? `${activeBg} ${activeText}` : "text-muted hover:bg-panel-2 hover:text-fg"
             }`;
+            // Aktiv olmayan bəndin ikonu bir az sakit (rəngi saxlanır, doyğunluq azalır),
+            // üzərinə gələndə tam rəngə qayıdır — aktiv bənd gözə dərhal çarpsın.
             const iconEl = (
-              <span className="relative">
+              <span
+                className={`relative transition ${on ? "" : "opacity-85 saturate-[0.8] group-hover/nav:opacity-100 group-hover/nav:saturate-100"}`}
+              >
                 <Icon size={28} />
               </span>
             );

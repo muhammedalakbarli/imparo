@@ -9,6 +9,8 @@ interface Props {
   size?: number;
   stroke?: number;
   label?: string;
+  /** Rəngli fon üzərində (məs. narıncı banner): ağ halqa və ağ, kiçik rəqəm. */
+  onColor?: boolean;
 }
 
 export default function RadialProgress({
@@ -16,6 +18,7 @@ export default function RadialProgress({
   size = 120,
   stroke = 10,
   label,
+  onColor = false,
 }: Props) {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -34,7 +37,7 @@ export default function RadialProgress({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e5e2f4"
+          stroke={onColor ? "rgba(255,255,255,0.3)" : "#e5e2f4"}
           strokeWidth={stroke}
         />
         <circle
@@ -42,7 +45,7 @@ export default function RadialProgress({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#5b4bf5"
+          stroke={onColor ? "#ffffff" : "#5b4bf5"}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -51,7 +54,13 @@ export default function RadialProgress({
         />
       </svg>
       <div className="absolute flex flex-col items-center leading-none">
-        <span className="text-2xl font-bold text-fg">{shown}%</span>
+        {/* Rəqəm halqanın içinə sığmalıdır: kiçik halqada şrift də kiçilir. */}
+        <span
+          className={`font-bold ${onColor ? "text-white" : "text-fg"}`}
+          style={{ fontSize: Math.max(12, Math.round(size * (onColor ? 0.24 : 0.2))) }}
+        >
+          {shown}%
+        </span>
         {label && <span className="mt-1 text-xs text-muted">{label}</span>}
       </div>
     </div>

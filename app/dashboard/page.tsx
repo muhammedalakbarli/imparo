@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Flame, Shield, Heart, Gem, Gift, Trophy, ChevronRight, ChevronDown, Crown } from "lucide-react";
+import { Flame, Shield, Heart, Gem, Gift, Trophy, ChevronRight, ChevronDown, Crown, Target, Zap, CircleCheck, Check } from "lucide-react";
 import { useContent } from "@/components/ContentProvider";
 import { loadProgress, loadActiveDays, lessonState, type ProgressState } from "@/lib/progress";
 import { getFriends } from "@/lib/friends";
@@ -13,7 +13,7 @@ import { loadHearts, MAX_HEARTS } from "@/lib/hearts";
 import { loadPlus } from "@/lib/plus";
 import StreakPopover from "@/components/StreakPopover";
 import { useAuthUser } from "@/lib/useAuthUser";
-import { userGrade, subjectsForGrade, gradeOrdinal } from "@/lib/grade";
+import { userGrade, subjectsForGrade, gradeOrdinal, gradeLabel } from "@/lib/grade";
 import { track } from "@/lib/analytics";
 import { useT } from "@/lib/i18n";
 import {
@@ -31,7 +31,15 @@ import RadialProgress from "@/components/RadialProgress";
 import LearningPath, { type PathNode } from "@/components/LearningPath";
 import { PageSkeleton } from "@/components/Skeleton";
 import Mascot from "@/components/Mascot";
+import SubjectBadge from "@/components/SubjectBadge";
 import type { Subject } from "@/lib/types";
+
+// Gündəlik hədəfin növünə görə ikon və rəng (sağ panel).
+const QUEST_KIND: Record<string, { Icon: typeof Target; tile: string }> = {
+  lessons: { Icon: Target, tile: "bg-violet-500/12 text-violet-600" },
+  xp: { Icon: Zap, tile: "bg-amber-400/18 text-amber-600" },
+  correct: { Icon: CircleCheck, tile: "bg-emerald-500/12 text-emerald-600" },
+};
 
 export default function DashboardPage() {
   const { user, ready } = useAuthUser();
@@ -171,7 +179,7 @@ export default function DashboardPage() {
           <div className="min-w-0">
             {/* Bölmə başlığı (Duolingo banner üslubu) */}
             <div className="mt-4 flex items-center gap-4 rounded-2xl bg-gradient-to-r from-brand to-brand-dark p-5 text-white shadow-lg">
-              <RadialProgress value={scorePct} size={64} stroke={6} />
+              <RadialProgress value={scorePct} size={64} stroke={6} onColor />
               <div className="min-w-0 flex-1">
                 <h2 className="truncate text-lg font-extrabold">{t(`subject.${active.slug}`)}</h2>
                 <p className="truncate text-sm text-white/80">
@@ -181,7 +189,7 @@ export default function DashboardPage() {
               {currentLesson && (
                 <Link
                   href={`/lessons/${currentLesson.id}`}
-                  className="shrink-0 rounded-2xl bg-white px-5 py-2.5 text-sm font-extrabold uppercase tracking-wide text-brand btn-pop [--pop:#c9c2f5] hover:bg-white/90"
+                  className="shrink-0 rounded-2xl bg-white px-5 py-2.5 text-sm font-extrabold uppercase tracking-wide text-brand btn-pop [--pop:#f6c9a3] hover:bg-white/90"
                 >
                   {t("dash.resume")}
                 </Link>
@@ -225,7 +233,7 @@ export default function DashboardPage() {
 
             <Link
               href="/liqa"
-              className="flex items-center gap-3 rounded-2xl border border-line bg-panel p-5 transition hover:bg-panel-2"
+              className="flex items-center gap-3 rounded-2xl border border-line bg-card p-5 shadow-sm transition hover:bg-panel"
             >
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-sm">
                 <Trophy size={22} />
@@ -238,29 +246,44 @@ export default function DashboardPage() {
             </Link>
 
             {quests && (
-              <div className="rounded-2xl border border-line bg-panel p-5">
+              <div className="rounded-2xl border border-line bg-card p-5 shadow-sm">
                 <div className="mb-3 text-sm font-extrabold text-fg">{t("quest.title")}</div>
                 <div className="space-y-3">
                   {todaysQuests(quests.date).map((q) => {
                     const val = questValue(quests, q.kind);
                     const done = isQuestDone(quests, q);
                     const label = t(q.labelKey).replace("{n}", String(q.goal));
+                    const k = QUEST_KIND[q.kind] ?? QUEST_KIND.xp;
                     return (
-                      <div key={q.id}>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className={done ? "font-bold text-emerald-600" : "font-semibold text-fg"}>
-                            {label}
-                          </span>
-                          <span className="text-xs text-muted">
-                            {Math.min(val, q.goal)}/{q.goal}
-                          </span>
+                      <div key={q.id} className="flex items-center gap-3">
+                        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${k.tile}`}>
+                          <k.Icon size={18} strokeWidth={2.6} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2 text-sm">
+                            <span className={`truncate ${done ? "font-bold text-emerald-600" : "font-semibold text-fg"}`}>
+                              {label}
+                            </span>
+                            <span className="shrink-0 text-xs text-muted">
+                              {Math.min(val, q.goal)}/{q.goal}
+                            </span>
+                          </div>
+                          <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-panel-2">
+                            <div
+                              className={`h-full rounded-full transition-all ${done ? "bg-emerald-500" : "bg-brand"}`}
+                              style={{ width: `${Math.min((val / q.goal) * 100, 100)}%` }}
+                            />
+                          </div>
                         </div>
-                        <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-panel-2">
-                          <div
-                            className={`h-full rounded-full transition-all ${done ? "bg-emerald-500" : "bg-brand"}`}
-                            style={{ width: `${Math.min((val / q.goal) * 100, 100)}%` }}
-                          />
-                        </div>
+                        {/* Mükafat — real olanı göstərilir: hədəf XP verir (zümrüd sandıqdan gəlir). */}
+                        <span
+                          className={`flex shrink-0 items-center gap-0.5 rounded-full px-2 py-1 text-[11px] font-extrabold ${
+                            done ? "bg-emerald-500/12 text-emerald-600" : "bg-amber-400/15 text-amber-600"
+                          }`}
+                          title={`Mükafat: +${q.rewardXp} XP`}
+                        >
+                          {done ? <Check size={12} strokeWidth={3} /> : <Zap size={12} fill="currentColor" strokeWidth={0} />}+{q.rewardXp}
+                        </span>
                       </div>
                     );
                   })}
@@ -325,16 +348,18 @@ function SubjectSwitcher({
 
   return (
     <div className="relative">
-      {/* Cari fənn — trigger */}
-      {/* Trigger — yalnız fənnin şəkli (ikonu) + ox; ad açılan bardadır */}
+      {/* Trigger — fənnin ikonu + tam adı + sinfi. Əvvəl yalnız "R" hərfi idi:
+          uşaq hansı fənndə olduğunu və onun dəyişdirilə biləcəyini anlamırdı. */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label={t(`subject.${active.slug}`)}
-        className="flex items-center gap-1 rounded-2xl border-2 border-line bg-panel p-1.5 pr-2 transition hover:border-brand"
+        aria-expanded={open}
+        className="flex min-w-0 items-center gap-2.5 rounded-2xl border-2 border-line bg-card p-1.5 pr-3 shadow-sm transition hover:border-brand"
       >
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-xl font-bold text-white">
-          {active.icon}
+        <SubjectBadge slug={active.slug} fallback={active.icon} size={40} />
+        <span className="min-w-0 truncate text-left text-sm font-extrabold text-fg">
+          {t(`subject.${active.slug}`)}
+          <span className="hidden font-semibold text-muted sm:inline"> · {gradeLabel(active.grade)}</span>
         </span>
         <ChevronDown
           size={18}
@@ -363,13 +388,11 @@ function SubjectSwitcher({
                     className="flex w-20 shrink-0 flex-col items-center gap-1.5 lg:w-full lg:flex-row lg:items-center lg:gap-3 lg:rounded-xl lg:px-2 lg:py-1.5 lg:transition lg:hover:bg-panel-2"
                   >
                     <span
-                      className={`flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold transition lg:h-11 lg:w-11 lg:text-lg ${
-                        on
-                          ? "bg-brand text-white ring-2 ring-brand ring-offset-2 ring-offset-panel lg:ring-0 lg:ring-offset-0"
-                          : "bg-brand/10 text-brand hover:bg-brand/20"
+                      className={`rounded-2xl transition ${
+                        on ? "ring-2 ring-brand ring-offset-2 ring-offset-panel lg:ring-0 lg:ring-offset-0" : ""
                       }`}
                     >
-                      {s.icon}
+                      <SubjectBadge slug={s.slug} fallback={s.icon} size={44} muted={!on} />
                     </span>
                     <span
                       className={`text-center text-xs leading-tight lg:flex-1 lg:text-left lg:text-sm ${
@@ -433,13 +456,10 @@ function StatMini({
 function DashboardFooter() {
   const t = useT();
   const links: { label: string; href: string }[] = [
+    // Şagird panelində korporativ linklər (İnvestorlar, Karyera...) yersizdir —
+    // onlar ictimai saytın footer-indədir (components/SiteFooter.tsx).
     { label: t("ft.about"), href: "/haqqimizda" },
-    { label: t("ft.blog"), href: "/blog" },
-    { label: t("ft.shop"), href: "/magaza" },
-    { label: t("ft.efficacy"), href: "/semerelilik" },
-    { label: t("ft.careers"), href: "/karyera" },
-    { label: t("ft.partners"), href: "/partnyorlar" },
-    { label: t("ft.investors"), href: "/investorlar" },
+    { label: t("ft.help"), href: "/yardim" },
     { label: t("ft.terms"), href: "/sertler" },
     { label: t("ft.privacy"), href: "/mexfilik" },
   ];

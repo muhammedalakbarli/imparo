@@ -15,6 +15,7 @@
   --color-ink: #fff4df; /* səhifə fonu — Vanilla Cream */
   --color-panel: #fffaf0; /* kartlar (isti ağ) */
   --color-panel-2: #fdecd0; /* iç panellər (isti krem) */
+  --color-card: #ffffff; /* fondan seçilən ağ kart (sağ panel) */
   --color-line: #f0ddbf; /* kənarlar (isti) */
   --color-muted: #8a7461; /* ikinci dərəcəli mətn (isti qəhvəyi) */
   --color-fg: #3b2723; /* əsas mətn — Cocoa */
@@ -43,6 +44,7 @@ html.dark {
   --color-ink: #241813; /* səhifə fonu — tünd cocoa */
   --color-panel: #31201a; /* kartlar */
   --color-panel-2: #3e2a22; /* iç panellər */
+  --color-card: #3a261f; /* fondan seçilən kart */
   --color-line: #4a3328; /* kənarlar */
   --color-muted: #b89e8e; /* ikinci dərəcəli mətn */
   --color-fg: #fff4df; /* əsas mətn — cream */
@@ -470,6 +472,7 @@ h1, h2, h3 {
   --color-ink: #fff4df;
   --color-panel: #fffaf0;
   --color-panel-2: #fdecd0;
+  --color-card: #ffffff;
   --color-line: #f0ddbf;
   --color-muted: #8a7461;
   --color-fg: #3b2723;

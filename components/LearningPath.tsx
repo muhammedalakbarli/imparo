@@ -1,12 +1,13 @@
 "use client";
 
-// "Imparo" öyrənmə xəritəsi — Duolingo-üslubu tək sütunlu zigzag yol.
-// Qalın 3D düyünlər (altında dərinlik kölgəsi), düyünlər arası xətt YOX (Duolingo kimi),
-// cari düyün qızılı + "BAŞLA" balonu + halo, kiliddə düyün toxunanda titrəyir. Hər bölmə
-// başında rəngli banner. Zefi yolun yanında platformada. Reduced-motion/.no-anim tabedir.
+// "Imparo" öyrənmə xəritəsi — tək sütunlu zigzag yol.
+// Mat 3D düyünlər (altında dərinlik kölgəsi), düyünləri birləşdirən yumşaq əyrili cığır
+// (keçilmiş hissə yaşıl, qalanı krem), cari düyün qızılı + "BAŞLA" balonu + halo, kiliddə
+// düyün toxunanda titrəyir. Sandıq qızılı mükafat qutusudur. Hər bölmə başında ağ başlıq
+// kartı. Zefi yolun yanında. Reduced-motion/.no-anim tabedir.
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Star, Check, Lock, Flag, Trophy, Sparkles, Gift } from "lucide-react";
 import ZefiMascot, { type ZefiEmotion, type CharacterName } from "@/components/ZefiMascot";
@@ -30,14 +31,16 @@ export interface PathNode {
   unitGoal?: string;
 }
 
-// Sabit en; zigzag amplitudası (Duolingo kimi orta).
-const LANE = 300;
+// Zigzag amplitudası (Duolingo kimi orta).
 const AMPLITUDE = 78;
 const offsetAt = (i: number) => Math.round(Math.sin(i * 0.9) * AMPLITUDE);
 
-// Bölmələr üçün növbələşən rəng temaları.
-// Vahid palitra: indiqo (brend) və amber növbələşir — göy qurşağı yox.
-const UNIT_THEMES = ["from-brand to-brand-dark", "from-amber-500 to-orange-500"];
+// Bölmə başlığının növbələşən vurğu rəngləri. Fon AĞDIR: əvvəl narıncı gradient idi və
+// səhifənin yuxarısındakı narıncı "davam et" bloku ilə iki eyni blok kimi görünürdü.
+const UNIT_THEMES = [
+  { tile: "bg-brand text-white", label: "text-brand", border: "border-brand/25" },
+  { tile: "bg-amber-500 text-white", label: "text-amber-600", border: "border-amber-400/40" },
+];
 
 // Düyünün 3D rəngləri (üz + alt dərinlik kölgəsi).
 const NODE_STYLE: Record<NodeState, { bg: string; depth: string; text: string }> = {
@@ -46,10 +49,17 @@ const NODE_STYLE: Record<NodeState, { bg: string; depth: string; text: string }>
   locked: { bg: "var(--color-panel-2)", depth: "var(--color-line)", text: "var(--color-muted)" },
 };
 
-// Sandıq və bölmə-sonu-test düyünləri adi dərsdən vizual olaraq fərqlənir.
-const SPECIAL_STYLE: Record<"chest" | "test", { bg: string; depth: string }> = {
-  chest: { bg: "#a855f7", depth: "#7e22ce" }, // bənövşəyi — mükafat
-  test: { bg: "#0ea5e9", depth: "#0369a1" }, // mavi — yoxlama
+// Bölmə-sonu-test düyünü adi dərsdən fərqlənir (mavi — yoxlama).
+const SPECIAL_STYLE: Record<"test", { bg: string; depth: string }> = {
+  test: { bg: "#0ea5e9", depth: "#0369a1" },
+};
+
+// Sandıq HƏR vəziyyətdə qızılı/kəhrəba mükafat qutusudur (əvvəl keçiləndən sonra adi
+// yaşıl dərs dairəsi kimi görünürdü). Forması da fərqlidir: yumru kvadrat.
+const CHEST_STYLE: Record<NodeState, { bg: string; depth: string; text: string }> = {
+  done: { bg: "#f59e0b", depth: "#b45309", text: "#fff" },
+  current: { bg: "#fbbf24", depth: "#d97706", text: "#fff" },
+  locked: { bg: "#f6e3bf", depth: "#e3c58f", text: "#b8873b" },
 };
 
 // Bölmə banneri — rəngli gradient, ikon + başlıq; keçilmişsə kubok. Görünəndə səs.
@@ -73,75 +83,76 @@ function UnitBanner({
       transition={{ type: "spring", stiffness: 240, damping: 22 }}
       className="relative z-10 my-4 w-full"
     >
-      <div
-        className={`flex items-center gap-3 rounded-2xl bg-gradient-to-r ${theme} px-4 py-3 shadow-lg`}
-      >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/25 text-white">
+      <div className={`flex items-center gap-3 rounded-2xl border-2 ${theme.border} bg-card px-4 py-3 shadow-sm`}>
+        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${theme.tile}`}>
           <Flag size={18} strokeWidth={2.6} />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">
+          <div className={`text-[10px] font-extrabold uppercase tracking-wider ${theme.label}`}>
             Bölmə {index + 1}
           </div>
-          <div className="truncate text-sm font-extrabold leading-tight text-white">
-            {title}
-          </div>
+          <div className="truncate text-sm font-extrabold leading-tight text-fg">{title}</div>
           {goal && (
             // Qəsdən `truncate` YOXDUR: məqsəd cümləsi kəsilsə mənasını itirir,
             // başlıqdan fərqli olaraq burada iki sətir qalması normaldır.
-            <div className="mt-0.5 text-xs font-semibold leading-snug text-white/85">
-              {goal}
-            </div>
+            <div className="mt-0.5 text-xs font-semibold leading-snug text-muted">{goal}</div>
           )}
         </div>
-        {reached && <Trophy size={18} className="shrink-0 text-white/90" />}
+        {reached && <Trophy size={18} className={`shrink-0 ${theme.label}`} />}
       </div>
     </motion.div>
   );
 }
 
-function NodeButton({ node }: { node: PathNode }) {
+function NodeButton({ node, circleRef }: { node: PathNode; circleRef?: (el: HTMLDivElement | null) => void }) {
   const t = useT();
   const [shake, setShake] = useState(false);
   const isDone = node.state === "done";
   const isCurrent = node.state === "current";
   const isLocked = node.state === "locked";
   const kind = node.kind ?? "lesson";
-  // Sandıq/test öz ikonunu saxlayır (kilidli olanda kilid göstərilir ki, əlçatmazlıq aydın olsun).
-  const Icon = isLocked
-    ? Lock
-    : kind === "chest"
+  // Sandıq kilidli olanda da hədiyyə ikonunu saxlayır (solğun rəng əlçatmazlığı bildirir) —
+  // uşaq irəlidə mükafat olduğunu görsün. Test kilidlidə kilid göstərir.
+  const Icon =
+    kind === "chest"
       ? Gift
-      : kind === "test"
-        ? Trophy
-        : isDone
-          ? Check
-          : Star;
+      : isLocked
+        ? Lock
+        : kind === "test"
+          ? Trophy
+          : isDone
+            ? Check
+            : Star;
   const base = NODE_STYLE[node.state];
-  // Xüsusi düyünlər açıq olanda öz rəngindədir; kilidli/bitmiş halda ümumi sxem qalır.
   const s =
-    kind !== "lesson" && isCurrent
-      ? { ...SPECIAL_STYLE[kind], text: "#fff" }
-      : base;
+    kind === "chest"
+      ? CHEST_STYLE[node.state]
+      : kind === "test" && isCurrent
+        ? { ...SPECIAL_STYLE.test, text: "#fff" }
+        : base;
 
+  // Mat 3D düymə: düz üz + aşağıda dərinlik + üzün alt kənarında incə daxili kölgə.
+  // Köhnə ağ "şüşə parıltısı" (glossy) qəsdən çıxarılıb — köhnəlmiş görünürdü.
   const inner = (
     <motion.div
+      ref={circleRef}
       whileTap={!isLocked ? { y: 5, boxShadow: `0 1px 0 0 ${s.depth}` } : undefined}
       whileHover={!isLocked ? { y: -2 } : undefined}
       transition={{ type: "spring", stiffness: 500, damping: 20 }}
-      className={`relative z-10 flex h-[82px] w-[82px] items-center justify-center rounded-full ${
-        isCurrent ? "node-bob" : ""
-      }`}
-      style={{ background: s.bg, color: s.text, boxShadow: `0 7px 0 0 ${s.depth}` }}
+      className={`relative z-10 flex h-[82px] w-[82px] items-center justify-center ${
+        kind === "chest" ? "rounded-[26px]" : "rounded-full"
+      } ${isCurrent ? "node-bob" : ""}`}
+      style={{
+        background: s.bg,
+        color: s.text,
+        boxShadow: `0 7px 0 0 ${s.depth}, inset 0 -5px 0 0 rgba(0,0,0,0.07)`,
+      }}
     >
-      {/* Parlaq üst işıq (glossy) */}
-      {!isLocked && (
-        <span
-          className="pointer-events-none absolute inset-x-4 top-2.5 h-4 rounded-full bg-white/35 blur-[2px]"
-          aria-hidden
-        />
-      )}
-      <Icon size={36} strokeWidth={3.2} {...(isCurrent || isDone ? { fill: "currentColor" } : {})} />
+      <Icon
+        size={kind === "chest" ? 38 : 36}
+        strokeWidth={3.2}
+        {...((isCurrent || isDone) && kind !== "chest" ? { fill: "currentColor" } : {})}
+      />
 
       {/* Cari düyünün yanında oynayan qığılcımlar */}
       {isCurrent && (
@@ -236,8 +247,10 @@ function NodeShell({
 
 function NodeLabel({ node }: { node: PathNode }) {
   return (
+    // Fon (səhifə rəngində) QƏSDƏNDİR: düyünləri birləşdirən cığır adın altından keçir,
+    // fonsuz yazı xəttin üstündə oxunmurdu.
     <span
-      className={`mt-3 max-w-[130px] text-center text-xs leading-tight ${
+      className={`relative z-10 mt-2.5 max-w-[140px] rounded-lg bg-ink/90 px-1.5 py-0.5 text-center text-xs leading-tight ${
         node.state === "locked" ? "text-muted" : "font-semibold text-fg"
       }`}
     >
@@ -296,7 +309,13 @@ function MascotPerch({ perch }: { perch: Perch }) {
           <ZefiMascot character={perch.name} size={MASCOT_SIZE} />
         )}
       </span>
-      <span className="relative z-10 mt-1 h-3 w-20 rounded-[50%] bg-black/25 blur-[3px]" aria-hidden />
+      {/* Kölgə ayaqların altında (şəklin aşağı şəffaf boşluğu qədər yuxarı çəkilib) və isti
+          tonda — əvvəl ayaqdan aralı tünd boz ləkə kimi görünürdü. */}
+      <span
+        className="relative z-0 -mt-9 h-3 w-16 rounded-[50%] blur-[4px]"
+        style={{ background: "rgba(160, 100, 50, 0.15)" }}
+        aria-hidden
+      />
     </div>
   );
 }
@@ -327,7 +346,68 @@ function Decor() {
   );
 }
 
+// Server-də useLayoutEffect xəbərdarlıq verir; brauzerdə ölçmə rəsmdən ƏVVƏL olsun
+// ki, cığır gec "peyda olmasın".
+const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+const PATH_DONE = "#a7e3bd"; // keçilmiş hissə — yumşaq yaşıl (düyünlərin yaşılına uyğun)
+const PATH_TODO = "var(--color-line)"; // qalan hissə — isti krem
+
+interface Segment {
+  d: string;
+  done: boolean;
+}
+
 export default function LearningPath({ nodes }: { nodes: PathNode[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const circles = useRef<(HTMLDivElement | null)[]>([]);
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const [box, setBox] = useState({ w: 0, h: 0 });
+
+  // Düyünləri birləşdirən cığır. Mərkəzlər LAYOUT mövqeyindən (offsetTop) hesablanır,
+  // getBoundingClientRect-dən YOX: sətirlər görünəndə framer ilə aşağıdan sürüşür
+  // (transform) və ölçü animasiya ortasında götürülsə cığır düyünlərdən qopardı.
+  // Üfüqi mövqe isə onsuz da bilinir — zigzag `offsetAt(i)`-dir.
+  useIsoLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const measure = () => {
+      const cx = el.clientWidth / 2;
+      const pts = nodes.map((_, i) => {
+        const c = circles.current[i];
+        if (!c) return null;
+        let y = 0;
+        let n: HTMLElement | null = c;
+        while (n && n !== el) {
+          y += n.offsetTop;
+          n = n.offsetParent as HTMLElement | null;
+        }
+        if (n !== el) return null;
+        return { x: cx + offsetAt(i), y: y + c.offsetHeight / 2 };
+      });
+      const segs: Segment[] = [];
+      for (let i = 1; i < nodes.length; i++) {
+        // Bölmə sərhədində cığır kəsilir — başlıq kartının arxasından keçməsin.
+        if (nodes[i].unitTitle) continue;
+        const a = pts[i - 1];
+        const b = pts[i];
+        if (!a || !b) continue;
+        const my = (a.y + b.y) / 2;
+        segs.push({
+          d: `M${a.x},${a.y} C${a.x},${my} ${b.x},${my} ${b.x},${b.y}`,
+          done: nodes[i].state !== "locked",
+        });
+      }
+      setSegments(segs);
+      setBox({ w: el.clientWidth, h: el.scrollHeight });
+    };
+    measure();
+    // Şriftlər yüklənəndə, pəncərə dəyişəndə və s. hündürlük dəyişir — yenidən ölç.
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [nodes]);
+
   const rows: React.ReactNode[] = [];
   let unitIndex = -1;
 
@@ -379,18 +459,41 @@ export default function LearningPath({ nodes }: { nodes: PathNode[] }) {
               <MascotPerch perch={perch} />
             </div>
           )}
-          <NodeButton node={node} />
+          <NodeButton
+            node={node}
+            circleRef={(el) => {
+              circles.current[i] = el;
+            }}
+          />
         </div>
       </motion.div>,
     );
   });
 
+  // Konteyner mərkəzi sütunun TAM enindədir: bölmə başlığı yuxarıdakı blokla eyni endə
+  // olsun (əvvəl 300px idi və dar görünürdü). Düyünlər yenə mərkəz ətrafında zigzag edir.
   return (
-    <div
-      className="relative mx-auto flex flex-col items-center py-2"
-      style={{ width: LANE, maxWidth: "100%" }}
-    >
+    <div ref={containerRef} className="relative mx-auto flex w-full flex-col items-center py-2">
       <Decor />
+      {box.w > 0 && (
+        <svg
+          className="pointer-events-none absolute left-0 top-0 z-0"
+          width={box.w}
+          height={box.h}
+          aria-hidden
+        >
+          {segments.map((sg, i) => (
+            <path
+              key={i}
+              d={sg.d}
+              fill="none"
+              stroke={sg.done ? PATH_DONE : PATH_TODO}
+              strokeWidth={12}
+              strokeLinecap="round"
+            />
+          ))}
+        </svg>
+      )}
       {rows}
     </div>
   );

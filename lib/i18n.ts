@@ -22,7 +22,7 @@ const DICT: Dict = {
   "nav.learn": { az: "Öyrən", en: "Learn", ru: "Учёба" },
   "nav.practice": { az: "Praktika et", en: "Practice", ru: "Практика" },
   "nav.league": { az: "Liqa", en: "League", ru: "Лига" },
-  "nav.quests": { az: "Görevlər", en: "Quests", ru: "Задания" },
+  "nav.quests": { az: "Hədəflər", en: "Goals", ru: "Цели" },
   "nav.shop": { az: "Mağaza", en: "Shop", ru: "Магазин" },
   "nav.schools": { az: "Məktəb", en: "Schools", ru: "Школа" },
   "nav.profile": { az: "Profil", en: "Profile", ru: "Профиль" },
@@ -261,7 +261,7 @@ const DICT: Dict = {
   "chest.wonHearts": { az: "Canlar doldu!", en: "Hearts refilled!", ru: "Жизни восстановлены!" },
   "chest.wonFreeze": { az: "Seriya qoruyucu!", en: "Streak freeze!", ru: "Заморозка серии!" },
   "chest.ready": {
-    az: "Bütün gündəlik görevləri bitirdin! Sandığı aç.",
+    az: "Bütün gündəlik hədəfləri bitirdin! Sandığı aç.",
     en: "You finished all daily goals! Open the chest.",
     ru: "Ты выполнил все дневные цели! Открой сундук.",
   },
