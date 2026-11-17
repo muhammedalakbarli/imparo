@@ -6,7 +6,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Check } from "lucide-react";
+import { Eye, EyeOff, Check, KeyRound } from "lucide-react";
 import { signInWithEmail, getCurrentUser } from "@/lib/auth";
 import { postLoginPath } from "@/lib/teacher";
 import { fillStats } from "@/lib/siteStats";
@@ -184,6 +184,14 @@ export default function LoginPage() {
               )}
             </button>
           </div>
+
+          {/* E-poçtu olmayan şagird (1–4-cü siniflər) — müəllimin verdiyi kodla */}
+          <Link
+            href="/sinif"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white py-3 font-bold text-slate-700 transition hover:border-brand hover:text-brand"
+          >
+            <KeyRound size={18} /> {t("auth.login.classCode")}
+          </Link>
 
           <p className="mt-8 text-center text-sm text-slate-600">
             {t("auth.login.noAccount")}{" "}

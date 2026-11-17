@@ -160,3 +160,48 @@ export interface StudentDetail {
 }
 export const classStudentDetail = (classId: string, uid: string) =>
   rpc<StudentDetail | null>("class_student_detail", { p_class_id: classId, p_uid: uid }).catch(() => null);
+
+// ── E-poçtsuz şagird hesabları (0065) ──────────────────────────────────────────
+export interface ManagedStudent {
+  user_id: string;
+  full_name: string;
+  ref: string;
+  pin: string;
+  last_login_at: string | null;
+  locked_until: string | null;
+  created_at: string;
+}
+export const classManagedStudents = (classId: string) =>
+  rpc<ManagedStudent[]>("class_managed_students", { p_class_id: classId }).catch(() => [] as ManagedStudent[]);
+export const resetStudentPin = (userId: string) => rpc<string>("reset_student_pin", { p_user_id: userId });
+export const deleteManagedStudent = (userId: string) => rpc<null>("delete_managed_student", { p_user_id: userId });
+
+/**
+ * Adları hissələrlə serverə göndərir (bir sorğuda ən çox STUDENT_CHUNK — Worker
+ * alt-sorğu limiti). Hər hissədən sonra irəliləyiş bildirilir.
+ */
+export async function createManagedStudents(
+  classId: string,
+  names: string[],
+  onProgress?: (done: number, total: number) => void,
+): Promise<{ created: number; failed: string[]; error?: string }> {
+  const { STUDENT_CHUNK } = await import("./managedStudents");
+  let created = 0;
+  const failed: string[] = [];
+  for (let i = 0; i < names.length; i += STUDENT_CHUNK) {
+    const chunk = names.slice(i, i + STUDENT_CHUNK);
+    const r = await fetch("/api/mekteb/students", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ classId, names: chunk }),
+    }).catch(() => null);
+    const j = (await r?.json().catch(() => null)) as { created?: unknown[]; failed?: string[]; error?: string } | null;
+    if (!r || !r.ok || !j) {
+      return { created, failed: [...failed, ...names.slice(i)], error: j?.error ?? "Bağlantı xətası" };
+    }
+    created += j.created?.length ?? 0;
+    failed.push(...(j.failed ?? []));
+    onProgress?.(Math.min(i + chunk.length, names.length), names.length);
+  }
+  return { created, failed };
+}

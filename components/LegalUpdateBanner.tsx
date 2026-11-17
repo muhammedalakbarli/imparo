@@ -44,7 +44,8 @@ export default function LegalUpdateBanner() {
   };
 
   return (
-    <div className="relative z-40 border-b border-line bg-panel-2 px-4 py-2.5 text-center text-sm text-fg">
+    // print:hidden — çap olunan sənədlərə (məs. şagird giriş kartları) düşməsin.
+    <div className="relative z-40 border-b border-line bg-panel-2 px-4 py-2.5 text-center text-sm text-fg print:hidden">
       <FileText size={15} className="mr-1.5 inline-block align-[-2px] text-brand" />
       <span>{t("legal.notice.body")} </span>
       <Link href="/sertler" className="font-bold text-brand underline underline-offset-2">

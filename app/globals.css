@@ -602,3 +602,15 @@ html.dark .admin-theme {
   background: color-mix(in srgb, var(--color-panel) 82%, transparent);
   backdrop-filter: saturate(1.6) blur(10px);
 }
+
+/* Sinif girişi: səhv PIN-də nöqtələr titrəyir */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-10px); }
+  40%, 80% { transform: translateX(10px); }
+}
+
+/* Şagird giriş kartları (çap) */
+@media print {
+  @page { size: A4; margin: 10mm; }
+}

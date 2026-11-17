@@ -810,6 +810,11 @@ const DICT: Dict = {
     en: "{lessons}+ interactive lessons in {subjects} subjects",
     ru: "{lessons}+ интерактивных уроков по {subjects} предметам",
   },
+  "auth.login.classCode": {
+    az: "Sinif kodu ilə daxil ol (e-poçtsuz)",
+    en: "Sign in with a class code (no email)",
+    ru: "Войти по коду класса (без почты)",
+  },
   "auth.login.perk2": {
     az: "Öz sürətinlə, oyun kimi öyrənmə",
     en: "Learn at your own pace, like a game",

@@ -29,6 +29,7 @@ const BARE_ROUTES = new Set([
   "/semerelilik",
   "/muellimler",
   "/muellim-ol",
+  "/sinif",
 ]);
 
 const BARE_PREFIXES = ["/lessons/", "/u/", "/dost/", "/hesabat/", "/admin"];
@@ -50,7 +51,11 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   //
   // ⚠️ YENİ MARKETING SƏHİFƏSİ ƏLAVƏ EDƏNDƏ ONU BURAYA DA YAZ — yoxsa səhifə
   // tətbiq səhifəsi sayılır və solunda şagird sidebar-ı görünür.
-  const bare = BARE_ROUTES.has(pathname) || BARE_PREFIXES.some((p) => pathname.startsWith(p));
+  // Çap kartları (/mekteb/sinif/[id]/kartlar) — kağıza sidebar düşməsin.
+  const bare =
+    BARE_ROUTES.has(pathname) ||
+    BARE_PREFIXES.some((p) => pathname.startsWith(p)) ||
+    pathname.endsWith("/kartlar");
 
   const body = bare ? (
     <>{children}</>

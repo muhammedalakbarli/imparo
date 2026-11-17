@@ -14,6 +14,7 @@
 // bunu jurnala yazır. Səssiz uğursuzluq YOXDUR.
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { isSyntheticEmail } from "./managedStudents";
 
 export const MAIL_FROM = "Imparo <hesabat@mail.imparo.app>";
 export const MAIL_REPLY_TO = "destek@imparo.app";
@@ -32,6 +33,12 @@ export interface Mail {
 export type SendResult = { ok: true; id?: string } | { ok: false; error: string };
 
 export async function sendEmail(mail: Mail): Promise<SendResult> {
+  // Müəllimin yaratdığı e-poçtsuz şagird hesablarının sintetik ünvanı
+  // (@sinif.imparo.internal) real poçt qutusu deyil — göndərmək bounce yaradar və
+  // Resend domen reytinqini korlayar. Bütün göndərmələr buradan keçir, ona görə
+  // qoruma bir yerdədir (bax lib/managedStudents.ts).
+  if (isSyntheticEmail(mail.to)) return { ok: false, error: "synthetic_address" };
+
   const { env } = await getCloudflareContext({ async: true });
   const key = env.RESEND_API_KEY;
   if (!key) return { ok: false, error: "missing_resend_key" };

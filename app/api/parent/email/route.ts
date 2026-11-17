@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { adminClient } from "@/lib/supabase/admin";
 import { ok, fail, readJson, currentUser } from "@/lib/api/http";
 import { sendEmail } from "@/lib/email";
+import { isSyntheticEmail } from "@/lib/managedStudents";
 import { renderVerifyEmail } from "@/lib/parentReport";
 import { SITE_URL } from "@/lib/site";
 
@@ -41,6 +42,7 @@ export async function POST(req: Request) {
   const body = await readJson<{ email?: string }>(req);
   const email = body?.email?.trim();
   if (!email) return fail("E-poçt ünvanı tələb olunur");
+  if (isSyntheticEmail(email)) return fail("E-poçt ünvanı düzgün deyil");
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("set_parent_email", { p_email: email });

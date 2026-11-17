@@ -222,7 +222,7 @@ function PublicSchool() {
         </Link>
 
         <Link
-          href="/login"
+          href="/sinif"
           className="mt-4 flex items-center gap-4 rounded-2xl border border-line bg-panel p-5 transition hover:bg-panel-2"
         >
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
@@ -230,7 +230,7 @@ function PublicSchool() {
           </span>
           <span className="min-w-0 flex-1">
             <span className="block font-extrabold text-fg">Müəllimin sinif kodu var?</span>
-            <span className="block text-sm text-muted">Daxil ol və kodu yazıb sinfə qoşul</span>
+            <span className="block text-sm text-muted">Kodu, adını və PIN-i yaz — e-poçt lazım deyil</span>
           </span>
           <ChevronRight size={18} className="shrink-0 text-muted" />
         </Link>

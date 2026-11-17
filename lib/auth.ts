@@ -4,6 +4,7 @@
 
 import { createClient } from "./supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { isSyntheticEmail } from "./managedStudents";
 
 export interface AuthResult {
   ok: boolean;
@@ -22,6 +23,7 @@ export async function signUpWithEmail(
   /** Əlavə user_metadata (məs. müəllim qeydiyyatında `role: "teacher"`). */
   extra?: Record<string, unknown>,
 ): Promise<AuthResult> {
+  if (isSyntheticEmail(email)) return { ok: false, error: "Bu e-poçt ünvanı qəbul edilmir." };
   const supabase = createClient();
 
   let ip = "";
@@ -110,6 +112,10 @@ export async function signInWithGoogle(): Promise<AuthResult> {
 
 // Parol bərpası: email-ə bərpa linki göndər (link /parol-yenile-ə qayıdır).
 export async function sendPasswordReset(email: string): Promise<AuthResult> {
+  // Sinif hesablarının parolu yoxdur (giriş PIN ilədir) və ünvanı sintetikdir —
+  // Supabase bura məktub göndərməsin. "Göndərdik" cavabı verilir ki, ünvanın
+  // mövcudluğu sızmasın (adi axınla eyni davranış).
+  if (isSyntheticEmail(email)) return { ok: true };
   const supabase = createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
     redirectTo: `${window.location.origin}/parol-yenile`,

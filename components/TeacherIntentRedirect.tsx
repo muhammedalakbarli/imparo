@@ -13,7 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getTeacherIntent, teacherFlowPath } from "@/lib/teacher";
 
-const SKIP = ["/muellim-ol", "/auth/", "/parol-yenile", "/parol-unutdum", "/signup", "/login"];
+const SKIP = ["/muellim-ol", "/auth/", "/parol-yenile", "/parol-unutdum", "/signup", "/login", "/sinif"];
 
 export default function TeacherIntentRedirect() {
   const router = useRouter();

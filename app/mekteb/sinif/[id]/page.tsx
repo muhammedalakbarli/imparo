@@ -35,6 +35,7 @@ import {
 } from "@/lib/schools";
 import { getSkill } from "@/lib/skills";
 import ClassVideos from "@/components/mekteb/ClassVideos";
+import ManagedStudents from "@/components/mekteb/ManagedStudents";
 import { endorseStudent } from "@/lib/sponsor";
 import { PageSkeleton } from "@/components/Skeleton";
 import { gradeLabel } from "@/lib/grade";
@@ -313,6 +314,9 @@ export default function ClassPage({ params }: { params: Promise<{ id: string }> 
 
         {/* Video dərslər — müəllim yükləyir, sinfin şagirdləri izləyir (0056) */}
         <ClassVideos classId={id} canManage subjectSlug={cls.subject_slug} grade={cls.grade} />
+
+        {/* E-poçtsuz şagird hesabları — sinif kodu + PIN ilə giriş (0065) */}
+        <ManagedStudents classId={id} classCode={cls.code} onChanged={reload} />
 
         {/* Şagird reyestri */}
         <h2 className="mt-6 text-lg font-bold text-fg">Şagirdlər</h2>
