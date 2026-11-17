@@ -11,18 +11,32 @@
 // sorğu-sətirli /api/* yollarını defolt keşləmir.
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { azToTrPhonetic } from "@/lib/tts";
 
 export const runtime = "nodejs";
 
-function ttsUrl(text: string): string {
-  const q = encodeURIComponent(text.slice(0, 200));
-  return `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${q}`;
+type TtsLang = "en" | "az" | "tr";
+
+function parseLang(raw: string | null): TtsLang {
+  const clean = raw?.trim().toLowerCase();
+  if (clean === "az" || clean === "tr") return clean;
+  return "en";
 }
 
-// Edge keşi üçün sabit açar. Sorğu-sətri normallaşdırılır ki, "have" və "have "
-// eyni girişə düşsün.
-function cacheKeyFor(text: string): Request {
-  return new Request(`https://tts.imparo.internal/${encodeURIComponent(text)}`);
+function ttsUrl(text: string, lang: TtsLang): string {
+  // Google Translate TTS `tl=az` üçün 400 qaytarır; Azərbaycan mətni fonetik olaraq
+  // uyğunlaşdırılıb (`azToTrPhonetic`) `tl=tr` səsi ilə 200 OK olaraq gətirilir.
+  const spoken = lang === "az" ? azToTrPhonetic(text) : text;
+  const tl = lang === "az" ? "tr" : lang;
+  const q = encodeURIComponent(spoken.slice(0, 200));
+  return `https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=tw-ob&q=${q}`;
+}
+
+// Edge keşi üçün sabit açar. Sorğu-sətri və dil normallaşdırılır ki, "have" və "have "
+// eyni girişə düşsün, fərqli dillər isə bir-birini əzməsin.
+function cacheKeyFor(text: string, lang: TtsLang): Request {
+  const prefix = lang === "en" ? "" : `${lang}-v2/`;
+  return new Request(`https://tts.imparo.internal/${prefix}${encodeURIComponent(text)}`);
 }
 
 const HEADERS = {
@@ -32,8 +46,10 @@ const HEADERS = {
 };
 
 export async function GET(req: Request) {
-  const text = new URL(req.url).searchParams.get("text")?.trim();
+  const searchParams = new URL(req.url).searchParams;
+  const text = searchParams.get("text")?.trim();
   if (!text) return new Response("text lazımdır", { status: 400 });
+  const lang = parseLang(searchParams.get("lang"));
 
   // `caches.default` Workers qlobalıdır; OpenNext-in Node qatında olmaya bilər,
   // ona görə hər çağırış qorunur — keş yoxdursa sadəcə birbaşa gətirilir.
@@ -43,7 +59,7 @@ export async function GET(req: Request) {
   } catch {
     /* keş yoxdur — problem deyil */
   }
-  const key = cacheKeyFor(text);
+  const key = cacheKeyFor(text, lang);
 
   if (cache) {
     try {
@@ -55,7 +71,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const upstream = await fetch(ttsUrl(text), {
+    const upstream = await fetch(ttsUrl(text, lang), {
       headers: {
         // Google bəzən brauzer User-Agent tələb edir.
         "User-Agent":

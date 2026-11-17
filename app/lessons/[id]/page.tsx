@@ -19,6 +19,8 @@ import LessonVisual from "@/components/LessonVisual";
 import LessonVideo from "@/components/lesson/LessonVideo";
 import Mascot from "@/components/Mascot";
 import SpeechBubble from "@/components/SpeechBubble";
+import SpeakButton from "@/components/SpeakButton";
+import { stopSpeaking } from "@/lib/tts";
 import { PageSkeleton } from "@/components/Skeleton";
 
 export default function LessonPage({
@@ -49,6 +51,7 @@ export default function LessonPage({
   const { subject, lesson } = found;
   const index = orderedLessonIds(subject.slug).indexOf(lesson.id);
   const bonusCount = lesson.bonusTasks?.length ?? 0;
+  const primary = subject.grade <= 4;
 
   // Bölmə sandığı — tapşırıq yoxdur: açılanda zümrüd verilir (server hesablayır, bax 0041).
   if (lesson.kind === "chest") {
@@ -85,7 +88,10 @@ export default function LessonPage({
             Dərsin hər yerində çıxış eyni davranmalıdır. */}
         <button
           type="button"
-          onClick={() => setQuitOpen(true)}
+          onClick={() => {
+            stopSpeaking();
+            setQuitOpen(true);
+          }}
           aria-label={t("run.quitLeave")}
           className="flex h-9 w-9 items-center justify-center rounded-full text-muted transition hover:bg-panel-2 hover:text-fg"
         >
@@ -98,9 +104,10 @@ export default function LessonPage({
               answered={0}
               total={lesson.tasks.length}
               onStay={() => setQuitOpen(false)}
-              onLeave={() =>
-                router.push(`/subjects/${subject.slug}${guest ? "?onboarding=1" : ""}`)
-              }
+              onLeave={() => {
+                stopSpeaking();
+                router.push(`/subjects/${subject.slug}${guest ? "?onboarding=1" : ""}`);
+              }}
             />
           )}
         </AnimatePresence>
@@ -109,21 +116,27 @@ export default function LessonPage({
         <div className="mt-4 flex items-end gap-3">
           <Mascot size={92} />
           <SpeechBubble className="mb-2 flex-1 font-semibold" tail="left">
-            {lesson.intro}
+            <div className="flex items-start justify-between gap-2.5">
+              <span className="flex-1">{lesson.intro}</span>
+              {primary && <SpeakButton text={lesson.intro} label="Dinlə" size="sm" />}
+            </div>
           </SpeechBubble>
         </div>
 
         <div className="mt-2 text-sm font-bold uppercase tracking-wide text-brand">
           {t(`subject.${subject.slug}`)} · {t("run.task")} {index + 1}
         </div>
-        <h1 className="mt-1 text-3xl font-bold text-fg">{lesson.title}</h1>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <h1 className="text-3xl font-bold text-fg">{lesson.title}</h1>
+          {primary && <SpeakButton text={lesson.title} size="sm" />}
+        </div>
 
         {/* Video varsa şəkilin YERİNƏ pleyer: ikisi birlikdə giriş ekranını
             şişirdir və uşağın diqqətini bölür. Video yoxdursa köhnə davranış. */}
         {lesson.video ? (
           <LessonVideo video={lesson.video} />
         ) : (
-          <LessonVisual visual={lesson.visual} />
+          <LessonVisual visual={lesson.visual ?? (primary ? lesson.id : undefined)} />
         )}
 
         {/* Qaydalar — dostyana kartlar */}
@@ -131,10 +144,20 @@ export default function LessonPage({
           <div className="mt-6 space-y-3">
             {lesson.sections.map((s, i) => (
               <div key={i} className="card-pop p-4">
-                {s.heading && (
-                  <h3 className="font-bold text-brand-soft">{s.heading}</h3>
-                )}
-                <p className="mt-1 leading-relaxed text-fg">{s.body}</p>
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="flex-1">
+                    {s.heading && (
+                      <h3 className="font-bold text-brand-soft">{s.heading}</h3>
+                    )}
+                    <p className="mt-1 leading-relaxed text-fg">{s.body}</p>
+                  </div>
+                  {primary && (
+                    <SpeakButton
+                      text={s.heading ? `${s.heading}. ${s.body}` : s.body}
+                      size="sm"
+                    />
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -153,7 +176,10 @@ export default function LessonPage({
         <div className="mx-auto max-w-xl px-4 py-4">
           <button
             type="button"
-            onClick={() => setStarted(true)}
+            onClick={() => {
+              stopSpeaking();
+              setStarted(true);
+            }}
             className="w-full rounded-2xl bg-brand px-5 py-4 text-lg font-extrabold uppercase tracking-wide text-white btn-pop hover:bg-brand-dark"
           >
             {t("dash.start")}

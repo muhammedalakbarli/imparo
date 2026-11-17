@@ -14,6 +14,8 @@ import { vibrateCelebrate } from "@/lib/haptics";
 import { useCountUp } from "@/lib/useCountUp";
 import TaskInput from "@/components/tasks/TaskInput";
 import { preloadEnglish, spokenTextsOf } from "@/lib/tts";
+import { isPrimaryTask } from "@/lib/numberHints";
+import SpeakButton from "@/components/SpeakButton";
 import TaskFigure from "@/components/TaskFigure";
 import Mascot from "@/components/Mascot";
 import Confetti from "@/components/Confetti";
@@ -190,8 +192,11 @@ function ReviewRunner({ tasks, onExit, onCorrect, onWrong, onFinish, silent, sou
       <div className="mt-4 text-sm font-medium text-muted">
         Sual {index + 1} / {total}
       </div>
-      <h2 className="mt-2 text-xl font-semibold text-fg">{task.prompt}</h2>
-      <TaskFigure figure={task.figure} />
+      <div className="mt-2 flex items-start justify-between gap-3">
+        <h2 className="flex-1 text-xl font-semibold text-fg">{task.prompt}</h2>
+        {isPrimaryTask(task.id) && <SpeakButton text={task.prompt} label="Dinlə" size="sm" />}
+      </div>
+      <TaskFigure figure={task.figure} task={task} />
 
       <div className="mt-6">
         <TaskInput task={task} value={answer} onChange={setAnswer} disabled={checked} reveal={checked} />

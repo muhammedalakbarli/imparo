@@ -8,6 +8,9 @@ import { useRef, useState } from "react";
 import type { Task } from "@/lib/types";
 import { gradeTask, type UserAnswer } from "@/lib/grading";
 import TaskInput from "@/components/tasks/TaskInput";
+import TaskFigure from "@/components/TaskFigure";
+import SpeakButton from "@/components/SpeakButton";
+import { isPrimaryTask } from "@/lib/numberHints";
 import Mascot from "@/components/Mascot";
 import { playCorrect, playWrong } from "@/lib/sound";
 
@@ -76,11 +79,18 @@ export default function Diagnostic({
       </header>
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-5 pb-8">
-        <h1 className="mt-4 text-center text-xl font-extrabold text-fg sm:text-2xl">
-          {cur.task.prompt}
-        </h1>
+        <div className="mt-4 flex items-center justify-center gap-3">
+          <h1 className="text-center text-xl font-extrabold text-fg sm:text-2xl">
+            {cur.task.prompt}
+          </h1>
+          {isPrimaryTask(cur.task.id) && (
+            <SpeakButton text={cur.task.prompt} label="Dinlə" size="sm" />
+          )}
+        </div>
 
-        <div className="mt-8">
+        <TaskFigure figure={cur.task.figure} task={cur.task} />
+
+        <div className="mt-6">
           <TaskInput
             key={cur.task.id}
             task={cur.task}

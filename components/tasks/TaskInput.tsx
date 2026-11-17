@@ -11,11 +11,11 @@ import { Volume2 } from "lucide-react";
 import type { Task } from "@/lib/types";
 import type { UserAnswer } from "@/lib/grading";
 import { playSelect } from "@/lib/sound";
-import { speakEnglish, preloadEnglish, spokenTextsOf } from "@/lib/tts";
+import { speakAz, speakEnglish, preloadAz, preloadEnglish, spokenTextsOf } from "@/lib/tts";
 import MatchPairs from "./MatchPairs";
 import NumberPad from "./NumberPad";
 import NumberTrain from "./NumberTrain";
-import { isYoungTask, sequenceHint } from "@/lib/numberHints";
+import { isPrimaryTask, isYoungTask, sequenceHint } from "@/lib/numberHints";
 
 interface Props {
   task: Task;
@@ -28,12 +28,21 @@ interface Props {
 }
 
 export default function TaskInput({ task, value, onChange, disabled, reveal, young }: Props) {
+  const primary = isPrimaryTask(task.id);
+
   // Səsləndiriləcək mətnləri tapşırıq ekrana gələn kimi ÖNCƏDƏN yüklə.
   // Əvvəl audio yalnız klikdən sonra yüklənirdi və səs 0.3–0.7 saniyə gecikirdi —
   // şagird üçün düymə ilə səs arasındakı əlaqə itirdi. Bax lib/tts.ts.
   useEffect(() => {
     preloadEnglish(spokenTextsOf(task));
-  }, [task]);
+    if (
+      primary &&
+      (task.type === "multiple_choice" || task.type === "listening") &&
+      !(task.type === "multiple_choice" && task.speakOptions)
+    ) {
+      preloadAz(task.options);
+    }
+  }, [task, primary]);
 
   // ── Cütləri tap ────────────────────────────────────────────
   if (task.type === "match_pairs") {
@@ -59,6 +68,7 @@ export default function TaskInput({ task, value, onChange, disabled, reveal, you
         disabled={disabled}
         reveal={!!reveal}
         speakOptions={task.speakOptions}
+        primary={primary}
       />
     );
   }
@@ -81,6 +91,7 @@ export default function TaskInput({ task, value, onChange, disabled, reveal, you
           onChange={onChange}
           disabled={disabled}
           reveal={!!reveal}
+          primary={primary}
         />
       </div>
     );
@@ -150,6 +161,7 @@ function ChoiceGrid({
   disabled,
   reveal,
   speakOptions,
+  primary,
 }: {
   options: string[];
   correctIndex: number;
@@ -158,6 +170,7 @@ function ChoiceGrid({
   disabled: boolean;
   reveal: boolean;
   speakOptions?: boolean;
+  primary?: boolean;
 }) {
   return (
     <div className="grid gap-3">
@@ -172,6 +185,11 @@ function ChoiceGrid({
         else if (reveal) state = "opacity-60";
         else if (selected) state = "tile-selected";
 
+        const playOptionVoice = () => {
+          if (speakOptions) speakEnglish(option);
+          else speakAz(option);
+        };
+
         return (
           <motion.button
             key={i}
@@ -180,6 +198,7 @@ function ChoiceGrid({
             onClick={() => {
               playSelect();
               if (speakOptions) speakEnglish(option);
+              else if (primary && /[a-zəöüığçş]/i.test(option)) speakAz(option);
               onChange(i);
             }}
             whileTap={disabled ? undefined : { scale: 0.98 }}
@@ -209,6 +228,20 @@ function ChoiceGrid({
               {String.fromCharCode(65 + i)}
             </span>
             <span className="flex-1">{option}</span>
+            {primary && (
+              <span
+                role="button"
+                tabIndex={-1}
+                aria-label={`Variantı dinlə: ${option}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playOptionVoice();
+                }}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand transition hover:bg-brand/20 active:scale-95"
+              >
+                <Volume2 size={16} />
+              </span>
+            )}
           </motion.button>
         );
       })}

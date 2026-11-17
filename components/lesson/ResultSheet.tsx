@@ -6,6 +6,7 @@
 import { motion } from "framer-motion";
 import { Check, X, Lightbulb } from "lucide-react";
 import Mascot from "@/components/Mascot";
+import SpeakButton from "@/components/SpeakButton";
 import QuestionFeedback from "@/components/lesson/QuestionFeedback";
 import { useT } from "@/lib/i18n";
 
@@ -128,14 +129,21 @@ export default function ResultSheet({
             məhz o an izahı oxumaq lazımdır. */}
         {explanation && (
           <div
-            className={`mt-3 flex gap-2.5 rounded-2xl leading-relaxed ${
+            className={`mt-3 flex items-start gap-2.5 rounded-2xl leading-relaxed ${
               correct
                 ? "bg-emerald-500/10 px-4 py-2.5 text-[15px] font-semibold text-emerald-950 dark:text-emerald-50"
                 : "border-2 border-red-500/35 bg-red-500/10 px-4 py-3.5 text-base font-bold text-red-950 sm:text-[17px] dark:text-red-50"
             }`}
           >
             <Lightbulb size={correct ? 18 : 22} className="mt-0.5 shrink-0 opacity-80" />
-            <span>{explanation}</span>
+            <span className="flex-1">{explanation}</span>
+            <SpeakButton
+              text={explanation}
+              variant="sheet"
+              size="sm"
+              label="Dinlə"
+              className="shrink-0"
+            />
           </div>
         )}
 

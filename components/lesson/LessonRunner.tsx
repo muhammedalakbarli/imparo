@@ -32,7 +32,10 @@ import { useCountUp } from "@/lib/useCountUp";
 import { useT } from "@/lib/i18n";
 import TaskInput from "@/components/tasks/TaskInput";
 import { getSubjectMeta } from "@/lib/subjectMeta";
-import { preloadEnglish, spokenTextsOf } from "@/lib/tts";
+import { preloadAz, preloadEnglish, speakAz, spokenTextsOf, stopSpeaking } from "@/lib/tts";
+import { loadPrefs } from "@/lib/prefs";
+import { isPrimaryTask, isYoungTask } from "@/lib/numberHints";
+import SpeakButton from "@/components/SpeakButton";
 import QuitDialog from "@/components/lesson/QuitDialog";
 import TaskFigure from "@/components/TaskFigure";
 import Mascot from "@/components/Mascot";
@@ -130,6 +133,8 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
   const list: Task[] = inRetry ? retryQueue : inBonus ? bonusTasks : mainTasks;
   const task = inRetry ? retryQueue[0] : list[index];
   const total = list.length;
+  const primary = subjectGrade !== undefined ? subjectGrade <= 4 : (task ? isPrimaryTask(task.id) : false);
+  const isYoung = young ?? (task ? isYoungTask(task.id) : false);
   const progressPct = inRetry
     ? retryTotal
       ? Math.round(((retryTotal - retryQueue.length) / retryTotal) * 100)
@@ -138,7 +143,7 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
       ? Math.round((index / total) * 100)
       : 0;
 
-  // İRƏLİ-YÜKLƏMƏ: növbəti 2 tapşırığın İngilis audiosunu indidən gətir.
+  // İRƏLİ-YÜKLƏMƏ: növbəti 2 tapşırığın İngilis və ya Azərbaycan audiosunu indidən gətir.
   // TaskInput cari tapşırığı onsuz da önyükləyir, amma o, tapşırıq EKRANA
   // GƏLƏNDƏ başlayır — şagird dərhal "Dinlə"yə basarsa audio hələ hazır
   // olmaya bilər. İki tapşırıq irəli getmək bu boşluğu bağlayır.
@@ -146,9 +151,32 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
   // Bütün dərs qəsdən yüklənmir: 20 tapşırıq × 4 variant ≈ 640 KB olardı və
   // mobil şəbəkədə onlarla paralel sorğu deməkdir.
   useEffect(() => {
-    const ahead = list.slice(index + 1, index + 3).flatMap(spokenTextsOf);
-    if (ahead.length) preloadEnglish(ahead);
-  }, [list, index]);
+    const slice = list.slice(index + 1, index + 3);
+    const aheadEn = slice.flatMap(spokenTextsOf);
+    if (aheadEn.length) preloadEnglish(aheadEn);
+    if (primary) {
+      const aheadAz = slice.flatMap((tk) => [tk.prompt, ...(tk.explanation ? [tk.explanation] : [])]);
+      if (aheadAz.length) preloadAz(aheadAz);
+    }
+  }, [list, index, primary]);
+
+  // İbtidai sinif (1–4): cari tapşırığın sual və izah audiosunu öncədən yüklə;
+  // 1–2-ci sinifdə isə sual ekrana gələndə avtomatik səsləndir (oxuya bilməyən uşaq üçün).
+  useEffect(() => {
+    if (!task || (phase !== "main" && phase !== "bonus" && phase !== "retry")) return;
+    if (primary) {
+      preloadAz([task.prompt, ...(task.explanation ? [task.explanation] : [])]);
+    }
+    if (isYoung && task.type !== "listening") {
+      const prefs = loadPrefs();
+      if (prefs.sound && prefs.listening) {
+        speakAz(task.prompt);
+      }
+    }
+    return () => {
+      stopSpeaking();
+    };
+  }, [task, phase, primary, isYoung]);
 
   function handleCheck() {
     if (answer === null || answer === "") return;
@@ -607,19 +635,24 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
             </>
           )}
         </div>
-        {/* 1–2-ci sinif: sual iri şriftlə (uşaq hərf-hərf oxuyur) */}
-        <h2 className={`mt-3 font-bold text-fg ${young ? "text-3xl leading-snug sm:text-4xl" : "text-2xl"}`}>
-          {task.prompt}
-        </h2>
-        <TaskFigure figure={task.figure} />
-        <div className={young ? "mt-4" : "mt-7"}>
+        {/* 1–2-ci sinif: sual iri şriftlə (uşaq hərf-hərf oxuyur); 1–4-cü sinif: Səsli Dinlə düyməsi */}
+        <div className="mt-3 flex items-start justify-between gap-3">
+          <h2 className={`flex-1 font-bold text-fg ${isYoung ? "text-3xl leading-snug sm:text-4xl" : "text-2xl"}`}>
+            {task.prompt}
+          </h2>
+          {primary && (
+            <SpeakButton text={task.prompt} label="Dinlə" size="md" className="mt-0.5" />
+          )}
+        </div>
+        <TaskFigure figure={task.figure} task={task} />
+        <div className={isYoung ? "mt-4" : "mt-7"}>
           <TaskInput
             task={task}
             value={answer}
             onChange={(v) => setAnswer(v)}
             disabled={checked}
             reveal={checked}
-            young={young}
+            young={isYoung}
           />
         </div>
       </div>

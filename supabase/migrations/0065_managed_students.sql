@@ -148,7 +148,7 @@ declare s managed_students%rowtype; ip_fails int; em text;
 begin
   select count(*) into ip_fails from class_login_events
    where ip = coalesce(p_ip, '') and kind = 'pin_fail' and at > now() - interval '1 hour';
-  if ip_fails >= 30 then return json_build_object('status', 'ip_limited'); end if;
+  if ip_fails >= 150 then return json_build_object('status', 'ip_limited'); end if;
 
   select m.* into s
     from managed_students m join classes c on c.id = m.class_id
