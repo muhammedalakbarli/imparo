@@ -109,7 +109,7 @@ const NOUN_EMOJI: [RegExp, string][] = [
   [/gecə|yuxu|yat/i, "🌙"],
   [/səhər/i, "🌅"],
   [/əl\b|əllər/i, "✋"],
-  [/göz/i, "👀"],
+  [/göz(?!əl|lə)/i, "👀"], // "gözəl", "gözlə(nilir)" — göz deyil
   [/qulaq/i, "👂"],
   [/burun/i, "👃"],
   [/ağız|diş/i, "👄"],
@@ -122,8 +122,49 @@ const NOUN_EMOJI: [RegExp, string][] = [
   [/uçur/i, "🕊️"],
 ];
 
+// JS regex-də `\b` yalnız ASCII hərflərini tanıyır — "ı ə ö ü ç ş ğ" onun üçün hərf
+// deyil. Ona görə /ayı\b/ "başlayır"-da, /arı\b/ "bunların"-da, /əl\b/ "əmələ"-də
+// tuturdu və suala aidiyyəti olmayan şəkil (🐻, 🐝, ✋) çıxırdı. Azərbaycan dili
+// şəkilçili dildir — isim kökü sözün ƏVVƏLİNDƏ olur. Ona görə hər alternativ söz
+// başlanğıcına bağlanır və `\b` Unicode hərf sərhədi ilə əvəzlənir.
+const NOT_AFTER_LETTER = "(?<![\\p{L}\\p{M}])";
+const NOT_BEFORE_LETTER = "(?![\\p{L}\\p{M}])";
+
+/** Regex mənbəyini yalnız ən üst səviyyədəki `|` üzrə bölür (`(?:a|b)` qrupuna toxunmur). */
+function splitTopLevel(src: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let cur = "";
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (ch === "\\") {
+      cur += ch + (src[i + 1] ?? "");
+      i++;
+      continue;
+    }
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    if (ch === "|" && depth === 0) {
+      out.push(cur);
+      cur = "";
+    } else cur += ch;
+  }
+  out.push(cur);
+  return out;
+}
+
+/** Azərbaycan hərflərini tanıyan, söz əvvəlinə bağlı regex. */
+export function azWordRegex(re: RegExp): RegExp {
+  const src = splitTopLevel(re.source)
+    .map((alt) => NOT_AFTER_LETTER + alt.replace(/^\\b/, "").replace(/\\b/g, NOT_BEFORE_LETTER))
+    .join("|");
+  return new RegExp(src, "iu");
+}
+
+const NOUN_RE: [RegExp, string][] = NOUN_EMOJI.map(([re, e]) => [azWordRegex(re), e]);
+
 function detectNounEmoji(text: string): string | null {
-  for (const [re, emoji] of NOUN_EMOJI) {
+  for (const [re, emoji] of NOUN_RE) {
     if (re.test(text)) return emoji;
   }
   return null;
@@ -255,6 +296,8 @@ const EN_WORD_EMOJI: [RegExp, string][] = [
   [/\bsleep|sleeping\b/i, "😴"],
   [/\bplay|playing\b/i, "⚽"],
 ];
+
+const EN_WORD_RE: [RegExp, string][] = EN_WORD_EMOJI.map(([re, e]) => [azWordRegex(re), e]);
 
 const EN_NUM_WORD: Record<string, number> = {
   one: 1, two: 2, three: 3, four: 4, five: 5,
@@ -652,7 +695,7 @@ function enTaskVisual(task: Task): AutoVisual | null {
   }
 
   // 5) İngilis və ya Azərbaycan açar sözünə görə şəkil
-  for (const [re, emoji] of EN_WORD_EMOJI) {
+  for (const [re, emoji] of EN_WORD_RE) {
     if (re.test(p)) {
       return {
         kind: "pictureCard",
@@ -661,7 +704,10 @@ function enTaskVisual(task: Task): AutoVisual | null {
       };
     }
   }
-  const azEmoji = detectNounEmoji(p);
+  // "'X' İngiliscə necədir?" — dırnaqdakı söz Azərbaycancadır, şəkil ondan seçilir.
+  // "'X' nə deməkdir?" — dırnaqdakı mətn İngiliscədir: "at 7", "at night" kimi ön
+  // qoşmalar Azərbaycanca "at" (🐴) kimi tanınmasın deyə dırnaq hissəsi atılır.
+  const azEmoji = detectNounEmoji(/[İi]ngiliscə/.test(p) ? p : p.replace(/'[^']*'/g, " "));
   if (azEmoji) {
     return {
       kind: "pictureCard",

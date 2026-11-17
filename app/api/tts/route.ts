@@ -11,7 +11,7 @@
 // sorğu-sətirli /api/* yollarını defolt keşləmir.
 
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { azToTrPhonetic } from "@/lib/tts";
+import { azToTrPhonetic } from "@/lib/azSpeech";
 
 export const runtime = "nodejs";
 

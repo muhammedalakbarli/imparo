@@ -95,3 +95,43 @@ describe("ibtidai sinif (1–4) dərslərinin və tapşırıqlarının vizual ö
     expect(taskCount).toBeGreaterThan(2500);
   });
 });
+
+describe("avtomatik şəkil: Azərbaycan hərfləri və söz sərhədi", () => {
+  const visualOf = (id: string, prompt: string, extra: Record<string, unknown> = {}) =>
+    getAutoTaskVisual({ id, type: "fill_blank", prompt, answer: "x", ...extra } as never);
+  const emojiOf = (id: string, prompt: string) => {
+    const v = visualOf(id, prompt);
+    return v && v.kind === "pictureCard" ? v.emojis[0] : null;
+  };
+
+  it("sözün ortasındakı hərf birləşməsinə görə şəkil seçmir (\\b ASCII tələsi)", () => {
+    // "başlayır" ⊃ "ayı", "bunların" ⊃ "arı", "əmələ" ⊃ "əl", "çatışmır" ⊃ "at"
+    expect(emojiOf("az1-x-q1", "Cümlə hansı hərflə başlayır?")).not.toBe("🐻");
+    expect(emojiOf("az1-x-q2", "Hansı sözdə hecaların sayı ən çoxdur?")).not.toBe("🐝");
+    expect(emojiOf("az1-x-q3", "Sait və samit birlikdə nəyi əmələ gətirir?")).not.toBe("✋");
+    expect(emojiOf("az1-x-q4", "'Sən hara gedirsən' — nə çatışmır?")).not.toBe("🐴");
+    expect(emojiOf("az2-x-q5", "'gözəl' sözünə mənaca yaxın hansıdır?")).not.toBe("👀");
+  });
+
+  it("əsl isim kökünü (şəkilçi ilə də) tanıyır", () => {
+    expect(emojiOf("az1-x-q6", "'at' sözündəki sait qalındır, yoxsa incə?")).toBe("🐴");
+    expect(emojiOf("az1-x-q7", "'alma' sözü hansı hərflə başlayır?")).toBe("🍎");
+    expect(emojiOf("en1-x-q8", "'əl' İngiliscə necədir?")).toBe("✋");
+  });
+
+  it("İngilis cümləsindəki 'at' ön qoşması 🐴 vermir", () => {
+    expect(emojiOf("en3-x-q9", "'I get up at 7.' nə deməkdir?")).not.toBe("🐴");
+    expect(emojiOf("en3-x-q10", "'at night' nə deməkdir?")).not.toBe("🐴");
+  });
+});
+
+describe("TTS server marşrutu client-only modul çəkmir", () => {
+  it("app/api/tts React hook-suz lib/azSpeech-dən istifadə edir", async () => {
+    const { readFileSync } = await import("node:fs");
+    const route = readFileSync("app/api/tts/route.ts", "utf8");
+    const speech = readFileSync("lib/azSpeech.ts", "utf8");
+    // lib/tts.ts useSyncExternalStore import edir → server marşrutunda Next build-i qırılır.
+    expect(route).not.toMatch(/from ["']@\/lib\/tts["']/);
+    expect(speech).not.toMatch(/from ["']react["']/);
+  });
+});
