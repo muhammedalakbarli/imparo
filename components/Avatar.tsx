@@ -25,7 +25,8 @@ export function defaultAvatar(seed: string): AvatarConfig {
   for (const c of seed || "?") h = (h * 31 + c.charCodeAt(0)) >>> 0;
   return {
     char: AVATAR_CHARS[h % AVATAR_CHARS.length],
-    bg: AVATAR_BGS[(h >> 3) % AVATAR_BGS.length],
+    // `>>>` (işarəsiz): h ≥ 2³¹ olanda `>>` mənfi verirdi → indeks undefined → avatar fonsuz (şəffaf) qalırdı.
+    bg: AVATAR_BGS[(h >>> 3) % AVATAR_BGS.length],
   };
 }
 

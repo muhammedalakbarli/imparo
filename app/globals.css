@@ -88,7 +88,10 @@ h1, h2, h3 {
     --pop: var(--color-danger-dark);
   }
   .btn-pop-ghost {
-    --pop: #d5d1ea;
+    --pop: #e2ccb0; /* isti krem/qum — köhnə bənövşəyi kölgə palitraya uymurdu */
+  }
+  html.dark .btn-pop-ghost {
+    --pop: #4a3328;
   }
 
   /* Böyük 3D cavab plitəsi (Duolingo answer tile) */

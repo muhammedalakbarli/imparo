@@ -4,7 +4,7 @@
 // İstənilən tapşırıq dəstini PracticeRunner ilə həll etdirir (dərsi tamamlamır).
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, Shuffle, Timer, ChevronRight, Check, Target, Stethoscope } from "lucide-react";
+import { AlertCircle, Shuffle, Timer, ChevronRight, Check, Target, Stethoscope, Zap } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { loadProgress, type ProgressState } from "@/lib/progress";
 import { useContent } from "@/components/ContentProvider";
@@ -39,6 +39,7 @@ import type { Task } from "@/lib/types";
 import { PageSkeleton } from "@/components/Skeleton";
 import PracticeRunner from "@/components/lesson/PracticeRunner";
 import Mascot from "@/components/Mascot";
+import SubjectBadge, { subjectVisual } from "@/components/SubjectBadge";
 
 const shuffle = <T,>(a: T[]): T[] => [...a].sort(() => Math.random() - 0.5);
 const sample = <T,>(a: T[], n: number): T[] => shuffle(a).slice(0, n);
@@ -205,6 +206,7 @@ export default function PracticePage() {
   }
 
   const active = shown.find((s) => s.slug === activeSlug) ?? shown[0];
+  const unitColor = (active && subjectVisual(active.slug)?.color) || "var(--color-brand)";
   const speedPool = completedTasks.filter((t) => t.type === "multiple_choice");
   // Gündəlik hovuzun ehtiyatı da yalnız istifadəçinin sinfindən olsun.
   const gradeAllTasks = shown
@@ -242,7 +244,7 @@ export default function PracticePage() {
             <button
               type="button"
               onClick={startDaily}
-              className="rounded-2xl bg-white px-5 py-2.5 font-extrabold uppercase tracking-wide text-brand btn-pop [--pop:#c9c2f5] hover:bg-white/90"
+              className="rounded-2xl bg-white px-5 py-2.5 font-extrabold uppercase tracking-wide text-brand btn-pop [--pop:#f6c9a3] hover:bg-white/90"
             >
               {t("dash.start")}
             </button>
@@ -253,7 +255,7 @@ export default function PracticePage() {
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <ModeCard
             Icon={AlertCircle}
-            tint="text-orange-500"
+            tint="bg-orange-500/12 text-orange-500"
             title={t("practice.mistakes")}
             desc={
               mistakeTasks.length > 0
@@ -267,7 +269,7 @@ export default function PracticePage() {
           />
           <ModeCard
             Icon={Target}
-            tint="text-rose-500"
+            tint="bg-rose-500/12 text-rose-500"
             title={t("practice.adaptive")}
             desc={
               targets.length
@@ -281,7 +283,7 @@ export default function PracticePage() {
           />
           <ModeCard
             Icon={Shuffle}
-            tint="text-brand"
+            tint="bg-brand/12 text-brand"
             title={t("practice.mixed")}
             desc={t("practice.mixedDesc")}
             disabled={completedTasks.length === 0}
@@ -291,7 +293,7 @@ export default function PracticePage() {
           />
           <ModeCard
             Icon={Stethoscope}
-            tint="text-sky-500"
+            tint="bg-sky-500/12 text-sky-500"
             title={t("practice.diagnostic")}
             desc={t("practice.diagnosticDesc")}
             disabled={diagnosticTasks.length === 0}
@@ -306,9 +308,11 @@ export default function PracticePage() {
           />
           <ModeCard
             Icon={Timer}
-            tint="text-emerald-500"
+            tint="bg-emerald-500/12 text-emerald-500"
             title={t("practice.speed")}
             desc={t("practice.speedDesc")}
+            wide
+            badge={t("practice.speedBadge")}
             disabled={speedPool.length === 0}
             onClick={() =>
               setSession({ tasks: speedPool, title: t("practice.speed"), timed: true, source: "free_practice" })
@@ -325,20 +329,23 @@ export default function PracticePage() {
               <button
                 key={s.slug}
                 onClick={() => setActiveSlug(s.slug)}
-                className={`rounded-2xl px-4 py-2 text-sm font-extrabold uppercase tracking-wide transition ${
+                className={`flex items-center gap-2 rounded-2xl py-1.5 pl-1.5 pr-4 text-sm font-extrabold uppercase tracking-wide transition ${
                   on
                     ? "bg-brand text-white btn-pop"
-                    : "border-2 border-line bg-panel text-muted hover:bg-panel-2"
+                    : "border-2 border-line bg-card text-muted hover:bg-panel"
                 }`}
               >
+                <span className={`rounded-xl ${on ? "ring-2 ring-white/70" : ""}`}>
+                  <SubjectBadge slug={s.slug} fallback={s.icon} size={28} />
+                </span>
                 {t(`subject.${s.slug}`)}
               </button>
             );
           })}
         </div>
 
-        <div className="mt-3 overflow-hidden rounded-2xl border border-line bg-panel">
-          {(active?.units ?? []).map((u) => {
+        <div className="mt-3 overflow-hidden rounded-2xl border-2 border-line bg-card shadow-[0_4px_0_0_var(--color-line)]">
+          {(active?.units ?? []).map((u, ui) => {
             const unitTasks = u.lessons.flatMap((l) => [
               ...l.tasks,
               ...(l.bonusTasks ?? []),
@@ -350,13 +357,20 @@ export default function PracticePage() {
               <button
                 key={u.id}
                 onClick={() => setSession({ tasks: sample(unitTasks, 10), title: unitName, source: "free_practice" })}
-                className="flex w-full items-center gap-3 border-b border-line px-4 py-3.5 text-left transition last:border-b-0 hover:bg-panel-2"
+                className="flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left transition last:border-b-0 hover:bg-panel"
               >
-                <span className="flex-1 font-bold text-fg">{unitName}</span>
-                <span className="text-xs text-muted">
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm font-extrabold text-white shadow-[0_2px_0_0_rgba(0,0,0,0.15)]"
+                  style={{ background: unitColor }}
+                >
+                  {ui + 1}
+                </span>
+                {/* Uşaq bölməni adından tanıyır — kəsilməsin, ən çox 2 sətir. */}
+                <span className="line-clamp-2 min-w-0 flex-1 font-bold leading-snug text-fg">{unitName}</span>
+                <span className="shrink-0 rounded-full bg-panel-2 px-2.5 py-1 text-xs font-extrabold text-muted">
                   {unitTasks.length} {t("practice.tasks")}
                 </span>
-                <ChevronRight size={18} className="text-muted" />
+                <ChevronRight size={18} className="shrink-0 text-muted" />
               </button>
             );
           })}
@@ -373,28 +387,42 @@ function ModeCard({
   desc,
   disabled,
   onClick,
+  wide = false,
+  badge,
 }: {
-  Icon: React.ComponentType<{ size?: number; className?: string }>;
+  Icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  /** İkon plitəsinin fon + ikon rəngi, məs. "bg-orange-500/12 text-orange-500". */
   tint: string;
   title: string;
   desc: string;
   disabled?: boolean;
   onClick: () => void;
+  /** 2 sütunlu şəbəkədə tam enli (5-ci kart tək qalıb boşluq yaratmasın). */
+  wide?: boolean;
+  badge?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex items-start gap-4 rounded-2xl border border-line bg-panel p-5 text-left transition hover:border-brand disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-line"
+      className={`card-pop flex items-center gap-4 bg-card p-4 text-left transition hover:border-brand active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-line disabled:active:translate-y-0 ${
+        wide ? "sm:col-span-2" : ""
+      }`}
     >
-      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-panel-2 ${tint}`}>
-        <Icon size={24} />
+      <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${tint}`}>
+        <Icon size={24} strokeWidth={2.4} />
       </span>
-      <div>
+      <div className="min-w-0 flex-1">
         <div className="font-extrabold text-fg">{title}</div>
         <div className="mt-0.5 text-sm text-muted">{desc}</div>
       </div>
+      {badge && (
+        <span className="hidden shrink-0 items-center gap-1 rounded-full bg-emerald-500/12 px-3 py-1 text-xs font-extrabold text-emerald-700 sm:flex dark:text-emerald-300">
+          {badge} <Zap size={12} fill="currentColor" strokeWidth={0} />
+        </span>
+      )}
+      <ChevronRight size={18} className="shrink-0 text-muted" />
     </button>
   );
 }

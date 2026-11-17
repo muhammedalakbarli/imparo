@@ -19,6 +19,8 @@ import {
   ChevronRight,
   School,
   ShieldCheck,
+  Users,
+  UserCheck,
   type LucideIcon,
 } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
@@ -38,12 +40,21 @@ import { PageSkeleton } from "@/components/Skeleton";
 import Avatar from "@/components/Avatar";
 import OrderBadge from "@/components/OrderBadge";
 import ShareProfile from "@/components/ShareProfile";
+import SubjectBadge, { subjectVisual } from "@/components/SubjectBadge";
 
 const ACH_ICON: Record<AchievementKind, LucideIcon> = {
   xp: Star,
   streak: Flame,
   lessons: CircleCheck,
   level: Crown,
+};
+
+// Hər nişan növünün öz irəliləyiş rəngi.
+const ACH_BAR: Record<AchievementKind, string> = {
+  xp: "bg-amber-400",
+  streak: "bg-orange-500",
+  lessons: "bg-emerald-500",
+  level: "bg-violet-500",
 };
 
 export default function ProfilePage() {
@@ -87,76 +98,98 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-ink">
       <main className="mx-auto max-w-3xl px-4 py-6">
-        {/* Kimlik kartı */}
-        <div className="flex flex-col items-center rounded-3xl border border-line bg-panel p-8 text-center">
-          <Avatar config={profile.avatar} seed={profile.username || profile.name} size={104} />
-          <h1 className="mt-3 text-2xl font-bold text-fg">{profile.name}</h1>
-          {profile.username && (
-            <p className="text-sm font-bold text-muted">@{profile.username}</p>
-          )}
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
-            <CalendarDays size={14} />
-            {t("profile.memberSince").replace("{d}", memberDate(profile.createdAt))}
-          </p>
-
-          {/* İzləyici / izlənilən */}
-          <div className="mt-3 flex items-center gap-5">
-            <span className="text-sm">
-              <b className="font-extrabold text-fg">{social.followers}</b>{" "}
-              <span className="text-muted">{t("follow.followers")}</span>
-            </span>
-            <span className="text-sm">
-              <b className="font-extrabold text-fg">{social.following}</b>{" "}
-              <span className="text-muted">{t("follow.followingCount")}</span>
+        {/* Kimlik kartı — dekorativ zolaq + üzərinə oturan avatar */}
+        <div className={`overflow-hidden ${CARD} rounded-3xl`}>
+          <div className="relative h-24 bg-gradient-to-r from-teal-300/45 via-amber-200/50 to-orange-300/55 dark:from-teal-500/25 dark:via-amber-500/15 dark:to-orange-500/25">
+            <span className="absolute right-4 top-3 flex items-center gap-1 rounded-full bg-card/90 px-3 py-1 text-xs font-extrabold text-brand shadow-sm">
+              <Crown size={13} strokeWidth={2.6} /> {t("level.label")} {lv.level}
             </span>
           </div>
+          {/* `relative` — yoxsa mövqeli (relative) zolaq avatarın üstünə çəkilir. */}
+          <div className="relative -mt-14 flex flex-col items-center px-5 pb-6 text-center sm:px-8">
+            <span className="rounded-[1.35rem] bg-card ring-4 ring-card">
+              <Avatar config={profile.avatar} seed={profile.username || profile.name} size={104} />
+            </span>
+            <h1 className="mt-3 text-2xl font-bold text-fg">{profile.name}</h1>
+            {profile.username && (
+              <p className="text-sm font-bold text-muted">@{profile.username}</p>
+            )}
+            <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
+              <CalendarDays size={14} />
+              {t("profile.memberSince").replace("{d}", memberDate(profile.createdAt))}
+            </p>
 
-          {/* Səviyyə */}
-          <div className="mt-4 w-full max-w-xs">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-extrabold text-brand">
-                {t("level.label")} {lv.level} · {t(lv.titleKey)}
+            {/* İzləyici / izlənilən — statistik kapsullar */}
+            <div className="mt-4 flex items-center gap-2.5">
+              <span className="flex items-center gap-2 rounded-2xl border border-line bg-panel px-3.5 py-2">
+                <Users size={16} className="text-teal-600 dark:text-teal-400" />
+                <b className="text-base font-extrabold text-fg">{social.followers}</b>
+                <span className="text-xs font-semibold text-muted">{t("follow.followers")}</span>
               </span>
-              <span className="text-xs text-muted">
-                {lv.xpInLevel}/{lv.xpForNext} XP
+              <span className="flex items-center gap-2 rounded-2xl border border-line bg-panel px-3.5 py-2">
+                <UserCheck size={16} className="text-brand" />
+                <b className="text-base font-extrabold text-fg">{social.following}</b>
+                <span className="text-xs font-semibold text-muted">{t("follow.followingCount")}</span>
               </span>
             </div>
-            <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-panel-2">
-              <div
-                className="h-full rounded-full bg-accent transition-all"
-                style={{ width: `${lv.progress * 100}%` }}
-              />
+
+            {/* Səviyyə */}
+            <div className="mt-5 w-full max-w-sm">
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="truncate font-extrabold text-brand">
+                  {t("level.label")} {lv.level} · {t(lv.titleKey)}
+                </span>
+                <span className="flex shrink-0 items-center gap-1 rounded-full bg-amber-400/15 px-2.5 py-0.5 text-xs font-extrabold text-amber-700 dark:text-amber-300">
+                  <Star size={12} fill="currentColor" strokeWidth={0} />
+                  {lv.xpInLevel}/{lv.xpForNext} XP
+                </span>
+              </div>
+              <div className="mt-2 h-3 overflow-hidden rounded-full bg-panel-2">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all"
+                  style={{ width: `${lv.progress * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Redaktə + Paylaş — yan-yana iki bərabər düymə (QR paneli altda tam enli açılır) */}
+            <div className="mt-5 grid w-full max-w-sm grid-cols-2 gap-3">
+              <Link
+                href="/profil/redakte"
+                className="flex items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl border-2 border-line bg-card px-2 py-2.5 text-[13px] font-bold text-fg btn-pop btn-pop-ghost hover:border-brand sm:text-sm"
+              >
+                <Pencil size={15} className="shrink-0" /> {t("profile.edit")}
+              </Link>
+              <ShareProfile username={profile.username} compact />
             </div>
           </div>
-
-          {/* Redaktə */}
-          <Link
-            href="/profil/redakte"
-            className="mt-4 inline-flex items-center gap-2 rounded-2xl border-2 border-line bg-panel px-4 py-2 text-sm font-bold text-fg btn-pop btn-pop-ghost hover:border-brand"
-          >
-            <Pencil size={16} /> {t("profile.edit")}
-          </Link>
         </div>
 
         {/* Statistika: streak · XP · liqa */}
         <div className="mt-4 grid grid-cols-3 gap-3">
-          <Stat Icon={Flame} value={state.streakDays} label={t("stat.streak")} color="text-orange-500" />
-          <Stat Icon={Star} value={state.totalXp} label={t("stat.xp")} color="text-accent" />
-          <StatText
+          <Stat
+            Icon={Flame}
+            value={String(state.streakDays)}
+            label={t("stat.streak")}
+            tile="bg-orange-500/12 text-orange-500"
+          />
+          <Stat
+            Icon={Star}
+            value={String(state.totalXp)}
+            label={t("stat.xp")}
+            tile="bg-amber-400/15 text-amber-500"
+          />
+          <Stat
             Icon={Crown}
             value={t(TIER_KEYS[Math.min(tier, 4)]).replace(" liqa", "").replace(" league", "").replace(" лига", "")}
             label={t("nav.league")}
-            color="text-brand"
+            tile="bg-yellow-500/15 text-yellow-600 dark:text-yellow-400"
+            text
           />
         </div>
 
-        {/* Paylaş */}
-        <div className="mt-4">
-          <ShareProfile username={profile.username} />
-        </div>
-
         {/* Dostlar */}
-        <div className="mt-4 rounded-2xl border border-line bg-panel p-5">
+        <div className={`mt-4 p-5 ${CARD}`}>
           <h2 className="text-lg font-bold text-fg">{t("friends.title")}</h2>
           {friends.length === 0 ? (
             <p className="mt-2 text-sm text-muted">{t("friends.none")}</p>
@@ -166,7 +199,7 @@ export default function ProfilePage() {
                 <Link
                   key={f.friendId}
                   href={`/u/${f.username || f.friendId}`}
-                  className="flex items-center gap-3 rounded-2xl border border-line px-3 py-2.5 transition hover:bg-panel-2"
+                  className="flex items-center gap-3 rounded-2xl border border-line bg-panel px-3 py-2.5 transition hover:bg-panel-2"
                 >
                   <Avatar config={f.avatar} seed={f.username || f.name} size={40} />
                   <span className="min-w-0 flex-1 truncate font-bold text-fg">{f.name}</span>
@@ -175,8 +208,8 @@ export default function ProfilePage() {
                       <Flame size={14} /> {f.friendStreak}
                     </span>
                   )}
-                  <span className="flex items-center gap-1 text-xs font-bold text-muted">
-                    <Star size={13} className="text-accent" /> {f.totalXp}
+                  <span className="flex items-center gap-1 rounded-full bg-amber-400/15 px-2.5 py-1 text-xs font-extrabold text-amber-700 dark:text-amber-300">
+                    <Star size={12} fill="currentColor" strokeWidth={0} /> {f.totalXp}
                   </span>
                 </Link>
               ))}
@@ -191,32 +224,34 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Nişanlar (medal/orden) */}
-        <div className="mt-4 rounded-2xl border border-line bg-panel p-5">
-          <div className="flex items-center justify-between">
+        {/* Nişanlar (medal/orden) — hər biri öz iç kartında, öz rəngində */}
+        <div className={`mt-4 p-5 ${CARD}`}>
+          <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-bold text-fg">{t("profile.badges")}</h2>
             {/* Aylıq nişan */}
-            <div className="flex items-center gap-2">
-              <OrderBadge Icon={CalendarDays} tier={monthTier} size={34} />
+            <div className="flex items-center gap-2 rounded-full border border-line bg-panel py-1 pl-1 pr-3">
+              <OrderBadge Icon={CalendarDays} tier={monthTier} size={30} />
               <span className="text-xs font-bold text-muted">{t("profile.monthly")}</span>
             </div>
           </div>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {achievements.map((a) => (
-              <div key={a.id} className="flex items-center gap-3">
-                <OrderBadge Icon={ACH_ICON[a.kind]} tier={a.tier} size={54} />
+              <div key={a.id} className="flex items-center gap-3 rounded-2xl border border-line bg-panel p-3.5">
+                <OrderBadge Icon={ACH_ICON[a.kind]} tier={a.tier} size={52} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate font-bold text-fg">{t(a.titleKey)}</span>
-                    <span className="shrink-0 text-xs font-bold text-muted">{a.tier}/3</span>
+                    <span className="shrink-0 rounded-full bg-panel-2 px-2 py-0.5 text-[11px] font-extrabold text-muted">
+                      {a.tier}/3
+                    </span>
                   </div>
-                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-panel-2">
+                  <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-panel-2">
                     <div
-                      className="h-full rounded-full bg-accent transition-all"
+                      className={`h-full rounded-full transition-all ${ACH_BAR[a.kind]}`}
                       style={{ width: `${a.progress * 100}%` }}
                     />
                   </div>
-                  <div className="mt-1 text-[11px] text-muted">
+                  <div className="mt-1 text-[11px] font-semibold text-muted">
                     {a.nextGoal === null ? `${a.value}` : `${a.value}/${a.nextGoal}`}
                   </div>
                 </div>
@@ -225,27 +260,31 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Fənn üzrə irəliləyiş */}
-        <div className="mt-4 rounded-2xl border border-line bg-panel p-5">
+        {/* Fənn üzrə irəliləyiş — fənn ikonu + fənnin öz rəngi */}
+        <div className={`mt-4 p-5 ${CARD}`}>
           <h2 className="text-lg font-bold text-fg">{t("profile.progress")}</h2>
           <div className="mt-4 space-y-4">
             {subjectsForGrade(subjects, user).map((s) => {
               const ls = s.units.flatMap((u) => u.lessons);
               const done = ls.filter((l) => state.completedLessons.includes(l.id)).length;
               const pct = ls.length ? Math.round((done / ls.length) * 100) : 0;
+              const color = subjectVisual(s.slug)?.color ?? "var(--color-brand)";
               return (
-                <div key={s.slug}>
-                  <div className="flex justify-between text-sm font-semibold">
-                    <span className="text-fg">{t(`subject.${s.slug}`)}</span>
-                    <span className="text-muted">
-                      {done}/{ls.length}
-                    </span>
-                  </div>
-                  <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-panel-2">
-                    <div
-                      className="h-full rounded-full bg-brand transition-all"
-                      style={{ width: `${pct}%` }}
-                    />
+                <div key={s.slug} className="flex items-center gap-3">
+                  <SubjectBadge slug={s.slug} fallback={s.icon} size={32} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2 text-sm font-semibold">
+                      <span className="truncate text-fg">{t(`subject.${s.slug}`)}</span>
+                      <span className="shrink-0 text-xs text-muted">
+                        <b className="font-extrabold text-fg">{done}/{ls.length}</b> · {pct}%
+                      </span>
+                    </div>
+                    <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-panel-2">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${pct}%`, background: color }}
+                      />
+                    </div>
                   </div>
                 </div>
               );
@@ -254,88 +293,84 @@ export default function ProfilePage() {
         </div>
 
         {/* Daha çoxu — Məktəblər üçün · Plus · Ayarlar · Yardım (mobil giriş) */}
-        <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-panel">
-          <Link href="/mekteb" className="flex items-center gap-3 border-b border-line px-4 py-3.5 transition hover:bg-panel-2">
-            <School size={20} className="text-brand" />
-            <span className="flex-1 font-bold text-fg">{t("nav.schools")}</span>
-            <ChevronRight size={18} className="text-muted" />
-          </Link>
-          <Link href="/plus" className="flex items-center gap-3 border-b border-line px-4 py-3.5 transition hover:bg-panel-2">
-            <Crown size={20} className="text-amber-500" />
-            <span className="flex-1 font-bold text-fg">Imparo Plus</span>
-            <ChevronRight size={18} className="text-muted" />
-          </Link>
-          <Link href="/ayarlar" className="flex items-center gap-3 border-b border-line px-4 py-3.5 transition hover:bg-panel-2">
-            <Settings size={20} className="text-muted" />
-            <span className="flex-1 font-bold text-fg">{t("nav.settings")}</span>
-            <ChevronRight size={18} className="text-muted" />
-          </Link>
+        <div className={`mt-6 overflow-hidden ${CARD}`}>
+          <MenuRow href="/mekteb" Icon={School} tile="bg-brand/12 text-brand" label={t("nav.schools")} />
+          <MenuRow href="/plus" Icon={Crown} tile="bg-amber-400/15 text-amber-500" label="Imparo Plus" />
+          <MenuRow href="/ayarlar" Icon={Settings} tile="bg-slate-500/12 text-slate-500 dark:text-slate-300" label={t("nav.settings")} />
           {isAdmin && (
-            <Link href="/admin" className="flex items-center gap-3 border-b border-line px-4 py-3.5 transition hover:bg-panel-2">
-              <ShieldCheck size={20} className="text-brand" />
-              <span className="flex-1 font-bold text-fg">Admin paneli</span>
-              <ChevronRight size={18} className="text-muted" />
-            </Link>
+            <MenuRow href="/admin" Icon={ShieldCheck} tile="bg-violet-500/12 text-violet-600 dark:text-violet-300" label="Admin paneli" />
           )}
-          <Link href="/yardim" className="flex items-center gap-3 px-4 py-3.5 transition hover:bg-panel-2">
-            <HelpCircle size={20} className="text-muted" />
-            <span className="flex-1 font-bold text-fg">{t("nav.help")}</span>
-            <ChevronRight size={18} className="text-muted" />
-          </Link>
+          <MenuRow href="/yardim" Icon={HelpCircle} tile="bg-sky-500/12 text-sky-600 dark:text-sky-300" label={t("nav.help")} last />
         </div>
 
         <button
           type="button"
           onClick={logout}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-line bg-panel px-5 py-3 font-bold text-fg btn-pop btn-pop-ghost hover:border-brand"
+          className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-2xl border-2 border-line bg-card px-5 py-3 font-bold text-fg btn-pop btn-pop-ghost hover:border-red-400"
         >
-          <LogOut size={18} /> {t("profile.logout")}
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/12 text-red-500">
+            <LogOut size={16} />
+          </span>
+          {t("profile.logout")}
         </button>
       </main>
     </div>
   );
 }
 
+// Bu səhifədəki əsas kartlar: ağ kart + "basılan" 3D alt haşiyə (Öyrən ekranı ilə eyni dil).
+const CARD = "rounded-2xl border-2 border-line bg-card shadow-[0_4px_0_0_var(--color-line)]";
+
 function Stat({
   Icon,
   value,
   label,
-  color,
+  tile,
+  text = false,
 }: {
   Icon: LucideIcon;
-  value: number;
+  value: string;
   label: string;
-  color: string;
+  tile: string;
+  /** Rəqəm yox, söz (liqa adı) — bir az kiçik şrift ki, sığsın. */
+  text?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-2xl border border-line bg-panel px-4 py-3">
-      <Icon size={22} className={color} />
-      <div className="leading-tight">
-        <div className="text-lg font-extrabold text-fg">{value}</div>
-        <div className="text-[11px] text-muted">{label}</div>
+    <div className={`flex min-w-0 flex-col items-start gap-2 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4 ${CARD}`}>
+      <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tile}`}>
+        <Icon size={22} strokeWidth={2.4} />
+      </span>
+      <div className="min-w-0 leading-tight">
+        <div className={`truncate font-extrabold text-fg ${text ? "text-base sm:text-lg" : "text-xl"}`}>{value}</div>
+        <div className="truncate text-[11px] font-semibold text-muted">{label}</div>
       </div>
     </div>
   );
 }
 
-function StatText({
+function MenuRow({
+  href,
   Icon,
-  value,
+  tile,
   label,
-  color,
+  last = false,
 }: {
+  href: string;
   Icon: LucideIcon;
-  value: string;
+  tile: string;
   label: string;
-  color: string;
+  last?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-2xl border border-line bg-panel px-4 py-3">
-      <Icon size={22} className={color} />
-      <div className="leading-tight">
-        <div className="truncate text-sm font-extrabold text-fg">{value}</div>
-        <div className="text-[11px] text-muted">{label}</div>
-      </div>
-    </div>
+    <Link
+      href={href}
+      className={`flex items-center gap-3 px-4 py-3 transition hover:bg-panel ${last ? "" : "border-b border-line"}`}
+    >
+      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tile}`}>
+        <Icon size={19} strokeWidth={2.3} />
+      </span>
+      <span className="flex-1 font-bold text-fg">{label}</span>
+      <ChevronRight size={18} className="text-muted" />
+    </Link>
   );
 }

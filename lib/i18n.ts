@@ -44,6 +44,20 @@ const DICT: Dict = {
   "shop.owned": { az: "Alındı!", en: "Purchased!", ru: "Куплено!" },
   "shop.notEnough": { az: "Zümrüd çatmır", en: "Not enough gems", ru: "Недостаточно кристаллов" },
   "shop.full": { az: "Artıq doludur", en: "Already full", ru: "Уже полно" },
+  "shop.fullBtn": { az: "Tam doludur", en: "Full", ru: "Полно" },
+  "shop.freezeActive": { az: "Aktiv: {n}", en: "Active: {n}", ru: "Активно: {n}" },
+  "shop.earnTitle": { az: "Zümrüd necə qazanılır?", en: "How to earn gems", ru: "Как заработать кристаллы" },
+  "shop.earnQuests": {
+    az: "Gündəlik hədəfləri tamamla və sürpriz sandığı aç",
+    en: "Complete daily goals and open the surprise chest",
+    ru: "Выполняй ежедневные цели и открывай сундук",
+  },
+  "shop.earnLessons": { az: "Hər dərsi bitir", en: "Finish every lesson", ru: "Заканчивай каждый урок" },
+  "shop.earnUnitChest": {
+    az: "Yolundakı bölmə sandıqlarını aç",
+    en: "Open unit chests on your path",
+    ru: "Открывай сундуки разделов на пути",
+  },
   "nav.settings": { az: "Ayarlar", en: "Settings", ru: "Настройки" },
   "nav.help": { az: "Yardım mərkəzi", en: "Help center", ru: "Центр помощи" },
   "nav.logout": { az: "Çıxış", en: "Log out", ru: "Выйти" },
@@ -281,6 +295,29 @@ const DICT: Dict = {
     en: "All daily goals done!",
     ru: "Все ежедневные цели выполнены!",
   },
+  "quest.chestLocked": {
+    az: "Bütün gündəlik hədəfləri bitir və sürpriz sandığı aç!",
+    en: "Finish all daily goals to open the surprise chest!",
+    ru: "Выполни все цели и открой сундук-сюрприз!",
+  },
+  "quest.chestOpenCta": { az: "Sandığı aç", en: "Open chest", ru: "Открыть сундук" },
+  "quest.chestDone": {
+    az: "Bugünkü sandıq açıldı ✓ — sabah yenisi gələcək",
+    en: "Today's chest is opened ✓ — a new one comes tomorrow",
+    ru: "Сегодняшний сундук открыт ✓ — завтра будет новый",
+  },
+  "quest.monthlyXp": { az: "Bu ay: {n} XP", en: "This month: {n} XP", ru: "В этом месяце: {n} XP" },
+  "quest.monthlyNext": {
+    az: "Növbəti nişana {n} XP qalıb",
+    en: "{n} XP to the next badge",
+    ru: "До следующего значка {n} XP",
+  },
+  "quest.monthlyMax": {
+    az: "Bu ayın ən yüksək nişanı səndədir!",
+    en: "You earned this month's top badge!",
+    ru: "У тебя высший значок месяца!",
+  },
+  "practice.speedBadge": { az: "60 saniyə", en: "60 seconds", ru: "60 секунд" },
 
   // Achievements (pilləli nişanlar)
   "ach.title": { az: "Nişanlar", en: "Badges", ru: "Награды" },

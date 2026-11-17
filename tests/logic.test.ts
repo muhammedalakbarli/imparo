@@ -362,3 +362,16 @@ describe("hesabatda zəiflik etiketi", () => {
     expect(weakLabel({ weakest: null })).toBeNull();
   });
 });
+
+describe("defaultAvatar", () => {
+  it("hər toxum üçün palitradan rəngli fon qaytarır (fonsuz/şəffaf avatar yoxdur)", async () => {
+    const { defaultAvatar, AVATAR_BGS, AVATAR_CHARS } = await import("@/components/Avatar");
+    const seeds = ["?", "Fidan-2-0", "Ayxan-2-3", "uicheck378ba2f0", "Səbinə-1-7", "x".repeat(40)];
+    for (let i = 0; i < 500; i++) seeds.push(`bot-${i}-${i * 7919}`);
+    for (const seed of seeds) {
+      const a = defaultAvatar(seed);
+      expect(AVATAR_BGS, seed).toContain(a.bg);
+      expect(AVATAR_CHARS, seed).toContain(a.char);
+    }
+  });
+});

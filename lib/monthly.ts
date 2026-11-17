@@ -39,7 +39,10 @@ export async function addMonthlyXp(amount: number): Promise<void> {
   }
 }
 
+/** Aylıq nişan hədləri: bürünc · gümüş · qızıl (XP). */
+export const MONTHLY_TIERS = [50, 200, 500] as const;
+
 // Aylıq nişan pilləsi (0-3) aylıq XP-dən.
 export function monthlyBadgeTier(xp: number): number {
-  return xp >= 500 ? 3 : xp >= 200 ? 2 : xp >= 50 ? 1 : 0;
+  return xp >= MONTHLY_TIERS[2] ? 3 : xp >= MONTHLY_TIERS[1] ? 2 : xp >= MONTHLY_TIERS[0] ? 1 : 0;
 }

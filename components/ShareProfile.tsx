@@ -12,10 +12,17 @@ export default function ShareProfile({
   username,
   path = "u",
   labelKey = "profile.share",
+  compact = false,
 }: {
   username: string | null;
   path?: string;
   labelKey?: string;
+  /**
+   * Kompakt: 2 sütunlu grid-in içində yan-yana düymə (Profil kimlik kartı).
+   * Sarğı `display: contents` olur — düymə grid xanasına, QR paneli isə
+   * tam enli ikinci sətrə (`col-span-2`) düşür.
+   */
+  compact?: boolean;
 }) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -49,7 +56,9 @@ export default function ShareProfile({
     return (
       <Link
         href="/profil/redakte"
-        className="flex items-center justify-center gap-2 rounded-2xl border-2 border-line bg-panel px-5 py-3 font-bold text-fg btn-pop btn-pop-ghost hover:border-brand"
+        className={`flex items-center justify-center gap-2 rounded-2xl border-2 border-line bg-panel font-bold text-fg btn-pop btn-pop-ghost hover:border-brand ${
+          compact ? "px-3 py-2.5 text-sm" : "px-5 py-3"
+        }`}
       >
         <Share2 size={18} /> {t(labelKey)}
       </Link>
@@ -57,17 +66,20 @@ export default function ShareProfile({
   }
 
   return (
-    <div>
+    <div className={compact ? "contents" : undefined}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-3 font-bold uppercase tracking-wide text-white btn-pop hover:bg-brand-dark"
+        aria-expanded={open}
+        className={`flex w-full items-center justify-center gap-2 rounded-2xl bg-brand font-bold text-white btn-pop hover:bg-brand-dark ${
+          compact ? "gap-1.5 whitespace-nowrap px-2 py-2.5 text-[13px] sm:text-sm" : "px-5 py-3 uppercase tracking-wide"
+        }`}
       >
-        <Share2 size={18} /> {t(labelKey)}
+        <Share2 size={compact ? 15 : 18} className="shrink-0" /> {t(labelKey)}
       </button>
 
       {open && (
-        <div className="mt-3 rounded-2xl border-2 border-line bg-panel p-5 text-center">
+        <div className={`rounded-2xl border-2 border-line bg-panel p-5 text-center ${compact ? "col-span-2" : "mt-3"}`}>
           <div className="flex justify-center rounded-2xl bg-white p-3">
             <QRCodeSVG value={url} size={148} bgColor="#ffffff" fgColor="#1c1a30" level="M" />
           </div>
