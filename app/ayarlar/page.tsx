@@ -2,13 +2,32 @@
 
 // Ayarlar → Tərcihlər: dərs təcrübəsi (səs, animasiya, motivasiya, dinləmə) +
 // görünüş (tünd rejim) + dil (interfeys dili).
+//
+// Sinif hesabı (müəllimin yaratdığı, sinif kodu + PIN ilə girən şagird): sinfi və
+// hesabı silməyi müəllim idarə edir — burada kilidlidir. Server də eyni qaydanı
+// tətbiq edir (migration 0067), bu ekran yalnız uşağı çaşdırmamaq üçündür.
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Trash2 } from "lucide-react";
+import {
+  Bell,
+  Download,
+  GraduationCap,
+  Headphones,
+  Languages,
+  Lock,
+  Moon,
+  PartyPopper,
+  Settings,
+  Sparkles,
+  Trash2,
+  Volume2,
+  type LucideIcon,
+} from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { createClient } from "@/lib/supabase/client";
 import { userGrade, GRADES_WITH_CONTENT, gradeOrdinal } from "@/lib/grade";
+import { isManagedAccount } from "@/lib/managedStudents";
 import { loadPrefs, savePrefs, type Prefs, type DarkMode, type Lang } from "@/lib/prefs";
 import {
   pushSupported,
@@ -22,11 +41,33 @@ import { PageSkeleton } from "@/components/Skeleton";
 import Toggle from "@/components/Toggle";
 import ParentReportCard from "@/components/ParentReportCard";
 
-const LESSON_ROWS: { key: keyof Prefs; labelKey: string; hintKey: string }[] = [
-  { key: "sound", labelKey: "settings.sound", hintKey: "settings.soundHint" },
-  { key: "animations", labelKey: "settings.animations", hintKey: "settings.animationsHint" },
-  { key: "motivational", labelKey: "settings.motivational", hintKey: "settings.motivationalHint" },
-  { key: "listening", labelKey: "settings.listening", hintKey: "settings.listeningHint" },
+const CARD = "rounded-2xl border-2 border-line bg-card shadow-[0_4px_0_0_var(--color-line)]";
+const SELECT =
+  "max-w-[46%] shrink-0 rounded-xl border-2 border-line bg-panel px-3 py-2 text-sm font-bold text-fg outline-none focus:border-brand sm:max-w-none";
+
+const LESSON_ROWS: { key: keyof Prefs; labelKey: string; hintKey: string; Icon: LucideIcon; tile: string }[] = [
+  { key: "sound", labelKey: "settings.sound", hintKey: "settings.soundHint", Icon: Volume2, tile: "bg-brand/12 text-brand" },
+  {
+    key: "animations",
+    labelKey: "settings.animations",
+    hintKey: "settings.animationsHint",
+    Icon: Sparkles,
+    tile: "bg-violet-500/12 text-violet-600 dark:text-violet-300",
+  },
+  {
+    key: "motivational",
+    labelKey: "settings.motivational",
+    hintKey: "settings.motivationalHint",
+    Icon: PartyPopper,
+    tile: "bg-amber-400/15 text-amber-600 dark:text-amber-300",
+  },
+  {
+    key: "listening",
+    labelKey: "settings.listening",
+    hintKey: "settings.listeningHint",
+    Icon: Headphones,
+    tile: "bg-sky-500/12 text-sky-600 dark:text-sky-300",
+  },
 ];
 
 export default function SettingsPage() {
@@ -40,6 +81,7 @@ export default function SettingsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteText, setDeleteText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [deleteErr, setDeleteErr] = useState(false);
   const t = useT();
   const DELETE_WORD = "SİL";
 
@@ -65,6 +107,11 @@ export default function SettingsPage() {
   }
 
   if (!ready || !user || !prefs) return <PageSkeleton />;
+
+  const managed = isManagedAccount(user);
+  const grade = userGrade(user);
+  const gradeText = (g: number) =>
+    t("settings.gradeOption").replace("{n}", String(g)).replace("{ord}", gradeOrdinal(g));
 
   function setToggle(key: keyof Prefs, value: boolean) {
     const next = { ...prefs!, [key]: value };
@@ -104,14 +151,21 @@ export default function SettingsPage() {
   }
 
   // Hesabı həmişəlik sil (bax migration 0039, delete_own_account RPC) — geri qaytarılmaz.
+  // RPC xəta qaytarsa (şəbəkə, sinif hesabı — 0067) çıxış ETMİRİK: əks halda istifadəçi
+  // hesabın silindiyini düşünərdi, amma hesab yerində qalardı.
   async function deleteAccount() {
-    if (deleteText !== DELETE_WORD || deleting) return;
+    if (managed || deleteText !== DELETE_WORD || deleting) return;
     setDeleting(true);
+    setDeleteErr(false);
     const supabase = createClient();
-    try {
-      await supabase.rpc("delete_own_account");
-    } catch {
-      // sükutla ötür — hər halda çıxış edib yönləndiririk
+    const { error } = await supabase.rpc("delete_own_account").then(
+      (r) => r,
+      () => ({ error: true }),
+    );
+    if (error) {
+      setDeleting(false);
+      setDeleteErr(true);
+      return;
     }
     await supabase.auth.signOut();
     router.replace("/");
@@ -119,6 +173,7 @@ export default function SettingsPage() {
 
   // Sinif dəyişdir — user_metadata.grade yenilə və yeni sinfin proqramına keç.
   async function setGrade(value: number) {
+    if (managed) return;
     const supabase = createClient();
     await supabase.auth.updateUser({ data: { grade: value } });
     // Sinif dəyişəndə bütün proqram/məzmun yenidən yüklənməlidir — tam keçid qəsdəndir.
@@ -129,112 +184,121 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-ink">
       <main className="mx-auto max-w-2xl px-4 py-6">
-        <h1 className="text-2xl font-bold text-fg">{t("settings.title")}</h1>
-        <p className="mt-1 text-sm text-muted">{t("settings.subtitle")}</p>
+        <div className="flex items-center gap-3">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-500/12 text-slate-500 dark:text-slate-300">
+            <Settings size={24} strokeWidth={2.3} />
+          </span>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-extrabold text-fg">{t("settings.title")}</h1>
+            <p className="text-sm text-muted">{t("settings.subtitle")}</p>
+          </div>
+        </div>
 
         {/* Dərs təcrübəsi */}
-        <h2 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">
-          {t("settings.lessonExp")}
-        </h2>
-        <div className="mt-2 overflow-hidden rounded-2xl border border-line bg-panel">
-          {LESSON_ROWS.map((row) => (
-            <div
+        <SectionTitle>{t("settings.lessonExp")}</SectionTitle>
+        <div className={`overflow-hidden ${CARD}`}>
+          {LESSON_ROWS.map((row, i) => (
+            <Row
               key={row.key}
-              className="flex items-center justify-between gap-4 border-b border-line px-4 py-3.5 last:border-b-0"
+              Icon={row.Icon}
+              tile={row.tile}
+              label={t(row.labelKey)}
+              hint={t(row.hintKey)}
+              last={i === LESSON_ROWS.length - 1}
             >
-              <div>
-                <div className="font-bold text-fg">{t(row.labelKey)}</div>
-                <div className="text-xs text-muted">{t(row.hintKey)}</div>
-              </div>
-              <Toggle
-                checked={prefs[row.key] as boolean}
-                onChange={(v) => setToggle(row.key, v)}
-              />
-            </div>
+              <Toggle checked={prefs[row.key] as boolean} onChange={(v) => setToggle(row.key, v)} />
+            </Row>
           ))}
         </div>
 
         {/* Bildirişlər (re-engagement push) */}
-        <h2 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">
-          {t("settings.notifSection")}
-        </h2>
-        <div className="mt-2 overflow-hidden rounded-2xl border border-line bg-panel">
-          <div className="flex items-center justify-between gap-4 px-4 py-3.5">
-            <div>
-              <div className="font-bold text-fg">{t("settings.notifications")}</div>
-              <div className="text-xs text-muted">
-                {pushSupported() ? t("settings.notificationsHint") : t("settings.notifUnsupported")}
-              </div>
-              {pushMsg && <div className="mt-1 text-xs font-semibold text-red-500">{pushMsg}</div>}
-            </div>
+        <SectionTitle>{t("settings.notifSection")}</SectionTitle>
+        <div className={`overflow-hidden ${CARD}`}>
+          <Row
+            Icon={Bell}
+            tile="bg-rose-500/12 text-rose-500 dark:text-rose-300"
+            label={t("settings.notifications")}
+            hint={pushSupported() ? t("settings.notificationsHint") : t("settings.notifUnsupported")}
+            extra={pushMsg ? <div className="mt-1 text-xs font-semibold text-red-500">{pushMsg}</div> : null}
+            last
+          >
             <Toggle
               checked={pushOn}
               disabled={pushBusy || !pushSupported() || pushPermission() === "denied"}
               onChange={togglePush}
             />
-          </div>
+          </Row>
         </div>
 
-        {/* Sinif */}
-        <h2 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">
-          {t("settings.gradeSection")}
-        </h2>
-        <div className="mt-2 overflow-hidden rounded-2xl border border-line bg-panel">
-          <div className="flex items-center justify-between gap-4 px-4 py-3.5">
-            <div>
-              <div className="font-bold text-fg">{t("settings.grade")}</div>
-              <div className="text-xs text-muted">{t("settings.gradeHint")}</div>
-            </div>
-            <select
-              value={userGrade(user)}
-              onChange={(e) => setGrade(Number(e.target.value))}
-              className="rounded-xl border-2 border-line bg-panel px-3 py-2 text-sm font-bold text-fg outline-none focus:border-brand"
-            >
-              {GRADES_WITH_CONTENT.map((g) => (
-                <option key={g} value={g}>
-                  {t("settings.gradeOption").replace("{n}", String(g)).replace("{ord}", gradeOrdinal(g))}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Sinif — sinif hesabında müəllim təyin edir (kilidli) */}
+        <SectionTitle>{t("settings.gradeSection")}</SectionTitle>
+        <div className={`overflow-hidden ${CARD}`}>
+          <Row
+            Icon={GraduationCap}
+            tile="bg-emerald-500/12 text-emerald-600 dark:text-emerald-300"
+            label={t("settings.grade")}
+            hint={managed ? t("settings.gradeLocked") : t("settings.gradeHint")}
+            last
+          >
+            {managed ? (
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-panel-2 px-3 py-2 text-sm font-bold text-fg">
+                <Lock size={14} className="text-muted" /> {gradeText(grade)}
+              </span>
+            ) : (
+              <select
+                value={grade}
+                onChange={(e) => setGrade(Number(e.target.value))}
+                aria-label={t("settings.grade")}
+                className={SELECT}
+              >
+                {GRADES_WITH_CONTENT.map((g) => (
+                  <option key={g} value={g}>
+                    {gradeText(g)}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Row>
         </div>
 
         {/* Görünüş */}
-        <h2 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">
-          {t("settings.appearance")}
-        </h2>
-        <div className="mt-2 overflow-hidden rounded-2xl border border-line bg-panel">
-          <div className="flex items-center justify-between gap-4 px-4 py-3.5">
-            <div>
-              <div className="font-bold text-fg">{t("settings.dark")}</div>
-              <div className="text-xs text-muted">{t("settings.darkHint")}</div>
-            </div>
+        <SectionTitle>{t("settings.appearance")}</SectionTitle>
+        <div className={`overflow-hidden ${CARD}`}>
+          <Row
+            Icon={Moon}
+            tile="bg-indigo-500/12 text-indigo-600 dark:text-indigo-300"
+            label={t("settings.dark")}
+            hint={t("settings.darkHint")}
+            last
+          >
             <select
               value={prefs.darkMode}
               onChange={(e) => setDark(e.target.value as DarkMode)}
-              className="rounded-xl border-2 border-line bg-panel px-3 py-2 text-sm font-bold text-fg outline-none focus:border-brand"
+              aria-label={t("settings.dark")}
+              className={SELECT}
             >
               <option value="system">{t("settings.system")}</option>
               <option value="light">{t("settings.light")}</option>
               <option value="dark">{t("settings.darkOpt")}</option>
             </select>
-          </div>
+          </Row>
         </div>
 
         {/* Dil */}
-        <h2 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">
-          {t("settings.language")}
-        </h2>
-        <div className="mt-2 overflow-hidden rounded-2xl border border-line bg-panel">
-          <div className="flex items-center justify-between gap-4 px-4 py-3.5">
-            <div>
-              <div className="font-bold text-fg">{t("settings.language")}</div>
-              <div className="text-xs text-muted">{t("settings.languageHint")}</div>
-            </div>
+        <SectionTitle>{t("settings.language")}</SectionTitle>
+        <div className={`overflow-hidden ${CARD}`}>
+          <Row
+            Icon={Languages}
+            tile="bg-teal-500/12 text-teal-600 dark:text-teal-300"
+            label={t("settings.language")}
+            hint={t("settings.languageHint")}
+            last
+          >
             <select
               value={prefs.lang}
               onChange={(e) => setLang(e.target.value as Lang)}
-              className="rounded-xl border-2 border-line bg-panel px-3 py-2 text-sm font-bold text-fg outline-none focus:border-brand"
+              aria-label={t("settings.language")}
+              className={SELECT}
             >
               {(Object.keys(LANG_NAMES) as Lang[]).map((l) => (
                 <option key={l} value={l}>
@@ -242,73 +306,131 @@ export default function SettingsPage() {
                 </option>
               ))}
             </select>
-          </div>
+          </Row>
         </div>
 
         <ParentReportCard />
 
         {/* Məlumatlarım — özünə-xidmət ixrac + silmə (məxfilik hüquqları) */}
-        <h2 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">
-          {t("settings.privacy")}
-        </h2>
-        <div className="mt-2 overflow-hidden rounded-2xl border border-line bg-panel">
+        <SectionTitle>{t("settings.privacy")}</SectionTitle>
+        <div className={`overflow-hidden ${CARD}`}>
           <button
+            type="button"
             onClick={exportData}
             disabled={exporting}
-            className="flex w-full items-center justify-between gap-4 border-b border-line px-4 py-3.5 text-left last:border-b-0 disabled:opacity-60"
+            className="flex w-full items-center gap-3 border-b border-line px-4 py-3.5 text-left transition hover:bg-panel disabled:opacity-60"
           >
-            <div className="flex items-center gap-3">
-              <Download size={18} className="text-muted" />
-              <div>
-                <div className="font-bold text-fg">{t("settings.exportData")}</div>
-                <div className="text-xs text-muted">{t("settings.exportDataHint")}</div>
-              </div>
+            <Tile Icon={Download} tile="bg-sky-500/12 text-sky-600 dark:text-sky-300" />
+            <div className="min-w-0">
+              <div className="font-bold text-fg">{t("settings.exportData")}</div>
+              <div className="text-xs text-muted">{t("settings.exportDataHint")}</div>
             </div>
           </button>
 
-          <div className="px-4 py-3.5">
-            <button
-              onClick={() => setDeleteOpen((v) => !v)}
-              className="flex w-full items-center gap-3 text-left"
-            >
-              <Trash2 size={18} className="text-red-500" />
-              <div>
-                <div className="font-bold text-red-500">{t("settings.deleteAccount")}</div>
-                <div className="text-xs text-muted">{t("settings.deleteAccountHint")}</div>
-              </div>
-            </button>
-
-            {deleteOpen && (
-              <div className="mt-3 rounded-xl border-2 border-red-500/30 bg-red-500/5 p-3">
-                <p className="text-sm font-semibold text-fg">
-                  {t("settings.deleteAccountConfirm")} <span className="font-mono text-red-500">{DELETE_WORD}</span>
-                </p>
-                <input
-                  value={deleteText}
-                  onChange={(e) => setDeleteText(e.target.value)}
-                  className="mt-2 w-full rounded-lg border-2 border-line bg-panel px-3 py-2 text-sm font-bold text-fg outline-none focus:border-red-500"
-                  placeholder={DELETE_WORD}
-                />
-                <div className="mt-3 flex gap-2">
-                  <button
-                    onClick={() => { setDeleteOpen(false); setDeleteText(""); }}
-                    className="flex-1 rounded-lg border-2 border-line px-3 py-2 text-sm font-bold text-fg"
-                  >
-                    {t("settings.deleteAccountCancel")}
-                  </button>
-                  <button
-                    onClick={deleteAccount}
-                    disabled={deleteText !== DELETE_WORD || deleting}
-                    className="flex-1 rounded-lg bg-red-500 px-3 py-2 text-sm font-bold text-white disabled:opacity-40"
-                  >
-                    {t("settings.deleteAccountFinal")}
-                  </button>
+          {managed ? (
+            <Row
+              Icon={Lock}
+              tile="bg-slate-500/12 text-slate-500 dark:text-slate-300"
+              label={t("settings.managedTitle")}
+              hint={t("settings.managedHint")}
+              last
+            />
+          ) : (
+            <div className="px-4 py-3.5">
+              <button
+                type="button"
+                onClick={() => setDeleteOpen((v) => !v)}
+                aria-expanded={deleteOpen}
+                className="flex w-full items-center gap-3 text-left"
+              >
+                <Tile Icon={Trash2} tile="bg-red-500/12 text-red-500" />
+                <div className="min-w-0">
+                  <div className="font-bold text-red-500">{t("settings.deleteAccount")}</div>
+                  <div className="text-xs text-muted">{t("settings.deleteAccountHint")}</div>
                 </div>
-              </div>
-            )}
-          </div>
+              </button>
+
+              {deleteOpen && (
+                <div className="mt-3 rounded-xl border-2 border-red-500/30 bg-red-500/5 p-3">
+                  <p className="text-sm font-semibold text-fg">
+                    {t("settings.deleteAccountConfirm")} <span className="font-mono text-red-500">{DELETE_WORD}</span>
+                  </p>
+                  <input
+                    value={deleteText}
+                    onChange={(e) => setDeleteText(e.target.value)}
+                    className="mt-2 w-full rounded-lg border-2 border-line bg-panel px-3 py-2 text-sm font-bold text-fg outline-none focus:border-red-500"
+                    placeholder={DELETE_WORD}
+                  />
+                  {deleteErr && <p className="mt-2 text-xs font-bold text-red-500">{t("settings.deleteAccountErr")}</p>}
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleteOpen(false);
+                        setDeleteText("");
+                        setDeleteErr(false);
+                      }}
+                      className="flex-1 rounded-xl border-2 border-line bg-card px-3 py-2 text-sm font-bold text-fg btn-pop btn-pop-ghost"
+                    >
+                      {t("settings.deleteAccountCancel")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={deleteAccount}
+                      disabled={deleteText !== DELETE_WORD || deleting}
+                      className="flex-1 rounded-xl bg-red-500 px-3 py-2 text-sm font-bold text-white btn-pop [--pop:#b91c1c] disabled:opacity-40"
+                    >
+                      {t("settings.deleteAccountFinal")}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="mb-2 mt-7 px-1 text-xs font-extrabold uppercase tracking-wide text-muted">{children}</h2>;
+}
+
+function Tile({ Icon, tile }: { Icon: LucideIcon; tile: string }) {
+  return (
+    <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${tile}`}>
+      <Icon size={20} strokeWidth={2.3} />
+    </span>
+  );
+}
+
+function Row({
+  Icon,
+  tile,
+  label,
+  hint,
+  extra,
+  last = false,
+  children,
+}: {
+  Icon: LucideIcon;
+  tile: string;
+  label: string;
+  hint?: string;
+  extra?: React.ReactNode;
+  last?: boolean;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className={`flex items-center gap-3 px-4 py-3.5 ${last ? "" : "border-b border-line"}`}>
+      <Tile Icon={Icon} tile={tile} />
+      <div className="min-w-0 flex-1">
+        <div className="font-bold text-fg">{label}</div>
+        {hint && <div className="text-xs text-muted">{hint}</div>}
+        {extra}
+      </div>
+      {children}
     </div>
   );
 }

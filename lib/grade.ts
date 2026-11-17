@@ -4,10 +4,17 @@
 import type { User } from "@supabase/supabase-js";
 import type { Subject } from "./types";
 
+const validGrade = (g: unknown): g is number => typeof g === "number" && g >= 1 && g <= 11;
+
 // Onboarding sinfi (1–11). Yoxdursa/etibarsızsa default 5.
+// Müəllimin yaratdığı sinif hesabında sinfi müəllim təyin edir: `app_metadata`-nı
+// yalnız server yazır, ona görə əvvəl o oxunur (user_metadata-nı istifadəçi özü
+// dəyişə bilir — bax migration 0067).
 export function userGrade(user: User | null): number {
+  const managed = user?.app_metadata?.managed_grade;
+  if (validGrade(managed)) return managed;
   const g = user?.user_metadata?.grade;
-  return typeof g === "number" && g >= 1 && g <= 11 ? g : 5;
+  return validGrade(g) ? g : 5;
 }
 
 // Hazırda məzmunu olan siniflər (settings sinif dəyişdiricisi bunları göstərir).

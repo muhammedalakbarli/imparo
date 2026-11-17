@@ -10,6 +10,19 @@ export function isSyntheticEmail(email: string | null | undefined): boolean {
   return e.endsWith(".internal") || e.endsWith(`@${SYNTHETIC_EMAIL_DOMAIN}`);
 }
 
+/**
+ * Müəllimin yaratdığı sinif hesabıdır? `app_metadata`-nı yalnız server yazır
+ * (app/api/mekteb/students, 0067) — istifadəçi özü dəyişə bilməz, ona görə etibarlı
+ * bayraqdır. Sintetik e-poçt ehtiyat yoxlamadır.
+ * Belə hesabda sinif, ad və hesabı silmək müəllimin əlindədir (Ayarlar/Profil kilidli).
+ */
+export function isManagedAccount(
+  user: { email?: string | null; app_metadata?: Record<string, unknown> | null } | null | undefined,
+): boolean {
+  if (!user) return false;
+  return Boolean(user.app_metadata?.managed_class) || isSyntheticEmail(user.email);
+}
+
 /** Bir sorğuda yaradılan şagird sayı — Cloudflare pulsuz planında 50 alt-sorğu limiti var. */
 export const STUDENT_CHUNK = 15;
 /** Bir sinifə bir dəfəyə yapışdırıla bilən maksimum ad. */

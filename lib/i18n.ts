@@ -517,6 +517,11 @@ const DICT: Dict = {
     en: "3-20 chars: lowercase, digits, underscore (_)",
     ru: "3-20 симв.: строчные, цифры, подчёркивание (_)",
   },
+  "profile.nameLocked": {
+    az: "Adını müəllimin yazıb. Səhv varsa, müəlliminə de.",
+    en: "Your teacher entered your name. If it's wrong, tell your teacher.",
+    ru: "Имя ввёл учитель. Если есть ошибка, скажи учителю.",
+  },
   "profile.monthly": { az: "Bu ayın nişanı", en: "This month's badge", ru: "Значок месяца" },
   "profile.back": { az: "Geri", en: "Back", ru: "Назад" },
   "profile.notFound": {
@@ -613,6 +618,11 @@ const DICT: Dict = {
     ru: "Контент показывается по твоему классу",
   },
   "settings.gradeOption": { az: "{ord} sinif", en: "Grade {n}", ru: "{n} класс" },
+  "settings.gradeLocked": {
+    az: "Sinfini müəllimin təyin edib",
+    en: "Your grade is set by your teacher",
+    ru: "Класс установлен учителем",
+  },
   "settings.appearance": { az: "Görünüş", en: "Appearance", ru: "Внешний вид" },
   "settings.dark": { az: "Tünd rejim", en: "Dark mode", ru: "Тёмная тема" },
   "settings.darkHint": {
@@ -651,6 +661,21 @@ const DICT: Dict = {
   },
   "settings.deleteAccountCancel": { az: "Ləğv et", en: "Cancel", ru: "Отмена" },
   "settings.deleteAccountFinal": { az: "Bəli, həmişəlik sil", en: "Yes, delete forever", ru: "Да, удалить навсегда" },
+  "settings.deleteAccountErr": {
+    az: "Hesab silinmədi. Bir az sonra yenidən yoxla.",
+    en: "The account was not deleted. Try again later.",
+    ru: "Аккаунт не удалён. Попробуйте позже.",
+  },
+  "settings.managedTitle": {
+    az: "Hesabını müəllimin idarə edir",
+    en: "Your teacher manages this account",
+    ru: "Этим аккаунтом управляет учитель",
+  },
+  "settings.managedHint": {
+    az: "Sinfi dəyişmək və ya hesabı silmək lazımdırsa, müəlliminə de.",
+    en: "Ask your teacher if your grade needs changing or the account should be deleted.",
+    ru: "Если нужно сменить класс или удалить аккаунт, скажи учителю.",
+  },
 
   // ── Landing (ana səhifə) ──
   "home.login": { az: "Daxil ol", en: "Sign in", ru: "Войти" },

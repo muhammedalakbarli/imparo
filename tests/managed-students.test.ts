@@ -1,7 +1,12 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import type { User } from "@supabase/supabase-js";
+import { userGrade } from "@/lib/grade";
+import { azShortDate } from "@/lib/azDate";
 import {
   parseStudentNames, genPin, genRef, isWeakPin, isRef, isSyntheticEmail, syntheticEmail,
-  normalizeClassCode, studentLoginUrl, SYNTHETIC_EMAIL_DOMAIN, randomPassword,
+  normalizeClassCode, studentLoginUrl, SYNTHETIC_EMAIL_DOMAIN, randomPassword, isManagedAccount,
 } from "@/lib/managedStudents";
 
 describe("müəllimin yapışdırdığı ad siyahısı", () => {
@@ -66,5 +71,62 @@ describe("giriş linki və kod", () => {
   });
   it("sinif kodu normallaşdırılır", () => {
     expect(normalizeClassCode(" ab-12 cd ")).toBe("AB12CD");
+  });
+});
+
+describe("sinif hesabının kilidləri (0067)", () => {
+  const managedUser = {
+    email: "s-abc234-xyz789@sinif.imparo.internal",
+    app_metadata: { managed_class: "c1", managed_grade: 1 },
+    user_metadata: { grade: 6 },
+  };
+
+  it("app_metadata bayrağı və ya sintetik e-poçt sinif hesabını tanıyır", () => {
+    expect(isManagedAccount(managedUser)).toBe(true);
+    expect(isManagedAccount({ email: "x@sinif.imparo.internal", app_metadata: {} })).toBe(true);
+    expect(isManagedAccount({ email: "ana@gmail.com", app_metadata: { managed_class: "c1" } })).toBe(true);
+    expect(isManagedAccount({ email: "ana@gmail.com", app_metadata: {} })).toBe(false);
+    expect(isManagedAccount({ email: "ana@gmail.com" })).toBe(false);
+    expect(isManagedAccount(null)).toBe(false);
+  });
+
+  it("uşaq user_metadata.grade-i dəyişsə də sinif müəllimin təyin etdiyi qalır", () => {
+    // user_metadata-nı istifadəçi özü yaza bilir; app_metadata-nı yalnız server.
+    expect(userGrade(managedUser as unknown as User)).toBe(1);
+  });
+
+  it("adi hesabda sinif user_metadata-dan gəlir, etibarsız app_metadata nəzərə alınmır", () => {
+    expect(userGrade({ app_metadata: {}, user_metadata: { grade: 6 } } as unknown as User)).toBe(6);
+    expect(userGrade({ app_metadata: { managed_grade: 99 }, user_metadata: { grade: 3 } } as unknown as User)).toBe(3);
+    expect(userGrade({ app_metadata: { managed_grade: "1" }, user_metadata: {} } as unknown as User)).toBe(5);
+    expect(userGrade(null)).toBe(5);
+  });
+
+  it("server qoruması: miqrasiya adı, silməni və sinfi bağlayır", () => {
+    const sql = readFileSync(join(__dirname, "../supabase/migrations/0067_managed_student_guards.sql"), "utf8");
+    // Ad: invoker trigger, müştəri rolunda köhnə ad saxlanılır.
+    expect(sql).toMatch(/create trigger trg_protect_managed_name\s+before update on profiles/);
+    expect(sql).toMatch(/new\.name := old\.name/);
+    expect(sql).not.toMatch(/create or replace function protect_managed_name\(\)[^$]*security definer/);
+    // Silmə: sinif hesabı delete_own_account ilə silinmir.
+    expect(sql).toMatch(/managed_students where user_id = me\) then\s+raise exception 'managed_account'/);
+    // Sinif: mövcud hesablara managed_grade yazılır.
+    expect(sql).toMatch(/'managed_grade', c\.grade/);
+    // Müəllimin ad düzəltməsi yalnız sinfin müəllimi üçün.
+    expect(sql).toMatch(/rename_managed_student[\s\S]*not is_class_teacher\(cid\)/);
+  });
+
+  it("yeni sinif hesabı yaradılanda sinif app_metadata-ya yazılır", () => {
+    const route = readFileSync(join(__dirname, "../app/api/mekteb/students/route.ts"), "utf8");
+    expect(route).toMatch(/app_metadata:\s*\{\s*managed_class: classId, managed_grade: cls\.grade\s*\}/);
+  });
+});
+
+describe("qısa AZ tarixi (ICU-dan asılı deyil)", () => {
+  it("yalnız tarix yerli gün kimi, ay adı əllə", () => {
+    expect(azShortDate("2026-11-25")).toBe("25 noy");
+    expect(azShortDate("2026-01-01")).toBe("1 yan");
+    expect(azShortDate(new Date(2026, 7, 16))).toBe("16 avq");
+    expect(azShortDate("bərbad")).toBe("bərbad");
   });
 });

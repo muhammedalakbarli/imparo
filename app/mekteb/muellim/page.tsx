@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, Users, ChevronRight, ArrowLeft, Clock, GraduationCap, Video, Eye } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import { useContent } from "@/components/ContentProvider";
@@ -16,9 +17,12 @@ import { markTeacherAccount } from "@/lib/teacher";
 import { myVideos, type MyVideo } from "@/lib/videos";
 import { PageSkeleton } from "@/components/Skeleton";
 import { gradeLabel } from "@/lib/grade";
+import { isManagedAccount } from "@/lib/managedStudents";
+import { azShortDate } from "@/lib/azDate";
 
 export default function TeacherPage() {
   const { user, ready } = useAuthUser();
+  const router = useRouter();
   const { subjects } = useContent();
   const [classes, setClasses] = useState<TeacherClass[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -48,9 +52,13 @@ export default function TeacherPage() {
       })
       .finally(() => setLoaded(true));
   }
+  // Sinif hesabı (müəllimin yaratdığı şagird) müəllim panelinə/müraciət formuna
+  // düşməsin — /mekteb-də öz sinfi görünür.
+  const managed = isManagedAccount(user);
   useEffect(() => {
-    if (user) refresh();
-  }, [user]);
+    if (managed) router.replace("/mekteb");
+    else if (user) refresh();
+  }, [user, managed, router]);
 
   async function submit() {
     const subj = options.find((s) => s.slug === subjectSlug) ?? options[0];
@@ -63,7 +71,7 @@ export default function TeacherPage() {
     refresh();
   }
 
-  if (!ready || (user && !loaded)) return <PageSkeleton />;
+  if (!ready || managed || (user && !loaded)) return <PageSkeleton />;
 
   // ── Müəllim qapısı: yalnız təsdiqlənmiş müəllim sinif aça bilər (Duolingo kimi) ──
   if (status && !status.is_teacher) {
@@ -216,7 +224,7 @@ export default function TeacherPage() {
                     <span className="block truncate font-bold text-fg">{v.title}</span>
                     <span className="block text-xs text-muted">
                       {v.class_name ?? "Ümumi kitabxana"} ·{" "}
-                      {new Date(v.created_at).toLocaleDateString("az-AZ", { day: "numeric", month: "short" })}
+                      {azShortDate(v.created_at)}
                     </span>
                   </span>
                   <span className="flex shrink-0 items-center gap-1 text-xs font-bold text-muted">

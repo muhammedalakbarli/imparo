@@ -175,6 +175,9 @@ export const classManagedStudents = (classId: string) =>
   rpc<ManagedStudent[]>("class_managed_students", { p_class_id: classId }).catch(() => [] as ManagedStudent[]);
 export const resetStudentPin = (userId: string) => rpc<string>("reset_student_pin", { p_user_id: userId });
 export const deleteManagedStudent = (userId: string) => rpc<null>("delete_managed_student", { p_user_id: userId });
+/** Şagird adını yalnız müəllim düzəldir (şagird üçün kilidlidir — 0067). Təmizlənmiş adı qaytarır. */
+export const renameManagedStudent = (userId: string, name: string) =>
+  rpc<string>("rename_managed_student", { p_user_id: userId, p_name: name });
 
 /**
  * Adları hissələrlə serverə göndərir (bir sorğuda ən çox STUDENT_CHUNK — Worker

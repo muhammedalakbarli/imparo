@@ -16,6 +16,7 @@ import {
   classVideos, createVideo, deleteVideo, markWatched, uploadVideo, youtubeId,
   MAX_VIDEO_BYTES, type ClassVideo,
 } from "@/lib/videos";
+import { azShortDate } from "@/lib/azDate";
 
 type Mode = "upload" | "link";
 
@@ -117,7 +118,7 @@ export default function ClassVideos({
 
       {/* ── Əlavə etmə formu (yalnız müəllim) ── */}
       {canManage && adding && (
-        <div className="mt-3 rounded-2xl border border-line bg-panel p-4">
+        <div className="mt-3 rounded-2xl border-2 border-line bg-card shadow-[0_4px_0_0_var(--color-line)] p-4">
           <div className="flex gap-1.5">
             {([["upload", "Fayl yüklə", Upload], ["link", "Link əlavə et", Link2]] as const).map(
               ([m, label, Icon]) => (
@@ -214,27 +215,32 @@ export default function ClassVideos({
       {videos === null ? (
         <p className="mt-3 text-sm text-muted">Yüklənir…</p>
       ) : videos.length === 0 ? (
-        <p className="mt-3 text-sm text-muted">
-          {canManage
-            ? "Hələ video yoxdur. Dərsini çək və ya YouTube linki əlavə et — şagirdlər burada görəcək."
-            : "Müəllimin hələ video əlavə etməyib."}
-        </p>
+        <div className="mt-3 flex items-center gap-3 rounded-2xl border-2 border-line bg-card shadow-[0_4px_0_0_var(--color-line)] p-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-panel-2 text-muted">
+            <Video size={22} strokeWidth={2.3} />
+          </span>
+          <p className="text-sm font-semibold text-muted">
+            {canManage
+              ? "Hələ video yoxdur. Dərsini çək və ya YouTube linki əlavə et — şagirdlər burada görəcək."
+              : "Müəllim hələ video əlavə etməyib."}
+          </p>
+        </div>
       ) : (
         <div className="mt-3 space-y-3">
           {videos.map((v) => (
-            <div key={v.id} className="overflow-hidden rounded-2xl border border-line bg-panel">
+            <div key={v.id} className="overflow-hidden rounded-2xl border-2 border-line bg-card shadow-[0_4px_0_0_var(--color-line)]">
               <div className="flex items-center gap-3 px-4 py-3">
                 <button
                   onClick={() => setOpen(open === v.id ? null : v.id)}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand transition-colors hover:bg-brand/20"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/12 text-brand transition-colors hover:bg-brand/20"
                   aria-label={open === v.id ? "Bağla" : "İzlə"}
                 >
-                  {open === v.id ? <X size={18} /> : <Play size={18} />}
+                  {open === v.id ? <X size={20} /> : <Play size={20} strokeWidth={2.5} />}
                 </button>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-bold text-fg">{v.title}</div>
+                  <div className="truncate font-extrabold text-fg">{v.title}</div>
                   <div className="flex items-center gap-2 text-xs text-muted">
-                    {new Date(v.created_at).toLocaleDateString("az-AZ", { day: "numeric", month: "short" })}
+                    {azShortDate(v.created_at)}
                     {canManage && (
                       <span className="flex items-center gap-1">
                         <Eye size={11} /> {v.views}

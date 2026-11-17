@@ -30,6 +30,9 @@ interface Roster {
 }
 
 const COLORS = ["bg-orange-400", "bg-amber-400", "bg-emerald-500", "bg-sky-400", "bg-violet-400", "bg-rose-400"];
+// Öyrən ekranının kart dili: ağ kart + 3D alt haşiyə; basanda kart "aşağı enir".
+const CARD = "rounded-3xl border-2 border-line bg-card shadow-[0_4px_0_0_var(--color-line)]";
+const PRESS = "transition active:translate-y-[3px] active:shadow-[0_1px_0_0_var(--color-line)]";
 
 function ClassLogin() {
   const params = useSearchParams();
@@ -152,7 +155,7 @@ function ClassLogin() {
                 e.preventDefault();
                 if (code.length >= 4) loadRoster(code);
               }}
-              className="mt-6"
+              className={`mt-6 p-5 ${CARD}`}
             >
               <input
                 value={code}
@@ -163,12 +166,12 @@ function ClassLogin() {
                 spellCheck={false}
                 aria-label="Sinif kodu"
                 placeholder="AB12CD"
-                className="w-full rounded-3xl border-4 border-line bg-panel px-4 py-4 text-center font-mono text-4xl font-extrabold tracking-[0.3em] text-fg outline-none focus:border-brand"
+                className="w-full rounded-2xl border-4 border-line bg-panel px-4 py-4 text-center font-mono text-4xl font-extrabold tracking-[0.3em] text-fg outline-none placeholder:text-muted/40 focus:border-brand"
               />
               <button
                 type="submit"
                 disabled={busy || code.length < 4}
-                className="mt-4 w-full rounded-3xl bg-brand py-4 text-xl font-extrabold uppercase tracking-wide text-white btn-pop hover:bg-brand-dark disabled:opacity-50"
+                className="mt-4 w-full rounded-2xl bg-brand py-4 text-xl font-extrabold uppercase tracking-wide text-white btn-pop hover:bg-brand-dark disabled:opacity-50"
               >
                 {busy ? "Axtarılır…" : "Davam"}
               </button>
@@ -183,9 +186,11 @@ function ClassLogin() {
               <ArrowLeft size={16} /> Başqa kod
             </button>
             <h1 className="mt-3 text-center text-3xl font-extrabold text-fg">Sən kimsən?</h1>
-            <p className="mt-1 text-center text-muted">{roster.class.name}</p>
+            <div className="mt-2 flex justify-center">
+              <span className="rounded-full bg-brand/12 px-3 py-1 text-sm font-extrabold text-brand-soft">{roster.class.name}</span>
+            </div>
             {roster.students.length === 0 ? (
-              <p className="mt-6 rounded-2xl bg-panel p-4 text-center text-muted">
+              <p className={`mt-6 p-4 text-center font-semibold text-muted ${CARD}`}>
                 Bu sinifdə hələ şagird yoxdur. Müəlliminə de.
               </p>
             ) : (
@@ -199,12 +204,12 @@ function ClassLogin() {
                       setPin("");
                       setError("");
                     }}
-                    className="flex flex-col items-center gap-2 rounded-3xl border-2 border-line bg-panel px-3 py-4 transition hover:border-brand active:scale-95"
+                    className={`flex flex-col items-center gap-2 px-3 py-4 hover:border-brand ${CARD} ${PRESS}`}
                   >
-                    <span className={`flex h-14 w-14 items-center justify-center rounded-full text-2xl font-extrabold text-white ${COLORS[i % COLORS.length]}`}>
+                    <span className={`flex h-14 w-14 items-center justify-center rounded-full text-2xl font-extrabold text-white shadow-[inset_0_-3px_0_rgba(0,0,0,0.12)] ${COLORS[i % COLORS.length]}`}>
                       {s.name.charAt(0)}
                     </span>
-                    <span className="text-lg font-extrabold text-fg">{s.name}</span>
+                    <span className="max-w-full truncate text-lg font-extrabold text-fg">{s.name}</span>
                   </button>
                 ))}
               </div>
@@ -226,16 +231,25 @@ function ClassLogin() {
             >
               <ArrowLeft size={16} /> Mən deyiləm
             </button>
-            <h1 className="mt-3 text-3xl font-extrabold text-fg">Salam, {student.name.split(" ")[0]}!</h1>
-            <p className="mt-1 text-muted">Kartdakı 4 rəqəmli PIN-i yaz</p>
+            <div className={`mt-3 px-5 py-5 ${CARD}`}>
+              <span
+                className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full text-3xl font-extrabold text-white shadow-[inset_0_-3px_0_rgba(0,0,0,0.12)] ${
+                  COLORS[Math.max(0, roster.students.findIndex((s) => s.ref === student.ref)) % COLORS.length]
+                }`}
+              >
+                {student.name.charAt(0)}
+              </span>
+              <h1 className="mt-3 text-3xl font-extrabold text-fg">Salam, {student.name.split(" ")[0]}!</h1>
+              <p className="mt-1 text-muted">Kartdakı 4 rəqəmli PIN-i yaz</p>
 
-            <div className={`mt-6 flex justify-center gap-4 ${shake ? "animate-[shake_0.4s]" : ""}`} aria-live="polite">
-              {[0, 1, 2, 3].map((i) => (
-                <span
-                  key={i}
-                  className={`h-6 w-6 rounded-full border-4 ${i < pin.length ? "border-brand bg-brand" : "border-line bg-panel"}`}
-                />
-              ))}
+              <div className={`mt-5 flex justify-center gap-4 ${shake ? "animate-[shake_0.4s]" : ""}`} aria-live="polite">
+                {[0, 1, 2, 3].map((i) => (
+                  <span
+                    key={i}
+                    className={`h-6 w-6 rounded-full border-4 transition-colors ${i < pin.length ? "border-brand bg-brand" : "border-line bg-panel"}`}
+                  />
+                ))}
+              </div>
             </div>
 
             {error && <p className="mx-auto mt-4 max-w-xs rounded-2xl bg-red-500/10 px-4 py-2 font-bold text-red-500">{error}</p>}
@@ -281,7 +295,7 @@ function PadKey({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className="flex h-16 items-center justify-center rounded-2xl border-2 border-line bg-panel text-2xl font-extrabold text-fg transition active:scale-95 active:bg-brand/10 disabled:opacity-50"
+      className="flex h-16 items-center justify-center rounded-2xl border-2 border-line bg-card text-2xl font-extrabold text-fg shadow-[0_4px_0_0_var(--color-line)] transition hover:border-brand/60 active:translate-y-[3px] active:bg-brand/10 active:shadow-[0_1px_0_0_var(--color-line)] disabled:opacity-50"
     >
       {children}
     </button>

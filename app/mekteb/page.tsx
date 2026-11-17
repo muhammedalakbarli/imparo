@@ -6,11 +6,26 @@
 // Girişsiz ziyarətçi login divarına ATILMIR: bu ünvan sitemap-dadır və footer-dən
 // gəlinir — məhsulu tanımayan müəllim birbaşa login görüb gedirdi. Ona iki yol
 // göstərilir: müəllim → /muellimler tanıtımı, şagird → giriş + kodla qoşulma.
+//
+// Sinif hesabı (müəllimin yaratdığı, sinif kodu + PIN ilə girən 1–4-cü sinif
+// şagirdi): "Müəlliməm" və "Sinfə qoşul" kartları GÖRÜNMÜR — uşaq yalnız öz sinfini,
+// müəllimin tapşırıqlarını və videolarını görür.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { School, KeyRound, ClipboardList, ChevronRight, Check, Clock, GraduationCap } from "lucide-react";
+import {
+  School,
+  KeyRound,
+  ClipboardList,
+  ChevronRight,
+  Check,
+  Clock,
+  GraduationCap,
+  type LucideIcon,
+} from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
+import { isManagedAccount } from "@/lib/managedStudents";
+import { gradeLabel } from "@/lib/grade";
 import {
   studentClasses,
   myAssignments,
@@ -21,6 +36,10 @@ import {
 import { PageSkeleton } from "@/components/Skeleton";
 import ClassVideos from "@/components/mekteb/ClassVideos";
 import Mascot from "@/components/Mascot";
+import SubjectBadge from "@/components/SubjectBadge";
+import { azShortDate } from "@/lib/azDate";
+
+const CARD = "rounded-2xl border-2 border-line bg-card shadow-[0_4px_0_0_var(--color-line)]";
 
 export default function SchoolPage() {
   const { user, ready } = useAuthUser({ optional: true });
@@ -62,78 +81,136 @@ export default function SchoolPage() {
   if (!ready || (user && !loaded)) return <PageSkeleton />;
   if (!user) return <PublicSchool />;
 
+  const managed = isManagedAccount(user);
+  const open = tasks.filter((a) => !a.done).length;
+
   return (
     <div className="min-h-screen bg-ink">
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        {/* Hero */}
-        <div className="flex items-center gap-4 rounded-3xl bg-gradient-to-br from-brand to-brand-dark p-6 text-white shadow-lg">
-          <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-white/95 shadow-sm">
-            <Mascot size={64} mood="happy" disk={false} />
-          </span>
-          <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-white/80">
-              <School size={14} /> Imparo Məktəb
-            </div>
-            <h1 className="mt-1 text-2xl font-extrabold">Sinifdə birlikdə öyrən</h1>
-          </div>
-        </div>
+      <main className="mx-auto max-w-2xl px-4 py-6">
+        <Hero subtitle={open > 0 ? `${open} tapşırıq səni gözləyir` : undefined} />
 
-        {/* Müəllim keçidi */}
-        <Link
-          href="/mekteb/muellim"
-          className="mt-5 flex items-center gap-4 rounded-2xl border border-line bg-panel p-5 transition hover:bg-panel-2"
-        >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-            <ClipboardList size={24} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-extrabold text-fg">Müəlliməm</span>
-            <span className="block text-sm text-muted">Sinif yarat, tapşırıq ver, nəticələrə bax</span>
-          </span>
-          <ChevronRight size={18} className="shrink-0 text-muted" />
-        </Link>
-
-        {/* Kodla qoşul */}
-        <div className="mt-4 rounded-2xl border border-line bg-panel p-5">
-          <div className="flex items-center gap-2 font-extrabold text-fg">
-            <KeyRound size={18} className="text-brand" /> Sinfə qoşul
-          </div>
-          <p className="mt-1 text-sm text-muted">Müəllimin verdiyi sinif kodunu daxil et.</p>
-          <div className="mt-3 flex gap-2">
-            <input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="MƏS: AZ1234"
-              maxLength={6}
-              className="flex-1 rounded-2xl border-2 border-line bg-ink px-4 py-2.5 font-bold uppercase tracking-widest text-fg outline-none focus:border-brand"
+        {!managed && (
+          <>
+            {/* Müəllim keçidi */}
+            <LinkCard
+              href="/mekteb/muellim"
+              Icon={ClipboardList}
+              tile="bg-violet-500/12 text-violet-600 dark:text-violet-300"
+              title="Müəlliməm"
+              body="Sinif yarat, tapşırıq ver, nəticələrə bax"
+              className="mt-5"
             />
-            <button
-              type="button"
-              onClick={join}
-              disabled={joining || !code.trim()}
-              className="rounded-2xl bg-brand px-5 py-2.5 font-extrabold uppercase tracking-wide text-white btn-pop hover:bg-brand-dark disabled:opacity-50"
-            >
-              Qoşul
-            </button>
-          </div>
-          {msg && (
-            <p className={`mt-2 text-sm font-bold ${msg.ok ? "text-emerald-600" : "text-red-500"}`}>
-              {msg.text}
-            </p>
-          )}
-        </div>
+
+            {/* Kodla qoşul */}
+            <div className={`mt-4 p-5 ${CARD}`}>
+              <div className="flex items-center gap-3">
+                <Tile Icon={KeyRound} tile="bg-brand/12 text-brand" />
+                <div className="min-w-0">
+                  <div className="font-extrabold text-fg">Sinfə qoşul</div>
+                  <p className="text-sm text-muted">Müəllimin verdiyi sinif kodunu daxil et.</p>
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.toUpperCase())}
+                  placeholder="MƏS: AZ1234"
+                  maxLength={6}
+                  aria-label="Sinif kodu"
+                  className="min-w-0 flex-1 rounded-2xl border-2 border-line bg-panel px-4 py-2.5 font-bold uppercase tracking-widest text-fg outline-none placeholder:tracking-normal placeholder:text-muted/70 focus:border-brand"
+                />
+                <button
+                  type="button"
+                  onClick={join}
+                  disabled={joining || !code.trim()}
+                  className="shrink-0 rounded-2xl bg-brand px-5 py-2.5 font-extrabold uppercase tracking-wide text-white btn-pop hover:bg-brand-dark disabled:opacity-50"
+                >
+                  Qoşul
+                </button>
+              </div>
+              {msg && (
+                <p
+                  className={`mt-3 rounded-xl px-3.5 py-2 text-sm font-bold ${
+                    msg.ok ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-500"
+                  }`}
+                >
+                  {msg.text}
+                </p>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Mənim siniflərim */}
         {classes.length > 0 && (
-          <div className="mt-6">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-muted">Siniflərim</h2>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {classes.map((c) => (
-                <span key={c.id} className="rounded-2xl border border-line bg-panel px-4 py-2 text-sm font-bold text-fg">
-                  {c.name} · {c.teacher}
-                </span>
+          <>
+            <SectionTitle>{managed ? "Sinfim" : "Siniflərim"}</SectionTitle>
+            <div className={`overflow-hidden ${CARD}`}>
+              {classes.map((c, i) => (
+                <div
+                  key={c.id}
+                  className={`flex items-center gap-3 px-4 py-3 ${i < classes.length - 1 ? "border-b border-line" : ""}`}
+                >
+                  <SubjectBadge slug={c.subject_slug} fallback="📚" size={40} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-extrabold text-fg">{c.name}</div>
+                    <div className="truncate text-sm text-muted">{c.teacher}</div>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-panel-2 px-2.5 py-1 text-xs font-extrabold text-muted">
+                    {gradeLabel(c.grade)}
+                  </span>
+                </div>
               ))}
             </div>
+          </>
+        )}
+
+        {/* Mənim tapşırıqlarım */}
+        <SectionTitle>Tapşırıqlarım</SectionTitle>
+        {tasks.length === 0 ? (
+          <div className={`flex items-center gap-3 p-4 ${CARD}`}>
+            <Tile Icon={ClipboardList} tile="bg-panel-2 text-muted" />
+            <p className="text-sm font-semibold text-muted">
+              Hələ tapşırıq yoxdur. Müəllim tapşırıq verəndə burada görünəcək.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {tasks.map((a) => (
+              <Link
+                key={a.id}
+                href={`/lessons/${a.lesson_id}`}
+                className={`flex items-center gap-3.5 p-4 transition hover:border-brand/60 ${CARD}`}
+              >
+                <span
+                  className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
+                    a.done ? "bg-emerald-500/12 text-emerald-600 dark:text-emerald-400" : "bg-brand/12 text-brand"
+                  }`}
+                >
+                  <ClipboardList size={24} strokeWidth={2.4} />
+                  {a.done && (
+                    <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white ring-2 ring-card">
+                      <Check size={12} strokeWidth={3.5} />
+                    </span>
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="line-clamp-2 font-extrabold leading-snug text-fg">{a.title}</span>
+                  <span className="block truncate text-xs text-muted">{a.class_name}</span>
+                </span>
+                {a.done ? (
+                  <span className="shrink-0 rounded-full bg-emerald-500/12 px-2.5 py-1 text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                    Bitdi
+                  </span>
+                ) : a.due_date ? (
+                  <span className="flex shrink-0 items-center gap-1 rounded-full bg-orange-500/12 px-2.5 py-1 text-xs font-extrabold text-orange-600 dark:text-orange-300">
+                    <Clock size={12} strokeWidth={2.6} /> {azShortDate(a.due_date)}
+                  </span>
+                ) : (
+                  <ChevronRight size={18} className="shrink-0 text-muted" />
+                )}
+              </Link>
+            ))}
           </div>
         )}
 
@@ -141,50 +218,72 @@ export default function SchoolPage() {
             Hər sinif üçün ayrıca blok: şagird bir neçə sinifdə ola bilər. */}
         {classes.map((c) => (
           <div key={`v-${c.id}`}>
-            {classes.length > 1 && (
-              <div className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">{c.name}</div>
-            )}
+            {classes.length > 1 && <SectionTitle>{c.name}</SectionTitle>}
             <ClassVideos classId={c.id} />
           </div>
         ))}
-
-        {/* Mənim tapşırıqlarım */}
-        <div className="mt-6">
-          <h2 className="text-xs font-bold uppercase tracking-wide text-muted">Tapşırıqlarım</h2>
-          {tasks.length === 0 ? (
-            <p className="mt-2 text-sm text-muted">Hələ tapşırıq yoxdur.</p>
-          ) : (
-            <div className="mt-2 space-y-2">
-              {tasks.map((a) => (
-                <Link
-                  key={a.id}
-                  href={`/lessons/${a.lesson_id}`}
-                  className="flex items-center gap-3 rounded-2xl border border-line bg-panel p-4 transition hover:bg-panel-2"
-                >
-                  <span
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                      a.done ? "bg-emerald-500 text-white" : "bg-brand/10 text-brand"
-                    }`}
-                  >
-                    {a.done ? <Check size={20} strokeWidth={3} /> : <ClipboardList size={20} />}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-bold text-fg">{a.title}</span>
-                    <span className="block text-xs text-muted">{a.class_name}</span>
-                  </span>
-                  {a.due_date && !a.done && (
-                    <span className="flex shrink-0 items-center gap-1 text-xs font-bold text-orange-500">
-                      <Clock size={13} /> {a.due_date}
-                    </span>
-                  )}
-                  {a.done && <span className="shrink-0 text-xs font-bold text-emerald-600">Bitdi</span>}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
       </main>
     </div>
+  );
+}
+
+function Hero({ subtitle }: { subtitle?: string }) {
+  return (
+    <div className="flex items-center gap-4 rounded-3xl bg-gradient-to-br from-brand to-brand-dark p-5 text-white shadow-[0_5px_0_0_#b4461a] sm:p-6">
+      <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-white/95 shadow-sm">
+        <Mascot size={64} mood="happy" disk={false} />
+      </span>
+      <div className="min-w-0">
+        <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-white/85">
+          <School size={14} /> Imparo Məktəb
+        </div>
+        <h1 className="mt-1 text-2xl font-extrabold leading-tight">Sinifdə birlikdə öyrən</h1>
+        {subtitle && (
+          <div className="mt-2 inline-flex max-w-full items-center rounded-full bg-white/20 px-3 py-1 text-sm font-bold">
+            <span className="truncate">{subtitle}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return <h2 className="mb-2 mt-7 px-1 text-xs font-extrabold uppercase tracking-wide text-muted">{children}</h2>;
+}
+
+function Tile({ Icon, tile }: { Icon: LucideIcon; tile: string }) {
+  return (
+    <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${tile}`}>
+      <Icon size={24} strokeWidth={2.4} />
+    </span>
+  );
+}
+
+function LinkCard({
+  href,
+  Icon,
+  tile,
+  title,
+  body,
+  className = "",
+}: {
+  href: string;
+  Icon: LucideIcon;
+  tile: string;
+  title: string;
+  body: string;
+  className?: string;
+}) {
+  return (
+    <Link href={href} className={`flex items-center gap-4 p-5 transition hover:border-brand/60 ${CARD} ${className}`}>
+      <Tile Icon={Icon} tile={tile} />
+      <span className="min-w-0 flex-1">
+        <span className="block font-extrabold text-fg">{title}</span>
+        <span className="block text-sm text-muted">{body}</span>
+      </span>
+      <ChevronRight size={18} className="shrink-0 text-muted" />
+    </Link>
   );
 }
 
@@ -192,48 +291,26 @@ export default function SchoolPage() {
 function PublicSchool() {
   return (
     <div className="min-h-screen bg-ink">
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        <div className="flex items-center gap-4 rounded-3xl bg-gradient-to-br from-brand to-brand-dark p-6 text-white shadow-lg">
-          <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-white/95 shadow-sm">
-            <Mascot size={64} mood="happy" disk={false} />
-          </span>
-          <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-white/80">
-              <School size={14} /> Imparo Məktəb
-            </div>
-            <h1 className="mt-1 text-2xl font-extrabold">Sinifdə birlikdə öyrən</h1>
-          </div>
-        </div>
+      <main className="mx-auto max-w-2xl px-4 py-6">
+        <Hero />
 
-        <Link
+        <LinkCard
           href="/muellimler"
-          className="mt-5 flex items-center gap-4 rounded-2xl border border-line bg-panel p-5 transition hover:bg-panel-2"
-        >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-            <GraduationCap size={24} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-extrabold text-fg">Müəllimsiniz?</span>
-            <span className="block text-sm text-muted">
-              Sinif yaradın, tapşırıq verin, sinfin harada ilişdiyini görün — pulsuz
-            </span>
-          </span>
-          <ChevronRight size={18} className="shrink-0 text-muted" />
-        </Link>
+          Icon={GraduationCap}
+          tile="bg-violet-500/12 text-violet-600 dark:text-violet-300"
+          title="Müəllimsiniz?"
+          body="Sinif yaradın, tapşırıq verin, sinfin harada ilişdiyini görün — pulsuz"
+          className="mt-5"
+        />
 
-        <Link
+        <LinkCard
           href="/sinif"
-          className="mt-4 flex items-center gap-4 rounded-2xl border border-line bg-panel p-5 transition hover:bg-panel-2"
-        >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-            <KeyRound size={24} />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block font-extrabold text-fg">Müəllimin sinif kodu var?</span>
-            <span className="block text-sm text-muted">Kodu, adını və PIN-i yaz — e-poçt lazım deyil</span>
-          </span>
-          <ChevronRight size={18} className="shrink-0 text-muted" />
-        </Link>
+          Icon={KeyRound}
+          tile="bg-brand/12 text-brand"
+          title="Müəllimin sinif kodu var?"
+          body="Kodu, adını və PIN-i yaz — e-poçt lazım deyil"
+          className="mt-4"
+        />
 
         <p className="mt-6 text-center text-sm text-muted">
           Hesabın yoxdur?{" "}

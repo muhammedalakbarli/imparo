@@ -7,19 +7,24 @@ import Avatar, { AVATAR_CHARS, AVATAR_BGS, type AvatarConfig } from "./Avatar";
 export default function AvatarPicker({
   value,
   onChange,
+  preview = true,
 }: {
   value: AvatarConfig;
   onChange: (c: AvatarConfig) => void;
+  /** false: önizləməni çağıran səhifə özü göstərir (Profili redaktə et — banner üstündə). */
+  preview?: boolean;
 }) {
   return (
     <div>
       {/* Önizləmə */}
-      <div className="flex justify-center">
-        <Avatar config={value} size={96} />
-      </div>
+      {preview && (
+        <div className="flex justify-center">
+          <Avatar config={value} size={96} />
+        </div>
+      )}
 
       {/* Personaj */}
-      <div className="mt-5 text-xs font-bold uppercase tracking-wide text-muted">
+      <div className={`${preview ? "mt-5" : ""} text-xs font-bold uppercase tracking-wide text-muted`}>
         Personaj
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
@@ -28,8 +33,9 @@ export default function AvatarPicker({
             key={c}
             type="button"
             onClick={() => onChange({ ...value, char: c })}
+            aria-pressed={value.char === c}
             className={`rounded-2xl border-2 p-1 transition ${
-              value.char === c ? "border-brand" : "border-line hover:border-brand/50"
+              value.char === c ? "border-brand bg-brand/10 ring-2 ring-brand/30" : "border-line bg-panel hover:border-brand/50"
             }`}
           >
             <Avatar config={{ char: c, bg: value.bg }} size={44} />
@@ -47,6 +53,7 @@ export default function AvatarPicker({
             key={bg}
             type="button"
             aria-label={bg}
+            aria-pressed={value.bg === bg}
             onClick={() => onChange({ ...value, bg })}
             className={`h-10 w-10 rounded-full border-2 transition ${
               value.bg === bg ? "border-fg scale-110" : "border-line"

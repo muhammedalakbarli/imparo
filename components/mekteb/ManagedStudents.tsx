@@ -7,16 +7,17 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { KeyRound, Printer, RefreshCw, Trash2, UserPlus, Lock, Check } from "lucide-react";
+import { KeyRound, Printer, RefreshCw, Trash2, UserPlus, Lock, Check, Pencil, X } from "lucide-react";
 import {
-  classManagedStudents, createManagedStudents, deleteManagedStudent, resetStudentPin,
+  classManagedStudents, createManagedStudents, deleteManagedStudent, renameManagedStudent, resetStudentPin,
   type ManagedStudent,
 } from "@/lib/schools";
 import { MAX_NAMES_PER_PASTE, parseStudentNames } from "@/lib/managedStudents";
+import { azShortDate } from "@/lib/azDate";
 
 function fmtLogin(s: string | null): string {
   if (!s) return "Hələ daxil olmayıb";
-  return new Date(s).toLocaleDateString("az-AZ", { day: "numeric", month: "short" });
+  return azShortDate(s);
 }
 
 export default function ManagedStudents({
@@ -36,6 +37,9 @@ export default function ManagedStudents({
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [fresh, setFresh] = useState<string | null>(null); // yeni PIN-i vurğulamaq üçün
   const [confirmDel, setConfirmDel] = useState<string | null>(null);
+  // Ad şagird üçün kilidlidir (0067) — səhv yazılmış adı müəllim burada düzəldir.
+  const [editing, setEditing] = useState<{ uid: string; name: string } | null>(null);
+  const [renameErr, setRenameErr] = useState<string | null>(null);
 
   const load = useCallback(() => {
     classManagedStudents(classId).then(setList);
@@ -73,6 +77,20 @@ export default function ManagedStudents({
     setList((l) => l?.map((s) => (s.user_id === uid ? { ...s, pin, locked_until: null } : s)) ?? l);
     setFresh(uid);
     setTimeout(() => setFresh((f) => (f === uid ? null : f)), 4000);
+  }
+
+  async function rename() {
+    if (!editing) return;
+    const { uid, name } = editing;
+    const clean = await renameManagedStudent(uid, name).catch(() => null);
+    if (!clean) {
+      setRenameErr(uid);
+      return;
+    }
+    setRenameErr(null);
+    setEditing(null);
+    setList((l) => l?.map((s) => (s.user_id === uid ? { ...s, full_name: clean } : s)) ?? l);
+    onChanged?.();
   }
 
   async function remove(uid: string) {
@@ -179,7 +197,60 @@ export default function ManagedStudents({
               {list.map((s) => (
                 <tr key={s.user_id} className="border-b border-line/60 last:border-b-0">
                   <td className="px-3 py-2 font-semibold text-fg">
-                    {s.full_name}
+                    {editing?.uid === s.user_id ? (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          void rename();
+                        }}
+                        className="flex items-center gap-1"
+                      >
+                        <input
+                          autoFocus
+                          value={editing.name}
+                          onChange={(e) => setEditing({ uid: s.user_id, name: e.target.value })}
+                          onKeyDown={(e) => e.key === "Escape" && setEditing(null)}
+                          maxLength={60}
+                          aria-label="Şagirdin adı"
+                          className="w-full min-w-0 rounded-lg border-2 border-line bg-card px-2 py-1 text-sm font-semibold text-fg outline-none focus:border-brand"
+                        />
+                        <button
+                          type="submit"
+                          disabled={editing.name.trim().length < 2}
+                          aria-label="Yadda saxla"
+                          className="rounded-lg p-1.5 text-emerald-600 hover:bg-emerald-500/10 disabled:opacity-40"
+                        >
+                          <Check size={15} strokeWidth={3} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditing(null)}
+                          aria-label="Ləğv et"
+                          className="rounded-lg p-1.5 text-muted hover:bg-panel-2"
+                        >
+                          <X size={15} />
+                        </button>
+                      </form>
+                    ) : (
+                      <span className="inline-flex items-center gap-1">
+                        {s.full_name}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditing({ uid: s.user_id, name: s.full_name });
+                            setRenameErr(null);
+                          }}
+                          title="Adı düzəlt"
+                          aria-label={`${s.full_name} — adı düzəlt`}
+                          className="rounded-md p-1 text-muted hover:bg-panel-2 hover:text-fg"
+                        >
+                          <Pencil size={12} />
+                        </button>
+                      </span>
+                    )}
+                    {renameErr === s.user_id && (
+                      <span className="mt-0.5 block text-[11px] font-bold text-red-500">Ad dəyişmədi, yenidən yoxlayın</span>
+                    )}
                     {s.locked_until && (
                       <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-600">
                         <Lock size={10} /> Bloklanıb

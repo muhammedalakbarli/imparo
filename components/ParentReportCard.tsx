@@ -78,13 +78,13 @@ export default function ParentReportCard() {
 
   return (
     <>
-      <h2 className="mt-6 text-xs font-bold uppercase tracking-wide text-muted">
+      <h2 className="mb-2 mt-7 px-1 text-xs font-extrabold uppercase tracking-wide text-muted">
         {t("parent.title")}
       </h2>
-      <div className="mt-2 overflow-hidden rounded-2xl border border-line bg-panel px-4 py-3.5">
+      <div className="overflow-hidden rounded-2xl border-2 border-line bg-card px-4 py-3.5 shadow-[0_4px_0_0_var(--color-line)]">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
-            <Mail size={17} />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/12 text-orange-500">
+            <Mail size={20} strokeWidth={2.3} />
           </span>
           <div className="min-w-0 flex-1">
             <div className="font-bold text-fg">{t("parent.heading")}</div>
@@ -125,7 +125,7 @@ export default function ParentReportCard() {
                 <button
                   type="submit"
                   disabled={busy || !input.trim()}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-sm font-extrabold text-white transition-colors hover:bg-brand-dark disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-4 py-2 text-sm font-extrabold text-white btn-pop hover:bg-brand-dark disabled:opacity-50"
                 >
                   {busy && <Loader2 size={14} className="animate-spin" />}
                   {state.status === "none" ? t("parent.add") : t("parent.change")}

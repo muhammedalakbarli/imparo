@@ -61,7 +61,8 @@ export async function POST(req: Request) {
         guardianConsent: true, // hesabı müəllim açıb (məktəb nəzarəti)
       },
       // app_metadata-nı yalnız server yaza bilər — "müəllimin hesabı" bayrağı etibarlıdır.
-      app_metadata: { managed_class: classId },
+      // managed_grade: sinfi şagird özü dəyişə bilməsin deyə userGrade bunu əvvəl oxuyur (0067).
+      app_metadata: { managed_class: classId, managed_grade: cls.grade },
     });
     if (error || !data.user) {
       console.error("mekteb/students createUser:", error?.message);

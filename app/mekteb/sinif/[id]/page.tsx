@@ -40,6 +40,7 @@ import { endorseStudent } from "@/lib/sponsor";
 import { PageSkeleton } from "@/components/Skeleton";
 import { gradeLabel } from "@/lib/grade";
 import { useRouter } from "next/navigation";
+import { azShortDate } from "@/lib/azDate";
 
 export default function ClassPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -597,7 +598,7 @@ function StudentModal({ classId, uid, onClose }: { classId: string; uid: string;
                       <CircleCheck size={14} className="shrink-0 text-emerald-500" />
                       <span className="flex-1 truncate text-fg">{r.title ?? r.lesson_id}</span>
                       <span className="shrink-0 text-xs text-muted">
-                        {new Date(r.at).toLocaleDateString("az-AZ", { day: "numeric", month: "short" })}
+                        {azShortDate(r.at)}
                       </span>
                     </div>
                   ))}
