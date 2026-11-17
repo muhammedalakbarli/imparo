@@ -13,6 +13,9 @@ import type { UserAnswer } from "@/lib/grading";
 import { playSelect } from "@/lib/sound";
 import { speakEnglish, preloadEnglish, spokenTextsOf } from "@/lib/tts";
 import MatchPairs from "./MatchPairs";
+import NumberPad from "./NumberPad";
+import NumberTrain from "./NumberTrain";
+import { isYoungTask, sequenceHint } from "@/lib/numberHints";
 
 interface Props {
   task: Task;
@@ -20,9 +23,11 @@ interface Props {
   onChange: (value: UserAnswer) => void;
   disabled: boolean;
   reveal?: boolean; // yoxlanıldıqdan sonra düz/səhv göstər
+  /** 1–2-ci sinif rejimi. Verilməsə tapşırığın id prefiksindən təyin olunur. */
+  young?: boolean;
 }
 
-export default function TaskInput({ task, value, onChange, disabled, reveal }: Props) {
+export default function TaskInput({ task, value, onChange, disabled, reveal, young }: Props) {
   // Səsləndiriləcək mətnləri tapşırıq ekrana gələn kimi ÖNCƏDƏN yüklə.
   // Əvvəl audio yalnız klikdən sonra yüklənirdi və səs 0.3–0.7 saniyə gecikirdi —
   // şagird üçün düymə ilə səs arasındakı əlaqə itirdi. Bax lib/tts.ts.
@@ -91,6 +96,28 @@ export default function TaskInput({ task, value, onChange, disabled, reveal }: P
         disabled={disabled}
         onChange={onChange}
       />
+    );
+  }
+
+  // ── Kiçik siniflər: rəqəm cavabı böyük düymələrlə ─────────
+  // 6 yaşlı uşaq hər sualda klaviatura açıb rəqəm yaza bilmir; ekranın çoxu da boş
+  // qalırdı. Sualın altında sıranın şəkli (ədəd qatarı), altında iri düymələr.
+  if (task.type === "numeric" && (young ?? isYoungTask(task.id)) && Number.isFinite(task.answer)) {
+    const hint = sequenceHint(task.prompt);
+    return (
+      <div>
+        {hint && <NumberTrain items={hint} />}
+        <div className={hint ? "mt-6" : ""}>
+          <NumberPad
+            key={task.id}
+            value={value === null ? "" : String(value)}
+            onChange={onChange}
+            disabled={disabled}
+            reveal={reveal}
+            correct={task.answer}
+          />
+        </div>
+      </div>
     );
   }
 

@@ -27,8 +27,8 @@ export const math4: Subject = {
             { heading: "Böyük ədədlər", body: "1000 — min, 10 000 — on min, 100 000 — yüz min, 1 000 000 — milyon." },
           ],
           tasks: [
-            { id: "ry4-boyuk-l1-t1", type: "numeric", prompt: "3456 ədədində neçə minlik var?", answer: 3, xp: 10, explanation: "3456 = 3000 + 400 + 50 + 6. Minliklərin sayı 3-dir.", skills: ["number.place_value"] },
-            { id: "ry4-boyuk-l1-t2", type: "numeric", prompt: "3456 ədədində neçə yüzlük var?", answer: 4, xp: 10, explanation: "3456 = 3000 + 400 + 50 + 6. Yüzlüklərin sayı 34-dir.", skills: ["number.place_value"] },
+            { id: "ry4-boyuk-l1-t1", type: "numeric", prompt: "3456 ədədində neçə minlik var?", answer: 3, xp: 10, explanation: "3456 = 3000 + 400 + 50 + 6. Minliklərin sayı 3-dür.", skills: ["number.place_value"] },
+            { id: "ry4-boyuk-l1-t2", type: "numeric", prompt: "3456 ədədində neçə yüzlük var?", answer: 4, xp: 10, explanation: "3456 = 3000 + 400 + 50 + 6. Yüzlüklərin sayı 34-dür.", skills: ["number.place_value"] },
             { id: "ry4-boyuk-l1-t3", type: "numeric", prompt: "2 minlik + 3 yüzlük + 0 onluq + 5 təklik = ?", answer: 2305, xp: 10, explanation: "Hər mərtəbəni ayrıca yazıb toplayırıq: 2000 + 300 + 0 + 5 = 2305.", skills: ["number.place_value"] },
             { id: "ry4-boyuk-l1-t4", type: "numeric", prompt: "5 minlik = ?", answer: 5000, xp: 10, explanation: "1 minlik 1000-dir, ona görə 5 minlik = 5 × 1000 = 5000.", skills: ["number.place_value"] },
             { id: "ry4-boyuk-l1-t5", type: "numeric", prompt: "'on min' rəqəmlə necə yazılır?", answer: 10000, xp: 10, explanation: "«On min» 10 dənə minlik deməkdir: 10 × 1000 = 10 000.", skills: ["number.place_value"] },
@@ -227,7 +227,7 @@ export const math4: Subject = {
             { id: "ry4-bolme-l2-t3", type: "numeric", prompt: "198 ÷ 11 = ?", answer: 18, xp: 10, explanation: "Hissə-hissə bölürük: 11 × 10 = 110, 11 × 8 = 88. Bu hissələrin cəmi 110 + 88 = 198, deməli qismət 10 + 8 = 18-dir.", skills: ["arith.div.multi_digit"] },
             { id: "ry4-bolme-l2-t4", type: "numeric", prompt: "375 ÷ 25 = ?", answer: 15, xp: 10, explanation: "Hissə-hissə bölürük: 25 × 10 = 250, 25 × 5 = 125. Bu hissələrin cəmi 250 + 125 = 375, deməli qismət 10 + 5 = 15-dir.", skills: ["arith.div.multi_digit"] },
             { id: "ry4-bolme-l2-t5", type: "numeric", prompt: "480 ÷ 16 = ?", answer: 30, xp: 10, explanation: "480-i 16 bərabər hissəyə bölürük. Hər hissəyə 30 düşür, çünki 16 × 30 = 480.", skills: ["arith.div.multi_digit"] },
-            { id: "ry4-bolme-l2-t6", type: "numeric", prompt: "169 ÷ 13 = ?", answer: 13, xp: 10, explanation: "Hissə-hissə bölürük: 13 × 10 = 130, 13 × 3 = 39. Bu hissələrin cəmi 130 + 39 = 169, deməli qismət 10 + 3 = 13-dir.", skills: ["arith.div.multi_digit"] },
+            { id: "ry4-bolme-l2-t6", type: "numeric", prompt: "169 ÷ 13 = ?", answer: 13, xp: 10, explanation: "Hissə-hissə bölürük: 13 × 10 = 130, 13 × 3 = 39. Bu hissələrin cəmi 130 + 39 = 169, deməli qismət 10 + 3 = 13-dür.", skills: ["arith.div.multi_digit"] },
             { id: "ry4-bolme-l2-t7", type: "numeric", prompt: "600 ÷ 24 = ?", answer: 25, xp: 10, explanation: "Hissə-hissə bölürük: 24 × 20 = 480, 24 × 5 = 120. Bu hissələrin cəmi 480 + 120 = 600, deməli qismət 20 + 5 = 25-dir.", skills: ["arith.div.multi_digit"] },
             { id: "ry4-bolme-l2-t8", type: "numeric", prompt: "840 ÷ 40 = ?", answer: 21, xp: 10, explanation: "Hissə-hissə bölürük: 40 × 20 = 800, 40 × 1 = 40. Bu hissələrin cəmi 800 + 40 = 840, deməli qismət 20 + 1 = 21-dir.", skills: ["arith.div.multi_digit"] },
             { id: "ry4-bolme-l2-t9", type: "multiple_choice", prompt: "Bölmənin nəticəsini necə yoxlayırıq?", options: ["Bölənə vururuq", "Bölənə bölürük", "Toplayırıq", "Çıxırıq"], correctIndex: 0, xp: 10, explanation: "Qismətlə böləni vursaq, bölünən alınmalıdır — ona görə bölmə vurma ilə yoxlanır.", skills: ["arith.inverse"] },
@@ -236,7 +236,7 @@ export const math4: Subject = {
           bonusTasks: [
             { id: "ry4-bolme-l2-b1", type: "numeric", prompt: "288 şəkil 24 albomda bərabər yerləşdi. Hər albomda neçə şəkil var?", answer: 12, xp: 15, explanation: "288 şəkli 24 alboma bərabər paylayırıq: 24 × 10 = 240, qalan 48 üçün 24 × 2 = 48. Deməli 10 + 2 = 12 şəkil.", skills: ["problem.one_step","arith.mul.multi_digit"] },
             { id: "ry4-bolme-l2-b2", type: "numeric", prompt: "1000 ÷ 25 = ?", answer: 40, xp: 15, explanation: "1000-i 25 bərabər hissəyə bölürük. Hər hissəyə 40 düşür, çünki 25 × 40 = 1000.", skills: ["arith.div.multi_digit"] },
-            { id: "ry4-bolme-l2-b3", type: "numeric", prompt: "756 ÷ 21 = ?", answer: 36, xp: 15, explanation: "Hissə-hissə bölürük: 21 × 30 = 630, 21 × 6 = 126. Bu hissələrin cəmi 630 + 126 = 756, deməli qismət 30 + 6 = 36-dir.", skills: ["arith.div.multi_digit"] },
+            { id: "ry4-bolme-l2-b3", type: "numeric", prompt: "756 ÷ 21 = ?", answer: 36, xp: 15, explanation: "Hissə-hissə bölürük: 21 × 30 = 630, 21 × 6 = 126. Bu hissələrin cəmi 630 + 126 = 756, deməli qismət 30 + 6 = 36-dır.", skills: ["arith.div.multi_digit"] },
             { id: "ry4-bolme-l2-b4", type: "numeric", prompt: "945 ÷ 35 = ?", answer: 27, xp: 15, explanation: "Hissə-hissə bölürük: 35 × 20 = 700, 35 × 7 = 245. Bu hissələrin cəmi 700 + 245 = 945, deməli qismət 20 + 7 = 27-dir.", skills: ["arith.div.multi_digit"] },
           ],
         },

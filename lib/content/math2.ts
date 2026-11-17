@@ -27,8 +27,8 @@ export const math2: Subject = {
             { heading: "Sıra", body: "Ədədlər sıra ilə gedir: 20, 21, 22... Hər ədəddən sonra gələn 1 böyükdür." },
           ],
           tasks: [
-            { id: "ry2-yuzluk-l1-t1", type: "numeric", prompt: "34 ədədində neçə onluq var?", answer: 3, xp: 10, explanation: "34 = 3 onluq + 4 təklik. Deməli onluqların sayı 3-dir.", skills: ["number.place_value"] },
-            { id: "ry2-yuzluk-l1-t2", type: "numeric", prompt: "34 ədədində neçə təklik var?", answer: 4, xp: 10, explanation: "34 = 3 onluq + 4 təklik. Deməli təkliklərin sayı 4-dir.", skills: ["number.place_value"] },
+            { id: "ry2-yuzluk-l1-t1", type: "numeric", prompt: "34 ədədində neçə onluq var?", answer: 3, xp: 10, explanation: "34 = 3 onluq + 4 təklik. Deməli onluqların sayı 3-dür.", skills: ["number.place_value"] },
+            { id: "ry2-yuzluk-l1-t2", type: "numeric", prompt: "34 ədədində neçə təklik var?", answer: 4, xp: 10, explanation: "34 = 3 onluq + 4 təklik. Deməli təkliklərin sayı 4-dür.", skills: ["number.place_value"] },
             { id: "ry2-yuzluk-l1-t3", type: "numeric", prompt: "50 ədədində neçə onluq var?", answer: 5, xp: 10, explanation: "50 = 5 onluq + 0 təklik. Deməli onluqların sayı 5-dir.", skills: ["number.place_value"] },
             { id: "ry2-yuzluk-l1-t4", type: "numeric", prompt: "3 onluq + 5 təklik = ?", answer: 35, xp: 10, explanation: "3 onluq 30 deməkdir. Üstünə 5 təklik gəlir: 30 + 5 = 35.", skills: ["number.place_value"] },
             { id: "ry2-yuzluk-l1-t5", type: "numeric", prompt: "4 onluq + 2 təklik = ?", answer: 42, xp: 10, explanation: "4 onluq 40 deməkdir. Üstünə 2 təklik gəlir: 40 + 2 = 42.", skills: ["number.place_value"] },
@@ -46,7 +46,7 @@ export const math2: Subject = {
           bonusTasks: [
             { id: "ry2-yuzluk-l1-b1", type: "numeric", prompt: "56 və 65 ədədlərindən böyüyü hansıdır?", answer: 65, xp: 15, explanation: "Onluqlara baxırıq: 6 onluq 5 onluqdan çoxdur, deməli 65 böyükdür.", skills: ["number.compare"] },
             { id: "ry2-yuzluk-l1-b2", type: "numeric", prompt: "8 onluq + 8 təklik = ?", answer: 88, xp: 15, explanation: "8 onluq 80 deməkdir. Üstünə 8 təklik gəlir: 80 + 8 = 88.", skills: ["number.place_value"] },
-            { id: "ry2-yuzluk-l1-b3", type: "numeric", prompt: "100 ədədində neçə onluq var?", answer: 10, xp: 15, explanation: "100 = 10 onluq + 0 təklik. Deməli onluqların sayı 10-dir.", skills: ["number.place_value"] },
+            { id: "ry2-yuzluk-l1-b3", type: "numeric", prompt: "100 ədədində neçə onluq var?", answer: 10, xp: 15, explanation: "100 = 10 onluq + 0 təklik. Deməli onluqların sayı 10-dur.", skills: ["number.place_value"] },
             { id: "ry2-yuzluk-l1-b4", type: "numeric", prompt: "'qırx' ədədi rəqəmlə necə yazılır?", answer: 40, xp: 15, explanation: "«Qırx» 4 onluq deməkdir, ona görə rəqəmlə 40 yazılır.", skills: ["number.place_value"] },
             { id: "ry2-yuzluk-l1-b5", type: "numeric", prompt: "45, 54, 44 ədədlərindən ən böyüyü hansıdır?", answer: 54, xp: 15, explanation: "Onluqlara baxırıq: 54-də 5 onluq var, 45 və 44-də isə 4. Deməli ən böyüyü 54-dür.", skills: ["number.compare"] },
           ],
@@ -603,7 +603,7 @@ export const math2: Subject = {
           ],
           tasks: [
             { id: "ry2-olcme-l2-t1", type: "numeric", prompt: "Aylının 15 stikeri var, 12 də aldı. Neçə stikeri oldu?", answer: 27, xp: 10, explanation: "«Də aldı» artım deməkdir: 15 + 12 = 27 stiker.", skills: ["problem.one_step","arith.add.no_carry"] },
-            { id: "ry2-olcme-l2-t2", type: "numeric", prompt: "Rəfdə 40 kitab var idi, 15-ni götürdük. Neçə kitab qaldı?", answer: 25, xp: 10, explanation: "«Götürdük» azalma deməkdir: 40 − 15 = 25 kitab qaldı.", skills: ["problem.one_step","arith.sub.borrow"] },
+            { id: "ry2-olcme-l2-t2", type: "numeric", prompt: "Rəfdə 40 kitab var idi, 15-i götürdük. Neçə kitab qaldı?", answer: 25, xp: 10, explanation: "«Götürdük» azalma deməkdir: 40 − 15 = 25 kitab qaldı.", skills: ["problem.one_step","arith.sub.borrow"] },
             { id: "ry2-olcme-l2-t3", type: "numeric", prompt: "Hər qutuda 5 qələm var. 4 qutuda neçə qələm var?", answer: 20, xp: 10, explanation: "Hər qutudakı 5 qələm 4 dəfə təkrarlanır: 4 × 5 = 20.", skills: ["problem.one_step","arith.mul.tables"] },
             { id: "ry2-olcme-l2-t4", type: "numeric", prompt: "12 konfeti 3 uşağa bərabər paylasaq, hər biri neçə alır?", answer: 4, xp: 10, explanation: "12 konfeti 3 uşağa bərabər paylayırıq: 12 : 3 = 4.", skills: ["problem.one_step","arith.div.tables"] },
             { id: "ry2-olcme-l2-t5", type: "numeric", prompt: "Bağçada 30 gül var idi, 25 də açdı. Neçə gül oldu?", answer: 55, xp: 10, explanation: "«Də açdı» artım deməkdir: 30 + 25 = 55 gül.", skills: ["problem.one_step","arith.add.no_carry"] },

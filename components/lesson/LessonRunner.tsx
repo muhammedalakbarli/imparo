@@ -31,6 +31,7 @@ import { vibrateCorrect, vibrateWrong, vibrateCelebrate } from "@/lib/haptics";
 import { useCountUp } from "@/lib/useCountUp";
 import { useT } from "@/lib/i18n";
 import TaskInput from "@/components/tasks/TaskInput";
+import { getSubjectMeta } from "@/lib/subjectMeta";
 import { preloadEnglish, spokenTextsOf } from "@/lib/tts";
 import QuitDialog from "@/components/lesson/QuitDialog";
 import TaskFigure from "@/components/TaskFigure";
@@ -60,6 +61,9 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
   const router = useRouter();
   const mainTasks = lesson.tasks;
   const bonusTasks = lesson.bonusTasks ?? [];
+  // Fənnin sinfi (slug-dan; tapılmasa tapşırıq id-sindən TaskInput özü təyin edir).
+  const subjectGrade = getSubjectMeta(slug)?.grade;
+  const young = subjectGrade !== undefined ? subjectGrade <= 2 : undefined;
 
   const [phase, setPhase] = useState<Phase>("main");
   const [index, setIndex] = useState(0);
@@ -603,15 +607,19 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
             </>
           )}
         </div>
-        <h2 className="mt-3 text-2xl font-bold text-fg">{task.prompt}</h2>
+        {/* 1–2-ci sinif: sual iri şriftlə (uşaq hərf-hərf oxuyur) */}
+        <h2 className={`mt-3 font-bold text-fg ${young ? "text-3xl leading-snug sm:text-4xl" : "text-2xl"}`}>
+          {task.prompt}
+        </h2>
         <TaskFigure figure={task.figure} />
-        <div className="mt-7">
+        <div className={young ? "mt-4" : "mt-7"}>
           <TaskInput
             task={task}
             value={answer}
             onChange={(v) => setAnswer(v)}
             disabled={checked}
             reveal={checked}
+            young={young}
           />
         </div>
       </div>

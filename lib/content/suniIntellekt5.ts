@@ -74,7 +74,7 @@ export const suniIntellekt5: Subject = {
             { id: "ai5-nedir-l2-b1", type: "multiple_choice", prompt: "'Etiketlənmiş məlumat' nə deməkdir?", options: ["Hər nümunənin nə olduğu yazılıb (bu pişikdir, bu itdir)", "Məlumatın rəngli olması", "Faylın adının uzun olması", "Şəkildə yazı olması"], correctIndex: 0, xp: 15 },
             { id: "ai5-nedir-l2-b2", type: "multiple_choice", prompt: "Yalnız oğlan şəkilləri ilə öyrədilən Aİ qız şəklində nə edər?", options: ["Daha çox səhv edər — məlumat qərəzlidir", "Daha dəqiq işləyər", "Heç bir fərq olmaz", "Şəkli silər"], correctIndex: 0, xp: 15 },
             { id: "ai5-nedir-l2-b3", type: "multiple_choice", prompt: "Aİ 'əmin deyiləm' deyə bilirmi?", options: ["Bəli — hər cavabın ehtimalı var", "Xeyr, həmişə tam əmindir", "Yalnız səhv edəndə", "Yalnız gecə"], correctIndex: 0, xp: 15 },
-            { id: "ai5-nedir-l2-b4", type: "numeric", prompt: "Aİ 200 şəkildən 180-ni düz tanıdı. Dəqiqliyi neçə faizdir?", answer: 90, xp: 15 },
+            { id: "ai5-nedir-l2-b4", type: "numeric", prompt: "Aİ 200 şəkildən 180-i düz tanıdı. Dəqiqliyi neçə faizdir?", answer: 90, xp: 15 },
           ],
         },
         {

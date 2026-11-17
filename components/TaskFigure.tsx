@@ -48,7 +48,7 @@ export default function TaskFigure({ figure }: { figure?: Figure }) {
     );
   } else if (figure.kind === "emoji") {
     content = (
-      <div className="flex flex-wrap justify-center gap-1.5 text-2xl">
+      <div className="flex flex-wrap justify-center gap-2 text-4xl sm:text-5xl">
         {figure.items.map((e, i) => (
           <span key={i}>{e}</span>
         ))}

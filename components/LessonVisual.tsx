@@ -85,10 +85,75 @@ function Frame({ children }: { children: ReactNode }) {
   );
 }
 
+// 1-dən 10-a sayma — oxumağı yenicə öyrənən uşaq üçün mətn əvəzinə şəkil:
+// hər rəqəm öz rəngində, altında o qədər ulduz (miqdarı GÖRÜR), sonra "3 → 4" sırası.
+const COUNT_COLORS = [
+  "#f47b3a", "#e9a23b", "#2fb170", "#38bdf8", "#8b5cf6",
+  "#ff6b5e", "#0ea5e9", "#f59e0b", "#10b981", "#ec4899",
+];
+
+function CountingCards({ from, to }: { from: number; to: number }) {
+  const nums = Array.from({ length: to - from + 1 }, (_, i) => from + i);
+  return (
+    <div className="mt-5 rounded-2xl border border-line bg-card p-3 sm:p-4">
+      <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
+        {nums.map((n, i) => {
+          const c = COUNT_COLORS[i % COUNT_COLORS.length];
+          return (
+            <div
+              key={n}
+              className="flex flex-col items-center rounded-xl border-2 bg-white px-1 pb-2 pt-1.5"
+              style={{ borderColor: `${c}55` }}
+            >
+              <span className="text-3xl font-extrabold leading-none sm:text-4xl" style={{ color: c }}>
+                {n}
+              </span>
+              {/* n ulduz — sıralar QƏSDƏN 5-lik: 7 = 5 + 2, uşaq beşliklə sayır */}
+              <span className="mt-1.5 flex flex-col items-center gap-[2px]" aria-hidden>
+                {[Math.min(n, 5), Math.max(n - 5, 0)].filter(Boolean).map((cnt, row) => (
+                  <span key={row} className="flex gap-[2px]">
+                    {Array.from({ length: cnt }).map((_, k) => (
+                      <svg key={k} width="8" height="8" viewBox="0 0 24 24" fill={c}>
+                        <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7L12 17.8 5.8 21.2l1.6-7L2 9.5l7.1-.6z" />
+                      </svg>
+                    ))}
+                  </span>
+                ))}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-4 flex items-center justify-center gap-2" aria-label="3-dən sonra 4 gəlir">
+        {[3, 4, 5].map((n, i) => (
+          <div key={n} className="flex items-center gap-2">
+            {i > 0 && (
+              <span className="flex flex-col items-center text-[11px] font-bold text-muted">
+                <span className="text-2xl leading-none text-brand">→</span>
+                sonra
+              </span>
+            )}
+            <span
+              className="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl font-extrabold text-white shadow-[0_3px_0_0_rgba(0,0,0,0.12)]"
+              style={{ background: COUNT_COLORS[n - 1] }}
+            >
+              {n}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function LessonVisual({ visual }: { visual?: string }) {
   if (!visual) return null;
 
   switch (visual) {
+    // ── 1-ci sinif: sayma ───────────────────────────────────────
+    case "count-1-10":
+      return <CountingCards from={1} to={10} />;
+
     // ── Riyaziyyat ──────────────────────────────────────────────
     case "fraction-basic":
       return (

@@ -10,6 +10,7 @@
  */
 import { subjects } from "@/lib/content";
 import type { Task } from "@/lib/types";
+import { fixNumeralSuffixes, sequenceExplanation } from "@/lib/azNumeralSuffix";
 
 const N = "(-?\\d+)";
 const num = (s: string) => Number(s);
@@ -258,7 +259,9 @@ const rules: Rule[] = [
   { re: new RegExp(`^${N} ədədində neçə təklik var\\?`), fn: (m) => { const n = num(m[1]); return `${n} = ${Math.floor(n / 10)} onluq + ${n % 10} təklik. Deməli təkliklərin sayı ${n % 10}-dir.`; } },
   { re: new RegExp(`^${N} onluq \\+ ${N} təklik`), fn: (m) => { const [t, u] = [num(m[1]), num(m[2])]; return `${t} onluq ${t * 10} deməkdir. Üstünə ${u} təklik gəlir: ${t * 10} + ${u} = ${t * 10 + u}.`; } },
   { re: new RegExp(`^${N} onluq\\s*=\\s*\\?`), fn: (m) => { const t = num(m[1]); return `1 onluq 10-dur, ona görə ${t} onluq = ${t} × 10 = ${t * 10}.`; } },
-  { re: new RegExp(`^${N}-[dD](an|ən) sonra hansı ədəd`), fn: (m) => { const n = num(m[1]); return `«Sonra gələn» 1 çox deməkdir: ${n} + 1 = ${n + 1}.`; } },
+  // Sıra ilə saymaqla izah olunur, "+1" ilə YOX: 1-ci sinfin ilk dərsində uşaq hələ
+  // "+" və "=" işarələrini keçməyib.
+  { re: new RegExp(`^${N}-[dD](an|ən) sonra hansı ədəd`), fn: (m) => sequenceExplanation("after", num(m[1])) },
   { re: new RegExp(`^${N}-[dD](an|ən) əvvəl`), fn: (m) => { const n = num(m[1]); return `«Əvvəl gələn» 1 az deməkdir: ${n} − 1 = ${n - 1}.`; } },
   { re: new RegExp(`^${N}-[iıuü]n sağ qonşusu`), fn: (m) => { const n = num(m[1]); return `Sağ qonşu ədəddən 1 böyükdür: ${n} + 1 = ${n + 1}.`; } },
   { re: new RegExp(`^${N}-[iıuü]n sol qonşusu`), fn: (m) => { const n = num(m[1]); return `Sol qonşu ədəddən 1 kiçikdir: ${n} − 1 = ${n - 1}.`; } },
@@ -344,7 +347,8 @@ for (const u of s.units) {
     for (const t of [...l.tasks, ...(l.bonusTasks ?? [])]) {
       if (t.explanation) continue;
       const e = explain(t);
-      if (e) out[t.id] = e;
+      // Şablonlardakı ${n}-dən kimi birləşmələr ahəngə uyğunlaşdırılır (6-dan, 3-dür).
+      if (e) out[t.id] = fixNumeralSuffixes(e);
       else {
         const a =
           "options" in t && Array.isArray(t.options) && typeof t.correctIndex === "number"

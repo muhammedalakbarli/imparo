@@ -123,15 +123,18 @@ export default function ResultSheet({
 
         {/* İzah — sualın cavabı niyə belədir. Tam enində, çünki mətn cümlədir;
             yuxarıdakı sətrə sıxışdırılsa düymə ilə dartışıb oxunmaz olur. */}
+        {/* Şrift ən azı 15–16px: əvvəl 14px idi və kiçik sinif şagirdi oxuya bilmirdi.
+            Düz cavabda yığcam (şagird onsuz da bilir), səhvdə böyük və çərçivəli —
+            məhz o an izahı oxumaq lazımdır. */}
         {explanation && (
           <div
-            className={`mt-3 flex gap-2.5 rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+            className={`mt-3 flex gap-2.5 rounded-2xl leading-relaxed ${
               correct
-                ? "bg-emerald-500/10 text-emerald-900 dark:text-emerald-100"
-                : "bg-red-500/10 text-red-900 dark:text-red-100"
+                ? "bg-emerald-500/10 px-4 py-2.5 text-[15px] font-semibold text-emerald-950 dark:text-emerald-50"
+                : "border-2 border-red-500/35 bg-red-500/10 px-4 py-3.5 text-base font-bold text-red-950 sm:text-[17px] dark:text-red-50"
             }`}
           >
-            <Lightbulb size={17} className="mt-0.5 shrink-0 opacity-70" />
+            <Lightbulb size={correct ? 18 : 22} className="mt-0.5 shrink-0 opacity-80" />
             <span>{explanation}</span>
           </div>
         )}
