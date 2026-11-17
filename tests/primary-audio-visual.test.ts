@@ -3,7 +3,7 @@ import { subjects } from "@/lib/content";
 import { azToTrPhonetic, normalizeAzSpeech, splitSpeechChunks } from "@/lib/tts";
 import { getAutoTaskVisual } from "@/lib/taskVisuals";
 import LessonVisual, { resolveLessonVisual } from "@/components/LessonVisual";
-import { isPrimaryTask, isYoungTask, sequenceHint } from "@/lib/numberHints";
+import { isPrimaryTask, isYoungTask } from "@/lib/numberHints";
 
 describe("ibtidai sinif səsli oxuma (normalizeAzSpeech & azToTrPhonetic)", () => {
   it("riyazi işarələri Azərbaycan dilində oxunuşa çevirir", () => {
@@ -73,26 +73,36 @@ describe("ibtidai sinif (1–4) dərslərinin və tapşırıqlarının vizual ö
     expect(count).toBeGreaterThan(100);
   });
 
-  it("1–4-cü sinifdəki BÜTÜN tapşırıqların şəkil/vizual dəstəyi var və cavabı sızdırmır", () => {
+  it("konkret şəkil yoxdursa ümumi kart (📖, 🇬🇧, 🔢, 🧮, 🎧) göstərilmir", () => {
+    // Köhnə ümumi kartların tam imzası (söz/əşya tapılmayanda qoyulan fallback-lar).
+    const FALLBACK = new Set(["🇬🇧💬", "🧮✨", "🎧🔊", "🔢", "📖", "👏", "🅰️", "🔤", "✍️", "🙋📦🏃", "📝", "🎵📜", "🧩💡", "🧚📖"]);
     let taskCount = 0;
+    let withVisual = 0;
     for (const s of primarySubjects) {
       for (const u of s.units) {
         for (const l of u.lessons) {
           for (const t of [...l.tasks, ...(l.bonusTasks ?? [])]) {
             taskCount++;
-            const autoVis = getAutoTaskVisual(t);
-            const hasTrain = t.type === "numeric" && sequenceHint(t.prompt) !== null;
-            const hasVisual = Boolean(t.figure || autoVis || hasTrain);
-            expect(hasVisual, `${s.slug}/${l.id}/${t.id} tapşırığının vizualı yoxdur`).toBe(true);
-            if (autoVis && "op" in autoVis) {
-              // Hesablama vizuallarında cavab birbaşa göstərilməməlidir
-              expect(autoVis.op).toContain("?");
+            const v = getAutoTaskVisual(t);
+            if (!v) continue;
+            withVisual++;
+            if (v.kind !== "pictureCard") continue;
+            const sig = v.emojis.join("");
+            const text = `${t.prompt} ${"options" in t ? t.options.join(" ") : ""}`;
+            const concrete =
+              (v.badges?.some((x) => x.startsWith("[ ")) ?? false) || // heca blokları [ ki ] [ tab ]
+              (sig === "📖" && /kitab|book|oxu|read/i.test(text)) || // "kitab" sözünün şəkli
+              (sig === "✍️" && /yaz|writ/i.test(text));
+            if (FALLBACK.has(sig) && !concrete) {
+              throw new Error(`${s.slug}/${l.id}/${t.id}: ümumi kart ${sig} — "${t.prompt}"`);
             }
           }
         }
       }
     }
     expect(taskCount).toBeGreaterThan(2500);
+    // Konkret vizualı olan tapşırıqlar hələ də çoxluq təşkil edir.
+    expect(withVisual / taskCount).toBeGreaterThan(0.4);
   });
 });
 
@@ -133,5 +143,27 @@ describe("TTS server marşrutu client-only modul çəkmir", () => {
     // lib/tts.ts useSyncExternalStore import edir → server marşrutunda Next build-i qırılır.
     expect(route).not.toMatch(/from ["']@\/lib\/tts["']/);
     expect(speech).not.toMatch(/from ["']react["']/);
+  });
+});
+
+describe("Azure Speech (az-AZ-BanuNeural) — açar varsa Azure, yoxdursa ehtiyat yol", () => {
+  it("config yalnız açar + düzgün region olanda yaranır", async () => {
+    const { parseAzureConfig } = await import("@/lib/azureSpeech");
+    expect(parseAzureConfig("k", "westeurope")).toEqual({ key: "k", region: "westeurope" });
+    expect(parseAzureConfig(" k ", " WestEurope ")).toEqual({ key: "k", region: "westeurope" });
+    expect(parseAzureConfig(undefined, "westeurope")).toBeNull();
+    expect(parseAzureConfig("k", "")).toBeNull();
+    expect(parseAzureConfig("k", "evil.com/x")).toBeNull(); // URL-ə düşür
+  });
+
+  it("SSML Banu səsi ilə qurulur və mətn XML-escape olunur", async () => {
+    const { azureSsml, azureTtsRequest } = await import("@/lib/azureSpeech");
+    const ssml = azureSsml("3 < 5 & \"ok\"");
+    expect(ssml).toContain('name="az-AZ-BanuNeural"');
+    expect(ssml).toContain('xml:lang="az-AZ"');
+    expect(ssml).toContain("3 &lt; 5 &amp; &quot;ok&quot;");
+    const { url, init } = azureTtsRequest("salam", { key: "K", region: "westeurope" });
+    expect(url).toBe("https://westeurope.tts.speech.microsoft.com/cognitiveservices/v1");
+    expect((init.headers as Record<string, string>)["Ocp-Apim-Subscription-Key"]).toBe("K");
   });
 });

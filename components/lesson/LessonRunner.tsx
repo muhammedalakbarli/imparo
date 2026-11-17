@@ -693,6 +693,7 @@ export default function LessonRunner({ slug, lesson, userId, guest = false }: Pr
             comboBonus={comboBonus}
             ctaLabel={ctaText}
             taskId={task.id}
+            speak={primary}
             onContinue={advance}
           />
         )}

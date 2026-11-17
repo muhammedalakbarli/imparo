@@ -516,19 +516,9 @@ function mathTaskVisual(task: Task): AutoVisual | null {
     };
   }
 
-  // 15) Ümumi rəqəm sualları üçün fallback
-  if (numsInPrompt.length >= 2) {
-    return {
-      kind: "pictureCard",
-      emojis: ["🔢"],
-      badges: numsInPrompt.slice(0, 4).map(String),
-    };
-  }
-  return {
-    kind: "pictureCard",
-    emojis: ["🧮", "✨"],
-    badges: ["Diqqətlə düşün və tap"],
-  };
+  // 15) Konkret şəkil yoxdursa ümumi kart (🔢, 🧮) GÖSTƏRİLMİR — mobil ekranda
+  //     cavab variantlarını aşağı itələyir, suala heç nə əlavə etmir.
+  return null;
 }
 
 function azTaskVisual(task: Task): AutoVisual | null {
@@ -543,6 +533,7 @@ function azTaskVisual(task: Task): AutoVisual | null {
   if (/heca/i.test(p)) {
     const sylHint = p.match(/\(([a-zəöüığçşA-ZƏÖÜIĞÇŞ-]+)\)/u);
     const parts = sylHint ? sylHint[1].split("-") : word ? [word] : [];
+    if (parts.length <= 1 && !emoji) return null;
     return {
       kind: "pictureCard",
       emojis: [emoji ?? "👏"],
@@ -553,6 +544,7 @@ function azTaskVisual(task: Task): AutoVisual | null {
 
   // Sait / samit / qalın-incə sualları
   if (/sait|samit|əlifba/i.test(p)) {
+    if (!emoji) return null;
     const isVowel = /sait/i.test(p);
     return {
       kind: "pictureCard",
@@ -572,12 +564,14 @@ function azTaskVisual(task: Task): AutoVisual | null {
     // yalnız əşyanın şəklini göstər!
     if (/Hansı düzgün sözdür/.test(p)) {
       const optEmoji = task.type === "multiple_choice" ? detectNounEmoji(task.options.join(" ")) : null;
+      if (!optEmoji && !emoji) return null;
       return {
         kind: "pictureCard",
         emojis: [optEmoji ?? emoji ?? "✍️"],
         badges: ["Düzgün yazılışı seç"],
       };
     }
+    if (!emoji) return null;
     return {
       kind: "pictureCard",
       emojis: [emoji ?? "🔤"],
@@ -587,6 +581,7 @@ function azTaskVisual(task: Task): AutoVisual | null {
 
   // Kim? Nə? Nə edir? (İsim / Sifət / Feil)
   if (/kim\?|nə\?|nə edir\?|hərəkət|əşya|canlı|isim|sifət|feil/i.test(p)) {
+    if (!emoji) return null;
     return {
       kind: "pictureCard",
       emojis: [emoji ?? "🙋", "📦", "🏃"],
@@ -597,6 +592,7 @@ function azTaskVisual(task: Task): AutoVisual | null {
 
   // Cümlə və durğu işarələri
   if (/cümlə|nöqtə|sual işarəsi|nida|boşluq/i.test(p)) {
+    if (!emoji) return null;
     return {
       kind: "pictureCard",
       emojis: [emoji ?? "📝"],
@@ -607,6 +603,7 @@ function azTaskVisual(task: Task): AutoVisual | null {
 
   // Nağıl, şeir, qafiyə, tapmaca, atalar sözü
   if (/qafiyə|şeir|misra|şair/i.test(p)) {
+    if (!emoji) return null;
     return {
       kind: "pictureCard",
       emojis: [emoji ?? "🎵", "📜"],
@@ -615,6 +612,7 @@ function azTaskVisual(task: Task): AutoVisual | null {
     };
   }
   if (/tapmaca|atalar sözü/i.test(p)) {
+    if (!emoji) return null;
     return {
       kind: "pictureCard",
       emojis: [emoji ?? "🧩", "💡"],
@@ -622,6 +620,7 @@ function azTaskVisual(task: Task): AutoVisual | null {
     };
   }
   if (/nağıl|Cırtdan|Tülkü/i.test(p)) {
+    if (!emoji) return null;
     return {
       kind: "pictureCard",
       emojis: [emoji ?? "🧚", "📖"],
@@ -630,9 +629,11 @@ function azTaskVisual(task: Task): AutoVisual | null {
     };
   }
 
+  // Konkret əşya şəkli yoxdursa ümumi 📖 kartı GÖSTƏRİLMİR.
+  if (!emoji) return null;
   return {
     kind: "pictureCard",
-    emojis: [emoji ?? "📖"],
+    emojis: [emoji],
     title: word ? `«${word}»` : undefined,
   };
 }
@@ -641,13 +642,8 @@ function enTaskVisual(task: Task): AutoVisual | null {
   const p = task.prompt.trim();
 
   // 1) Dinləmə tapşırığıdırsa, cavabı şəkillə ələ verməmək üçün dinləmə kartı göstər
-  if (task.type === "listening") {
-    return {
-      kind: "pictureCard",
-      emojis: ["🎧", "🔊"],
-      title: "Səsi dinlə və düzgün cavabı seç",
-    };
-  }
+  // Dinləmə tapşırığının öz "Dinlə" düyməsi var; cavabı şəkillə ələ verməmək üçün şəkil yoxdur.
+  if (task.type === "listening") return null;
 
   // 2) Rəng sualları: "'qırmızı' İngiliscə necədir?" və ya "'red' nə rəngdir?"
   const quoted = p.match(/'([^']+)'/)?.[1]?.toLowerCase();
@@ -716,11 +712,8 @@ function enTaskVisual(task: Task): AutoVisual | null {
     };
   }
 
-  return {
-    kind: "pictureCard",
-    emojis: ["🇬🇧", "💬"],
-    title: quoted ? `«${quoted}»` : undefined,
-  };
+  // Konkret şəkil yoxdursa ümumi 🇬🇧 kartı GÖSTƏRİLMİR.
+  return null;
 }
 
 /**

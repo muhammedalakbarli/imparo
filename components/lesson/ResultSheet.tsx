@@ -26,6 +26,8 @@ interface Props {
   comboBonus?: number;
   ctaLabel: string;
   taskId: string; // sualla bağlı rəy üçün
+  /** İzahın yanında "Dinlə" düyməsi — yalnız ibtidai sinif (1–4). */
+  speak?: boolean;
   onContinue: () => void;
 }
 
@@ -36,6 +38,7 @@ export default function ResultSheet({
   comboBonus = 0,
   ctaLabel,
   taskId,
+  speak = false,
   onContinue,
 }: Props) {
   const t = useT();
@@ -137,13 +140,15 @@ export default function ResultSheet({
           >
             <Lightbulb size={correct ? 18 : 22} className="mt-0.5 shrink-0 opacity-80" />
             <span className="flex-1">{explanation}</span>
-            <SpeakButton
-              text={explanation}
-              variant="sheet"
-              size="sm"
-              label="Dinlə"
-              className="shrink-0"
-            />
+            {speak && (
+              <SpeakButton
+                text={explanation}
+                variant="sheet"
+                size="sm"
+                label="Dinlə"
+                className="shrink-0"
+              />
+            )}
           </div>
         )}
 

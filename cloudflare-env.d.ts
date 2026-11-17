@@ -14,6 +14,9 @@ declare global {
     /** "1" olanda test rejimli LemonSqueezy ödənişləri də emal olunur (yalnız sınaq üçün). */
     LS_ALLOW_TEST_MODE?: string;
     RESEND_API_KEY?: string;
+    /** Azure Speech (az-AZ-BanuNeural) — ikisi də varsa AZ səsi Azure-dan gəlir (bax lib/azureSpeech.ts). */
+    AZURE_SPEECH_KEY?: string;
+    AZURE_SPEECH_REGION?: string;
     // wrangler.jsonc-dəki statik asset binding-i. `lib/api/content.ts` DB boş olanda
     // /content-seed.json-u bununla oxuyur (məzmunu Worker bundle-ına salmamaq üçün).
     ASSETS: { fetch: (req: Request | URL | string) => Promise<Response> };
