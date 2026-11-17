@@ -206,6 +206,10 @@ describe("subjectMeta", () => {
         (n, u) => n + u.lessons.filter((l) => l.tasks.length > 0).length,
         0,
       ),
+      tasks: s.units.reduce(
+        (n, u) => n + u.lessons.reduce((k, l) => k + l.tasks.length + (l.bonusTasks?.length ?? 0), 0),
+        0,
+      ),
     }));
     expect(subjectMeta).toEqual(expected);
   });

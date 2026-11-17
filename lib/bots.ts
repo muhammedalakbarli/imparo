@@ -33,6 +33,11 @@ const BOT_NAMES = [
   "Gülnar", "Emin", "Türkan", "Nihad",
 ];
 
+// Soyadın ilk hərfi. Real istifadəçilər başqalarına "Ad S." kimi göstərilir
+// (migration 0064, uşaq məxfiliyi) — botlar da eyni formatda olmalıdır, yoxsa
+// "soyadsız ad = bot" kimi ayırd edilərdi (bax bots-parity qaydası).
+export const SURNAME_INITIALS = ["M", "H", "Ə", "Q", "A", "İ", "R", "S", "N", "K", "B", "C", "T", "V", "Z", "Ş", "Ö"];
+
 // Pillə üzrə həftəlik XP aralığı (aşağı→yuxarı liqa daha güclüdür).
 const TIER_XP: [number, number][] = [
   [20, 250], [60, 400], [120, 550], [200, 700], [300, 900],
@@ -76,12 +81,14 @@ export function botIdentity(tier: number, index: number, week: string): BotIdent
   const i = Math.max(0, Math.floor(index));
   const key = `${week}:${t}:${i}`;
   const nameOff = Math.floor(seedHash(`${week}:${t}:names`) * BOT_NAMES.length);
-  const name = BOT_NAMES[(nameOff + i) % BOT_NAMES.length];
+  const first = BOT_NAMES[(nameOff + i) % BOT_NAMES.length];
+  const initial = SURNAME_INITIALS[Math.floor(seedHash(`${key}:sn`) * SURNAME_INITIALS.length) % SURNAME_INITIALS.length];
+  const name = `${first} ${initial}.`;
   const [lo, hi] = TIER_XP[t];
   const weeklyXp = Math.round(lo + seedHash(key) * (hi - lo));
   const handleNum = 10 + Math.floor(seedHash(`${key}:h`) * 89); // 10..98 → unikal-təbii
-  const username = `${translit(name)}_${handleNum}`;
-  const avatar = defaultAvatar(`${name}-${t}-${i}`);
+  const username = `${translit(first)}_${handleNum}`;
+  const avatar = defaultAvatar(`${first}-${t}-${i}`);
   const totalXp = weeklyXp * (4 + Math.floor(seedHash(`${key}:tot`) * 20)); // həftəlikdən böyük
   const streakDays = Math.floor(seedHash(`${key}:str`) * 60);
   const followers = Math.floor(seedHash(`${key}:fol`) * 40);

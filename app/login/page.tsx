@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Eye, EyeOff, Check } from "lucide-react";
 import { signInWithEmail, getCurrentUser } from "@/lib/auth";
 import { postLoginPath } from "@/lib/teacher";
+import { fillStats } from "@/lib/siteStats";
 import { useT } from "@/lib/i18n";
 import Logo from "@/components/Logo";
 import GoogleButton from "@/components/GoogleButton";
@@ -23,7 +24,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const PERKS = [t("auth.login.perk1"), t("auth.login.perk2"), t("auth.login.perk3")];
+  const PERKS = [fillStats(t("auth.login.perk1")), t("auth.login.perk2"), t("auth.login.perk3")];
 
   useEffect(() => {
     getCurrentUser().then((u) => {

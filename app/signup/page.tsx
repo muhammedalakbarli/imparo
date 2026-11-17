@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/client";
 import { completeLesson } from "@/lib/progress";
 import { addWrong } from "@/lib/srs";
 import { useT } from "@/lib/i18n";
+import { fillStats } from "@/lib/siteStats";
 
 // useSearchParams() statik prerender-i pozur — Next sənədlərinə görə Suspense
 // sərhədi tələb olunur. Səhifə qabığı serverdə hazırlanır, parametrdən asılı hissə
@@ -62,7 +63,7 @@ function SignupInner() {
 
   const passwordStrength = getPasswordStrength(password);
   const doPasswordsMatch = password === confirmPassword && password.length > 0;
-  const PERKS = [t("auth.signup.perk1"), t("auth.signup.perk2"), t("auth.signup.perk3")];
+  const PERKS = [t("auth.signup.perk1"), fillStats(t("auth.signup.perk2")), t("auth.signup.perk3")];
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();

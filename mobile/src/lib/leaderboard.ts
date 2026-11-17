@@ -40,6 +40,8 @@ const BOT_NAMES = [
   "Aytac", "Ramil", "Fidan", "Vüsal", "Xəyalə", "Ayxan", "Sevinc", "Ruslan",
   "Gülnar", "Emin", "Türkan", "Nihad",
 ];
+// Web lib/bots.ts ilə EYNİ: real adlar "Ad S." formatındadır (migration 0064).
+const SURNAME_INITIALS = ["M", "H", "Ə", "Q", "A", "İ", "R", "S", "N", "K", "B", "C", "T", "V", "Z", "Ş", "Ö"];
 const TIER_XP: [number, number][] = [[20, 250], [60, 400], [120, 550], [200, 700], [300, 900]];
 const AV_COLORS = ["#F47B3A", "#E9A23B", "#2FB170", "#38BDF8", "#A78BFA", "#FF6B5E", "#F5B60A"];
 
@@ -51,7 +53,8 @@ function makeBots(count: number, tier: number, week: string): CohortRow[] {
   const out: CohortRow[] = [];
   for (let i = 0; i < Math.max(0, count); i++) {
     const key = `${week}:${t}:${i}`;
-    const name = BOT_NAMES[(nameOff + i) % BOT_NAMES.length];
+    const first = BOT_NAMES[(nameOff + i) % BOT_NAMES.length];
+    const name = `${first} ${SURNAME_INITIALS[Math.floor(seedHash(`${key}:sn`) * SURNAME_INITIALS.length) % SURNAME_INITIALS.length]}.`;
     const [lo, hi] = TIER_XP[t];
     out.push({
       userId: `bot-${t}-${i}`,

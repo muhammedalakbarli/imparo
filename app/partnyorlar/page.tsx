@@ -18,17 +18,13 @@ import {
   Mail,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { subjectMeta } from "@/lib/subjectMeta";
+import { SUBJECT_COUNT, LESSONS_SHOWN, GRADE_RANGE } from "@/lib/siteStats";
 
 export default function PartnersPage() {
   const t = useT();
 
   // Fənn sayı ADINA görə təkrarsızdır (bazada hər sinif ayrıca sətirdir) —
   // ana səhifədəki hesablama ilə eyni məntiq.
-  const subjectCount = new Set(subjectMeta.map((s) => s.name)).size;
-  const grades = subjectMeta.map((s) => s.grade);
-  const gradeRange = `${Math.min(...grades)}–${Math.max(...grades)}`;
-  const lessonCount = subjectMeta.reduce((n, s) => n + s.lessons, 0);
 
   const tracks = [
     { Icon: School, title: t("partners.schools.t"), body: t("partners.schools.b") },
@@ -47,9 +43,9 @@ export default function PartnersPage() {
   ];
 
   const stats = [
-    { value: String(subjectCount), label: t("partners.statSubjects") },
-    { value: gradeRange, label: t("partners.statGrades") },
-    { value: `${Math.floor(lessonCount / 50) * 50}+`, label: t("partners.statLessons") },
+    { value: String(SUBJECT_COUNT), label: t("partners.statSubjects") },
+    { value: GRADE_RANGE, label: t("partners.statGrades") },
+    { value: `${LESSONS_SHOWN}+`, label: t("partners.statLessons") },
   ];
 
   return (

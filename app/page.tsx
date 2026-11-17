@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { useContent } from "@/components/ContentProvider";
+import { SUBJECT_COUNT, LESSONS_SHOWN, TASKS_SHOWN } from "@/lib/siteStats";
 import { useT } from "@/lib/i18n";
 import { useCountUp } from "@/lib/useCountUp";
 import Logo from "@/components/Logo";
@@ -43,7 +44,6 @@ const stagger: Variants = {
 export default function LandingPage() {
   const router = useRouter();
   const t = useT();
-  const { subjects } = useContent();
 
   useEffect(() => {
     getCurrentUser().then((u) => {
@@ -51,38 +51,8 @@ export default function LandingPage() {
     });
   }, [router]);
 
-  // Vitrin rəqəmləri YUVARLAQ göstərilir: "666 dərs" səliqəsiz görünür, "650+" isə
-  // həm təmiz, həm dürüstdür (real say həmişə göstərilən rəqəmdən çoxdur).
-  // Addım rəqəmin böyüklüyünə uyğunlaşır: 666 → 650, 11 693 → 10 000.
-  function niceFloor(n: number): number {
-    if (n < 10) return n;
-    const step = Math.pow(10, Math.floor(Math.log10(n))) / 2;
-    return Math.floor(n / step) * step;
-  }
-
-  // Fənn sayı ADINA görə təkrarsızdır: bazada hər sinif üçün ayrıca sətir var
-  // (26 sətir), amma şagird üçün bu, 5 fərqli fənn deməkdir.
-  const subjectCount = new Set(subjects.map((s) => s.name)).size;
-
-  // Sandıqlar "dərs" sayılmır — onların tapşırığı yoxdur. Əvvəl sayılırdı və
-  // ana səhifə 750+ göstərirdi, halbuki 110-u boş sandıqdır (bax subjectMeta).
-  const totalLessons = subjects.reduce(
-    (n, s) =>
-      n +
-      s.units.reduce((m, u) => m + u.lessons.filter((l) => l.tasks.length > 0).length, 0),
-    0,
-  );
-  const totalTasks = subjects.reduce(
-    (n, s) =>
-      n +
-      s.units.reduce(
-        (m, u) =>
-          m + u.lessons.reduce((k, l) => k + l.tasks.length + (l.bonusTasks?.length ?? 0), 0),
-        0,
-      ),
-    0,
-  );
-
+  // Rəqəmlər statik mənbədən (lib/siteStats) — DB-dən gözləmir, ona görə serverin
+  // HTML-ində də düzgündür. Bütün səhifələr eyni rəqəmi göstərir.
   return (
     <div className="force-light relative min-h-screen overflow-hidden bg-ink">
       <Blobs />
@@ -173,9 +143,9 @@ export default function LandingPage() {
 
         {/* ── Statistika (count-up) ── */}
         <Reveal className="grid grid-cols-3 gap-4 pb-6">
-          <StatCard value={subjectCount} label={t("home.stat.subjects")} />
-          <StatCard value={niceFloor(totalLessons)} suffix="+" label={t("home.stat.lessons")} />
-          <StatCard value={niceFloor(totalTasks)} suffix="+" label={t("home.stat.tasks")} />
+          <StatCard value={SUBJECT_COUNT} label={t("home.stat.subjects")} />
+          <StatCard value={LESSONS_SHOWN} suffix="+" label={t("home.stat.lessons")} />
+          <StatCard value={TASKS_SHOWN} suffix="+" label={t("home.stat.tasks")} />
         </Reveal>
 
 

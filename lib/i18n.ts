@@ -666,14 +666,14 @@ const DICT: Dict = {
   },
   "home.r3.tag": { az: "Məktəb proqramı", en: "School curriculum", ru: "Школьная программа" },
   "home.r3.title": {
-    az: "3 fənn, real kurikulum",
-    en: "3 subjects, real curriculum",
-    ru: "3 предмета, реальная программа",
+    az: "Real kurikulum, 1–8-ci siniflər",
+    en: "Real curriculum, grades 1–8",
+    ru: "Реальная программа, 1–8 классы",
   },
   "home.r3.body": {
-    az: "1–8-ci sinif proqramına uyğun: hər mövzu izah + tapşırıqlarla. Riyaziyyat, Azərbaycan dili və İngilis dili.",
-    en: "Aligned with the grade 1–8 program: each topic with an explanation + exercises. Math, Azerbaijani and English.",
-    ru: "По программе 1–8 классов: каждая тема с объяснением и заданиями. Математика, азербайджанский и английский.",
+    az: "Hər mövzu izah + tapşırıqlarla: Riyaziyyat, Azərbaycan dili və İngilis dili. 5-ci sinifdə əlavə olaraq Rəqəmsal Təhlükəsizlik, Maliyyə Savadlılığı, Süni İntellekt və Kibertəhlükəsizlik.",
+    en: "Every topic with an explanation + exercises: Math, Azerbaijani and English. Grade 5 also has Digital Safety, Financial Literacy, Artificial Intelligence and Cybersecurity.",
+    ru: "Каждая тема с объяснением и заданиями: математика, азербайджанский и английский. В 5 классе также цифровая безопасность, финансовая грамотность, искусственный интеллект и кибербезопасность.",
   },
   "home.finalTitle": {
     az: "Bu gün öyrənməyə başla",
@@ -681,9 +681,9 @@ const DICT: Dict = {
     ru: "Начните учиться сегодня",
   },
   "home.finalBody": {
-    az: "Hesab yarat, ilk dərsini bitir və XP qazan. Tamamilə pulsuz.",
-    en: "Create an account, finish your first lesson and earn XP. Completely free.",
-    ru: "Создайте аккаунт, завершите первый урок и получите XP. Совершенно бесплатно.",
+    az: "İlk dərsi qeydiyyatsız həll et və XP qazan — irəliləyişini sonra yadda saxlayarsan. Tamamilə pulsuz.",
+    en: "Solve your first lesson without signing up and earn XP — save your progress afterwards. Completely free.",
+    ru: "Реши первый урок без регистрации и получи XP — сохранить прогресс можно потом. Совершенно бесплатно.",
   },
 
   // ── Landing: fənn vitrini ──
@@ -737,11 +737,11 @@ const DICT: Dict = {
   },
   "home.app.soon": { az: "Tezliklə", en: "Coming soon", ru: "Скоро" },
   "home.how.title": { az: "Necə işləyir?", en: "How it works", ru: "Как это работает" },
-  "home.how.s1.t": { az: "Hesab yarat", en: "Create an account", ru: "Создай аккаунт" },
+  "home.how.s1.t": { az: "Sınaq dərsini keç", en: "Try a lesson", ru: "Пройди пробный урок" },
   "home.how.s1.d": {
-    az: "Sinfini seç, bir neçə saniyəyə hazırsan.",
-    en: "Pick your grade, ready in seconds.",
-    ru: "Выбери класс — готово за секунды.",
+    az: "Qeydiyyat lazım deyil: sinfini seç və ilk dərsi elə indi həll et.",
+    en: "No signup needed: pick your grade and solve your first lesson right now.",
+    ru: "Регистрация не нужна: выбери класс и реши первый урок прямо сейчас.",
   },
   "home.how.s2.t": { az: "Hər gün öyrən", en: "Learn every day", ru: "Учись каждый день" },
   "home.how.s2.d": {
@@ -806,9 +806,9 @@ const DICT: Dict = {
     ru: "Зарегистрироваться",
   },
   "auth.login.perk1": {
-    az: "3 fənn üzrə 60+ interaktiv dərs",
-    en: "60+ interactive lessons in 3 subjects",
-    ru: "60+ интерактивных уроков по 3 предметам",
+    az: "{subjects} fənn üzrə {lessons}+ interaktiv dərs",
+    en: "{lessons}+ interactive lessons in {subjects} subjects",
+    ru: "{lessons}+ интерактивных уроков по {subjects} предметам",
   },
   "auth.login.perk2": {
     az: "Öz sürətinlə, oyun kimi öyrənmə",
@@ -912,9 +912,9 @@ const DICT: Dict = {
     ru: "Бесплатно — без карты и оплаты",
   },
   "auth.signup.perk2": {
-    az: "3 fənn: Riyaziyyat, Azərbaycan dili, İngilis dili",
-    en: "3 subjects: Math, Azerbaijani, English",
-    ru: "3 предмета: математика, азербайджанский, английский",
+    az: "Riyaziyyat, Azərbaycan dili, İngilis dili + {extra} əlavə fənn",
+    en: "Math, Azerbaijani, English + {extra} more subjects",
+    ru: "Математика, азербайджанский, английский + ещё {extra} предмета",
   },
   "auth.signup.perk3": {
     az: "İrəliləyişin hər cihazda yadda qalır",
@@ -1012,9 +1012,9 @@ const DICT: Dict = {
   "about.products.heading": { az: "Nə təklif edirik", en: "What we offer", ru: "Что мы предлагаем" },
   "about.prod.imparo.title": { az: "Imparo", en: "Imparo", ru: "Imparo" },
   "about.prod.imparo.desc": {
-    az: "1–8-ci siniflər üçün interaktiv öyrənmə platforması — Riyaziyyat, Azərbaycan dili, İngilis dili, həmçinin Rəqəmsal Təhlükəsizlik və Maliyyə Savadlılığı, oyun kimi.",
-    en: "An interactive learning platform for grades 1–8 — Math, Azerbaijani, English, plus Digital Safety and Financial Literacy, like a game.",
-    ru: "Интерактивная платформа для 1–8 классов — математика, азербайджанский, английский, а также цифровая безопасность и финансовая грамотность, как игра.",
+    az: "1–8-ci siniflər üçün interaktiv öyrənmə platforması — Riyaziyyat, Azərbaycan dili, İngilis dili, üstəlik 5-ci sinif üçün Rəqəmsal Təhlükəsizlik, Maliyyə Savadlılığı, Süni İntellekt və Kibertəhlükəsizlik — oyun kimi.",
+    en: "An interactive learning platform for grades 1–8 — Math, Azerbaijani, English, plus Digital Safety, Financial Literacy, Artificial Intelligence and Cybersecurity for grade 5 — like a game.",
+    ru: "Интерактивная платформа для 1–8 классов — математика, азербайджанский, английский, а для 5 класса ещё цифровая безопасность, финансовая грамотность, искусственный интеллект и кибербезопасность — как игра.",
   },
   "about.prod.plus.title": { az: "Imparo Plus", en: "Imparo Plus", ru: "Imparo Plus" },
   "about.prod.plus.desc": {
@@ -1097,10 +1097,11 @@ const DICT: Dict = {
   "legal.notice.close": { az: "Bildirişi bağla", en: "Dismiss notice", ru: "Закрыть уведомление" },
   "legal.changed": { az: "Bu dəfə nə dəyişdi", en: "What changed this time", ru: "Что изменилось" },
   "legal.changedBody": {
-    az: "Ayrıca Geri qaytarma siyasəti əlavə olundu: ilk ödənişdən sonrakı 14 gün ərzində şərtsiz geri qaytarma, yenilənmə ödənişi üçün 7 günlük pəncərə, ləğvetmə qaydası, sponsorluq və kart/m10 köçürmələri üzrə şərtlər. Şərtlərin 11-ci bəndi (\"ödənişlər geri qaytarılmır\") həmin sənədə uyğun yenidən yazıldı.",
-    en: "Added a separate Refund Policy: a no-questions refund within 14 days of the first payment, a 7-day window for renewal charges, cancellation rules, and terms for sponsorships and card/m10 transfers. Clause 11 of the Terms (\"payments are non-refundable\") was rewritten to match.",
-    ru: "Добавлена отдельная Политика возврата: полный возврат в течение 14 дней после первого платежа, 7-дневное окно для платежей за продление, правила отмены, условия для спонсорства и переводов картой/m10. Пункт 11 Условий («платежи не возвращаются») переписан соответственно.",
+    az: "Uşaqların məxfiliyi gücləndirildi: liqada, reytinqdə, dostlar siyahısında və açıq profildə artıq tam ad yox, yalnız ad və soyadın ilk hərfi göstərilir (məs. «Aysel M.»). Məxfilik siyasətinin 4-cü və 5-ci bəndləri buna uyğun yeniləndi.",
+    en: "Stronger privacy for children: the league, leaderboard, friends list and public profiles now show only your first name and last initial (e.g. “Aysel M.”) instead of your full name. Sections 4 and 5 of the Privacy Policy were updated accordingly.",
+    ru: "Усилена защита данных детей: в лиге, рейтинге, списке друзей и публичном профиле теперь показываются только имя и первая буква фамилии (напр. «Айсель М.»), а не полное имя. Разделы 4 и 5 Политики конфиденциальности обновлены.",
   },
+
   "legal.contactLine": { az: "Sualın var? Bizə yaz:", en: "Have a question? Write to us:", ru: "Есть вопрос? Напишите нам:" },
 
   // ── Info səhifələri (Bloq, Karyera, İnvestorlar, Səmərəlilik) ──
@@ -1593,15 +1594,15 @@ const DICT: Dict = {
   },
   "privacy.s4.t": { az: "4. Profil və liqa", en: "4. Profile and league", ru: "4. Профиль и лига" },
   "privacy.s4.b": {
-    az: "Profilin adın, avatarın və öyrənmə statistikanı göstərə bilər; dostlar bir-birini izləyə bilər. Liqa (leaderboard) həftəlik XP üzrə digər istifadəçilərlə sıralanmanı göstərir. E-poçt, telefon və parol heç vaxt profilində ictimai göstərilmir.",
-    en: "Your profile may show your name, avatar and learning stats; friends can follow each other. The league (leaderboard) shows your weekly XP ranking among other users. Your email, phone and password are never shown publicly on your profile.",
-    ru: "Ваш профиль может показывать имя, аватар и статистику обучения; друзья могут подписываться друг на друга. Лига (таблица лидеров) показывает ваш недельный рейтинг XP среди других. Эл. почта, телефон и пароль никогда не отображаются публично.",
+    az: "Profilin adını (yalnız ad və soyadın ilk hərfi, məs. «Aysel M.»), avatarını və öyrənmə statistikanı göstərə bilər; dostlar bir-birini izləyə bilər. Liqa (leaderboard) həftəlik XP üzrə digər istifadəçilərlə sıralanmanı göstərir. E-poçt, telefon və parol heç vaxt profilində ictimai göstərilmir.",
+    en: "Your profile may show your name (first name and last initial only, e.g. “Aysel M.”), avatar and learning stats; friends can follow each other. The league (leaderboard) shows your weekly XP ranking among other users. Your email, phone and password are never shown publicly on your profile.",
+    ru: "Ваш профиль может показывать имя (только имя и первую букву фамилии, напр. «Айсель М.»), аватар и статистику обучения; друзья могут подписываться друг на друга. Лига (таблица лидеров) показывает ваш недельный рейтинг XP среди других. Эл. почта, телефон и пароль никогда не отображаются публично.",
   },
   "privacy.s5.t": { az: "5. Uşaq istifadəçilər", en: "5. Child users", ru: "5. Дети-пользователи" },
   "privacy.s5.b": {
-    az: "Uşaqlar əlavə qoruma layiqdir — Imparo-nun bütün istifadəçiləri məktəblidir. Qeydiyyatda valideyn/müəllim nəzarətini təsdiqləyən bənd və könüllü valideyn e-poçtu sahəsi var. Reklam göstərmirik və məlumatı satmırıq. Liqa və profildə real ad görünür (bax bölmə 4) — bunu istəmirsənsə, adını dəyişə bilərsən. Valideyn/qəyyum kimi uşağının hesabına (onun öz girişi ilə) daxil olub Ayarlar bölməsindən məlumatını yükləyə və ya hesabı silə bilərsən; bunu edə bilmirsənsə, bizə yaz (bölmə 14) — sorğunu araşdırıb icra edərik.",
-    en: "Children deserve extra protection — every Imparo user is a school student. Signup includes a checkbox confirming parent/teacher supervision and an optional parent email field. We do not show ads and do not sell data. Your real name appears in the league and profile (see section 4) — you can change your display name if you'd rather not use your real one. As a parent/guardian, you can sign in with your child's own login and use Settings to download or delete their data; if you can't do that yourself, contact us (section 14) and we will action the request.",
-    ru: "Дети заслуживают дополнительной защиты — все пользователи Imparo являются школьниками. При регистрации есть флажок, подтверждающий контроль родителя/учителя, и необязательное поле email родителя. Мы не показываем рекламу и не продаём данные. Ваше настоящее имя отображается в лиге и профиле (см. раздел 4) — вы можете изменить отображаемое имя. Как родитель/опекун вы можете войти под учётной записью ребёнка и в Настройках скачать или удалить его данные; если это невозможно самостоятельно, напишите нам (раздел 14) — мы выполним запрос.",
+    az: "Uşaqlar əlavə qoruma layiqdir — Imparo-nun bütün istifadəçiləri məktəblidir. Qeydiyyatda valideyn/müəllim nəzarətini təsdiqləyən bənd və könüllü valideyn e-poçtu sahəsi var. Reklam göstərmirik və məlumatı satmırıq. Liqada, reytinqdə, dostlar siyahısında və açıq profildə tam ad göstərilmir — yalnız ad və soyadın ilk hərfi (bax bölmə 4). Tam adı yalnız sən, qoşulduğun sinfin müəllimi və Imparo administratorları görür. Valideyn/qəyyum kimi uşağının hesabına (onun öz girişi ilə) daxil olub Ayarlar bölməsindən məlumatını yükləyə və ya hesabı silə bilərsən; bunu edə bilmirsənsə, bizə yaz (bölmə 14) — sorğunu araşdırıb icra edərik.",
+    en: "Children deserve extra protection — every Imparo user is a school student. Signup includes a checkbox confirming parent/teacher supervision and an optional parent email field. We do not show ads and do not sell data. Your full name is never shown in the league, leaderboard, friends list or public profile — only your first name and last initial (see section 4). Your full name is visible only to you, the teacher of a class you join, and Imparo administrators. As a parent/guardian, you can sign in with your child's own login and use Settings to download or delete their data; if you can't do that yourself, contact us (section 14) and we will action the request.",
+    ru: "Дети заслуживают дополнительной защиты — все пользователи Imparo являются школьниками. При регистрации есть флажок, подтверждающий контроль родителя/учителя, и необязательное поле email родителя. Мы не показываем рекламу и не продаём данные. Полное имя не показывается в лиге, рейтинге, списке друзей и публичном профиле — только имя и первая буква фамилии (см. раздел 4). Полное имя видят только вы, учитель класса, к которому вы присоединились, и администраторы Imparo. Как родитель/опекун вы можете войти под учётной записью ребёнка и в Настройках скачать или удалить его данные; если это невозможно самостоятельно, напишите нам (раздел 14) — мы выполним запрос.",
   },
   "privacy.s6.t": { az: "6. Imparo Məktəb (müəllimlər)", en: "6. Imparo for Schools (teachers)", ru: "6. Imparo для школ (учителя)" },
   "privacy.s6.b": {

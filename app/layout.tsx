@@ -83,15 +83,12 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
-  // Kanonik ünvan + dil alternativləri (eyni səhifə, ?lang ilə).
+  // Kanonik ünvan. Dil alternativləri (hreflang) QƏSDƏN YOXDUR: əvvəl /?lang=en və
+  // /?lang=ru elan olunurdu, amma server hər üçündə Azərbaycan mətni qaytarır (dil
+  // seçimi yalnız brauzerdədir) — Google eyni AZ səhifəsini "ingiliscə" kimi
+  // indeksləyirdi (dublikat məzmun). Real EN/RU üçün ayrıca marşrut lazımdır.
   alternates: {
     canonical: "/",
-    languages: {
-      az: "/?lang=az",
-      en: "/?lang=en",
-      ru: "/?lang=ru",
-      "x-default": "/",
-    },
   },
   appleWebApp: {
     capable: true,

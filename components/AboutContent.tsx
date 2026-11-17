@@ -9,7 +9,7 @@ import Logo from "@/components/Logo";
 import Mascot from "@/components/Mascot";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useT } from "@/lib/i18n";
-import { subjectMeta } from "@/lib/subjectMeta";
+import { SUBJECT_COUNT, LESSONS_SHOWN, GRADE_RANGE } from "@/lib/siteStats";
 
 export default function AboutContent() {
   const t = useT();
@@ -47,7 +47,7 @@ export default function AboutContent() {
       </header>
 
       {/* Missiya */}
-      <section className="mx-auto max-w-5xl px-5 py-16 sm:py-24">
+      <section id="missiya" className="scroll-mt-20 mx-auto max-w-5xl px-5 py-16 sm:py-24">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/10 px-4 py-1.5 text-sm font-bold text-brand ring-1 ring-brand/20">
@@ -123,7 +123,7 @@ export default function AboutContent() {
       </section>
 
       {/* Əlaqə */}
-      <section className="mx-auto max-w-5xl px-5 py-10">
+      <section id="elaqe" className="scroll-mt-20 mx-auto max-w-5xl px-5 py-10">
         <div className="rounded-3xl border border-line bg-panel p-8 text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10 text-brand">
             <Mail size={28} />
@@ -164,11 +164,7 @@ export default function AboutContent() {
 // Rəqəmlər ƏL İLƏ YAZILMIR. Əvvəl burada "3 fənn" və "60+ dərs" sabit yazılmışdı —
 // məzmun böyüdükcə köhnəldi və ziyarətçiyə 5 fənn / 650+ dərs əvəzinə 10 dəfə az
 // göstərirdi (ana səhifə isə düzgün rəqəmi göstərirdi → sayt öz-özü ilə ziddiyyətdə).
-const SUBJECT_COUNT = new Set(subjectMeta.map((s) => s.name)).size;
-const GRADES = subjectMeta.map((s) => s.grade);
-const GRADE_RANGE = `${Math.min(...GRADES)}–${Math.max(...GRADES)}`;
-// Sandıqlar dərs sayılmır (tapşırığı yoxdur) — bax lib/subjectMeta.ts qeydi.
-const LESSON_COUNT = Math.floor(subjectMeta.reduce((n, s) => n + s.lessons, 0) / 50) * 50;
+const LESSON_COUNT = LESSONS_SHOWN;
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (

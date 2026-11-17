@@ -21,6 +21,11 @@ const rows = subjects.map((s) => ({
     (n, u) => n + u.lessons.filter((l) => l.tasks.length > 0).length,
     0,
   ),
+  // Əsas + bonus tapşırıqlar (bölmə sonu testlərinin yığdığı suallar da daxil).
+  tasks: s.units.reduce(
+    (n, u) => n + u.lessons.reduce((k, l) => k + l.tasks.length + (l.bonusTasks?.length ?? 0), 0),
+    0,
+  ),
 }));
 
 const out = `// AVTOMATİK YARADILIB — əl ilə redaktə etmə.
@@ -35,6 +40,7 @@ export interface SubjectMeta {
   grade: number;
   units: number;
   lessons: number;
+  tasks: number;
 }
 
 export const subjectMeta: SubjectMeta[] = ${JSON.stringify(rows, null, 2)};

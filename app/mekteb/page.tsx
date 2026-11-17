@@ -2,10 +2,14 @@
 
 // Imparo Məktəb — hub. Şagird: kodla sinfə qoşulur + tapşırıqlarını görür.
 // Müəllim: panelə keçir. (Duolingo for Schools məntiqi, AZ 1–8 kurikuluma uyğun.)
+//
+// Girişsiz ziyarətçi login divarına ATILMIR: bu ünvan sitemap-dadır və footer-dən
+// gəlinir — məhsulu tanımayan müəllim birbaşa login görüb gedirdi. Ona iki yol
+// göstərilir: müəllim → /muellimler tanıtımı, şagird → giriş + kodla qoşulma.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { School, KeyRound, ClipboardList, ChevronRight, Check, Clock } from "lucide-react";
+import { School, KeyRound, ClipboardList, ChevronRight, Check, Clock, GraduationCap } from "lucide-react";
 import { useAuthUser } from "@/lib/useAuthUser";
 import {
   studentClasses,
@@ -19,7 +23,7 @@ import ClassVideos from "@/components/mekteb/ClassVideos";
 import Mascot from "@/components/Mascot";
 
 export default function SchoolPage() {
-  const { user, ready } = useAuthUser();
+  const { user, ready } = useAuthUser({ optional: true });
   const [classes, setClasses] = useState<StudentClass[]>([]);
   const [tasks, setTasks] = useState<MyAssignment[]>([]);
   const [code, setCode] = useState("");
@@ -56,6 +60,7 @@ export default function SchoolPage() {
   }
 
   if (!ready || (user && !loaded)) return <PageSkeleton />;
+  if (!user) return <PublicSchool />;
 
   return (
     <div className="min-h-screen bg-ink">
@@ -178,6 +183,64 @@ export default function SchoolPage() {
             </div>
           )}
         </div>
+      </main>
+    </div>
+  );
+}
+
+// Girişsiz ziyarətçi üçün — iki aydın yol, login divarı yox.
+function PublicSchool() {
+  return (
+    <div className="min-h-screen bg-ink">
+      <main className="mx-auto max-w-2xl px-4 py-8">
+        <div className="flex items-center gap-4 rounded-3xl bg-gradient-to-br from-brand to-brand-dark p-6 text-white shadow-lg">
+          <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-white/95 shadow-sm">
+            <Mascot size={64} mood="happy" disk={false} />
+          </span>
+          <div>
+            <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-white/80">
+              <School size={14} /> Imparo Məktəb
+            </div>
+            <h1 className="mt-1 text-2xl font-extrabold">Sinifdə birlikdə öyrən</h1>
+          </div>
+        </div>
+
+        <Link
+          href="/muellimler"
+          className="mt-5 flex items-center gap-4 rounded-2xl border border-line bg-panel p-5 transition hover:bg-panel-2"
+        >
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+            <GraduationCap size={24} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-extrabold text-fg">Müəllimsiniz?</span>
+            <span className="block text-sm text-muted">
+              Sinif yaradın, tapşırıq verin, sinfin harada ilişdiyini görün — pulsuz
+            </span>
+          </span>
+          <ChevronRight size={18} className="shrink-0 text-muted" />
+        </Link>
+
+        <Link
+          href="/login"
+          className="mt-4 flex items-center gap-4 rounded-2xl border border-line bg-panel p-5 transition hover:bg-panel-2"
+        >
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+            <KeyRound size={24} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-extrabold text-fg">Müəllimin sinif kodu var?</span>
+            <span className="block text-sm text-muted">Daxil ol və kodu yazıb sinfə qoşul</span>
+          </span>
+          <ChevronRight size={18} className="shrink-0 text-muted" />
+        </Link>
+
+        <p className="mt-6 text-center text-sm text-muted">
+          Hesabın yoxdur?{" "}
+          <Link href="/onboarding" className="font-bold text-brand hover:underline">
+            Əvvəl pulsuz sına
+          </Link>
+        </p>
       </main>
     </div>
   );

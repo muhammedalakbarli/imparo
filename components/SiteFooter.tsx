@@ -15,7 +15,7 @@ export default function SiteFooter() {
       title: "Imparo",
       links: [
         { label: t("ft.about"), href: "/haqqimizda" },
-        { label: t("ft.mission"), href: "/haqqimizda" },
+        { label: t("ft.mission"), href: "/haqqimizda#missiya" },
         { label: t("ft.efficacy"), href: "/semerelilik" },
         { label: t("ft.blog"), href: "/blog" },
         { label: t("ft.careers"), href: "/karyera" },
@@ -27,14 +27,13 @@ export default function SiteFooter() {
         { label: "Imparo", href: "/" },
         { label: "Imparo Plus", href: "/plus" },
         { label: t("ft.school"), href: "/muellimler" },
-        { label: t("ft.shop"), href: "/signup" },
       ],
     },
     {
       title: t("ft.col.support"),
       links: [
         { label: t("ft.help"), href: "/yardim" },
-        { label: t("ft.contact"), href: "/haqqimizda" },
+        { label: t("ft.contact"), href: "/haqqimizda#elaqe" },
         { label: t("ft.partners"), href: "/partnyorlar" },
         { label: t("ft.investors"), href: "/investorlar" },
       ],
